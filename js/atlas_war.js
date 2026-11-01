@@ -21,6 +21,17 @@
   const TIER_WIDTHS = [3, 4.6, 6.6, 9.2];     // screen px per strength tier
   const TIER_SCALES = [1, 1.3, 1.6, 2];       // battle-diamond core scales
 
+  // 相机视野标定（全局唯一换算，无每战役特调）：
+  // 投影画布 1000×700 用户单位覆盖东经 66°–142°（76°），即 1° 经度 = 13.16 单位。
+  // 所有战场视野参数以「度」声明、经 DEG 换算，五场战役共用一套公式。
+  const DEG = 1000 / 76;
+  const FIT_PAD = 0.12;           // 战场四周边距（占 bbox 尺寸比例）
+  const STEP_MIN_DEG = 1.8;       // 单步聚焦最小视野（度）
+  const STEP_MAX_DEG = 30;        // 单步聚焦最大视野
+  const THEATER_MIN_DEG = 2.3;    // 战场全境最小视野
+  const THEATER_MAX_DEG = 53;     // 战场全境最大视野
+  const CANVAS_AR = 1000 / 700;   // 画布纵横比
+
   const reducedMotion = () =>
     typeof window !== 'undefined' &&
     window.matchMedia &&
@@ -625,9 +636,9 @@
       (s.moves || []).forEach((mv) => this._warPointList(mv).forEach((p) => pts.push(p)));
       (s.battles || []).forEach((b) => b.at && pts.push(b.at));
       if (!pts.length || !this.projector) return;
+      const scr = pts.map((p) => this.projector.toScreen(p[0], p[1]));
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-      pts.forEach((p) => {
-        const [sx, sy] = this.projector.toScreen(p[0], p[1]);
+      scr.forEach(([sx, sy]) => {
         if (sx < minX) minX = sx;
         if (sy < minY) minY = sy;
         if (sx > maxX) maxX = sx;
@@ -644,29 +655,60 @@
           cy > cam.y + cam.h * 0.2 &&
           cy < cam.y + cam.h * 0.8;
         if (inView) return;
-        const w2 = cam.w, h2 = cam.h;
         this._animateCameraTo({
-          x: Math.max(-180, Math.min(1000 - w2 + 140, cx - w2 / 2)),
-          y: Math.max(-150, Math.min(700 - h2 + 120, cy - h2 / 2)),
-          w: w2,
-          h: h2,
+          x: Math.max(-180, Math.min(1000 - cam.w + 140, cx - cam.w / 2)),
+          y: Math.max(-150, Math.min(700 - cam.h + 120, cy - cam.h / 2)),
+          w: cam.w,
+          h: cam.h,
         });
         return;
       }
-      const padX = 110, padY = 90;
-      let bw = maxX - minX + padX * 2;
-      let bh = maxY - minY + padY * 2;
-      bw = Math.max(430, bw);
-      bh = Math.max(330, bh);
-      // keep aspect consistent with the projector canvas (1000x700)
-      if (bw / bh > 1000 / 700) bh = (bw * 700) / 1000;
-      else bw = (bh * 1000) / 700;
+      // 手动聚焦：度标定的 AABB 适配（pad 12%、最小 1.8°、最大 30°）。
+      // 旧版裸数字 430 单位 ≈ 32°，是"战场纵深小"事故的源头。
+      const padW = (maxX - minX) * FIT_PAD;
+      const padH = (maxY - minY) * FIT_PAD;
+      let bw = Math.max(maxX - minX + padW * 2, STEP_MIN_DEG * DEG);
+      let bh = Math.max(maxY - minY + padH * 2, (STEP_MIN_DEG * DEG) / CANVAS_AR);
+      bw = Math.min(bw, STEP_MAX_DEG * DEG);
+      if (bw / bh > CANVAS_AR) bh = bw / CANVAS_AR;
+      else bw = bh * CANVAS_AR;
       this._animateCameraTo({
-        x: Math.max(-180, Math.min(1000 - bw + 140, cx - bw / 2)),
-        y: Math.max(-150, Math.min(700 - bh + 120, cy - bh / 2)),
+        x: cx - bw / 2,
+        y: cy - bh / 2,
         w: bw,
         h: bh,
       });
+    }
+
+    // 战场全境适配：全场步骤所有坐标点的 AABB，pad 12%、最小 2.3°、最大 53°。
+    _warTheaterFit(w) {
+      const pts = [];
+      (w.steps || []).forEach((s) => {
+        (s.moves || []).forEach((mv) => this._warPointList(mv).forEach((p) => pts.push(p)));
+        (s.battles || []).forEach((b) => b.at && pts.push(b.at));
+      });
+      if (!pts.length || !this.projector) return null;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      pts.forEach((p) => {
+        const [sx, sy] = this.projector.toScreen(p[0], p[1]);
+        if (sx < minX) minX = sx;
+        if (sy < minY) minY = sy;
+        if (sx > maxX) maxX = sx;
+        if (sy > maxY) maxY = sy;
+      });
+      const padW = (maxX - minX) * FIT_PAD;
+      const padH = (maxY - minY) * FIT_PAD;
+      let bw = Math.max(maxX - minX + padW * 2, THEATER_MIN_DEG * DEG);
+      let bh = Math.max(maxY - minY + padH * 2, (THEATER_MIN_DEG * DEG) / CANVAS_AR);
+      bw = Math.min(bw, THEATER_MAX_DEG * DEG);
+      if (bw / bh > CANVAS_AR) bh = bw / CANVAS_AR;
+      else bw = bh * CANVAS_AR;
+      return {
+        x: (minX + maxX) / 2 - bw / 2,
+        y: (minY + maxY) / 2 - bh / 2,
+        w: bw,
+        h: bh,
+      };
     }
 
     _toggleWarPlay() {
@@ -788,6 +830,24 @@
       this._renderWarSvg(w, idx, zi);
       this._renderWarCard(w, idx);
       this._syncWarBalloon(w, idx);
+      // 战局激活（从无到有）→ 相机自动飞入战场全境；
+      // 战局失活清登记，下次进入重新飞。拖轴途中不抢相机。
+      if (w && this._warTheaterKey !== w.key) {
+        this._warTheaterKey = w.key;
+        if (!this.isScrubbing && !this.challenge && !this.activePerson && !this.activeTrace) {
+          const fit = this._warTheaterFit(w);
+          if (fit) {
+            if (reducedMotion()) {
+              this.camera = { ...fit, zoom: 1000 / fit.w };
+              this._applyCamera(false);
+            } else {
+              this._animateCameraTo(fit);
+            }
+          }
+        }
+      } else if (!w) {
+        this._warTheaterKey = null;
+      }
     }
 
     // ---------------- war situation balloon (战争态势浮签) ----------------
