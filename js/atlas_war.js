@@ -495,7 +495,7 @@
       const sidesHtml = (w.sides || [])
         .map((sd) => `<span class="war-side"><i style="background:${sd.color}"></i>${esc(this._warField(sd, 'name'))}</span>`)
         .join('');
-      const sideHint = `<span class="war-side-hint">${esc(this._warTxt('sideHint'))}</span>`;
+      const sideHint = `<div class="war-side-hint">${esc(this._warTxt('sideHint'))}</div>`;
       const step = idx >= 0 ? w.steps[idx] : null;
       const narrHtml = idx < 0
         ? `<b>${this.formatYear(w.span[0])}</b> · ${esc(this._warTxt('upcoming'))}`
@@ -523,14 +523,15 @@
         `<button class="war-fold" data-act="fold" aria-expanded="${folded ? 'false' : 'true'}" title="${esc(this._warTxt('fold'))}">▾</button>` +
         `</div>` +
         `<div class="war-body${folded ? ' is-folded' : ''}">` +
-        `<div class="war-sides">${sidesHtml}${sideHint}</div>` +
+        `<div class="war-sides">${sidesHtml}</div>` +
+        sideHint +
         `<div class="war-narr">${narrHtml}</div>` +
         (idx >= 0 ? this._warForceBarsHtml(w, step) : '') +
         `<div class="war-steps">${listHtml}</div>` +
         `<div class="war-ctrl">` +
-        `<button class="war-btn" data-act="prev">◀ ${esc(this._warTxt('prev'))}</button>` +
+        `<button class="war-btn" data-act="prev">${esc(this._warTxt('prev'))}</button>` +
         `<button class="war-btn is-play" data-act="play">${this._warPlayTimer ? esc(this._warTxt('pause')) : '▶ ' + esc(this._warTxt('play'))}</button>` +
-        `<button class="war-btn" data-act="next">${esc(this._warTxt('next'))} ▶</button>` +
+        `<button class="war-btn" data-act="next">${esc(this._warTxt('next'))}</button>` +
         `<button class="war-btn" data-act="rewind" title="${esc(this._warTxt('rewind'))}">⟲</button>` +
         `<button class="war-btn is-speed" data-act="speed" title="${esc(this._warTxt('speed'))}">${this._warPlaySpeed || 1}×</button>` +
         `</div>` +

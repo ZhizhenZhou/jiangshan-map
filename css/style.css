@@ -5293,20 +5293,20 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   stroke-linejoin: round;
 }
 
-/* --- campaign card (#war-card, 与 #journey-card 同槽互斥) --- */
+/* --- campaign card (#war-card, 与 #journey-card 同槽互斥；表面配方对齐 genealogy/challenge 卡) --- */
 #war-card {
   position: absolute;
   left: 14px;
   bottom: 26px;
   z-index: 8;
   width: min(340px, calc(100% - 28px));
-  border-radius: 10px;
-  border: 1px solid rgba(181, 69, 47, 0.36);
-  background: rgba(248, 243, 233, 0.96);
+  background: rgba(250, 246, 237, 0.96);
+  border: 1px solid var(--hairline);
+  border-radius: var(--corner-radius);
+  box-shadow: var(--card-shadow);
   backdrop-filter: blur(8px);
-  box-shadow: 0 8px 24px rgba(36, 28, 20, 0.18);
   overflow: hidden;
-  animation: warCardIn 0.32s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+  animation: warCardIn 0.3s cubic-bezier(0.22, 0.9, 0.32, 1) both;
 }
 #viewport-frame.is-camera-moving #war-card {
   animation: none;
@@ -5325,48 +5325,49 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 
 .war-head {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 8px;
-  padding: 9px 12px;
-  border-bottom: 1px solid rgba(90, 74, 58, 0.15);
+  padding: 11px 14px 9px;
+  border-bottom: 1px solid var(--hairline);
   cursor: pointer;
   user-select: none;
 }
 .war-title {
-  font-family: var(--serif-stack, Georgia, serif);
+  font-family: var(--serif-stack);
   font-weight: 800;
-  font-size: 15px;
-  color: var(--text-primary, #33261c);
+  font-size: 15.5px;
+  color: var(--text-main);
   letter-spacing: 0.02em;
 }
 .war-years {
-  font-family: var(--sans-stack, sans-serif);
+  font-family: var(--sans-stack);
   font-size: 11px;
-  color: var(--text-secondary, #7a6a55);
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 .war-fold {
   margin-left: auto;
-  border: 1px solid var(--hairline, rgba(90, 74, 58, 0.25));
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--text-secondary, #7a6a55);
-  width: 22px;
-  height: 22px;
+  align-self: center;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  width: 20px;
+  height: 20px;
+  padding: 0;
   line-height: 1;
+  font-size: 12px;
   cursor: pointer;
   transition: transform 0.18s;
 }
-.war-card-folded .war-fold,
 #war-card.is-folded .war-fold {
   transform: rotate(-90deg);
 }
 
 .war-body {
-  padding: 8px 12px 10px;
+  padding: 9px 14px 11px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
   max-height: min(58vh, 430px);
   overflow-y: auto;
 }
@@ -5377,15 +5378,16 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 .war-sides {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px 12px;
+  gap: 4px 12px;
+  align-items: center;
 }
 .war-side {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: var(--sans-stack, sans-serif);
+  font-family: var(--sans-stack);
   font-size: 11.5px;
-  color: var(--text-primary, #33261c);
+  color: var(--text-main);
 }
 .war-side i {
   width: 9px;
@@ -5394,62 +5396,71 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   display: inline-block;
   border: 1px solid rgba(36, 28, 20, 0.28);
 }
+.war-side-hint {
+  display: block;
+  font-family: var(--sans-stack);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+}
 
 .war-narr {
-  font-family: var(--sans-stack, sans-serif);
+  position: relative;
+  font-family: var(--sans-stack);
   font-size: 12.2px;
   line-height: 1.62;
-  color: var(--text-primary, #33261c);
+  color: var(--text-main);
+  padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--vermilion);
 }
 .war-narr b {
-  color: var(--vermilion, #b5452f);
+  color: var(--vermilion);
 }
 
-/* 兵力对比条（附史料出处 tooltip） */
 .war-fbars {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 6px 8px;
-  border: 1px solid rgba(90, 74, 58, 0.14);
-  border-radius: 7px;
-  background: rgba(255, 255, 255, 0.5);
+  padding: 7px 9px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.42);
 }
 .war-fbars-head {
-  font-family: var(--sans-stack, sans-serif);
-  font-size: 10.5px;
-  letter-spacing: 0.04em;
-  color: var(--text-secondary, #7a6a55);
+  font-family: var(--sans-stack);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
 }
 .war-fbar-row {
   display: grid;
   grid-template-columns: 88px 1fr 62px;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 .war-fbar-name {
-  font-family: var(--sans-stack, sans-serif);
+  font-family: var(--sans-stack);
   font-size: 11px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .war-fbar-track {
-  height: 8px;
+  height: 7px;
   border-radius: 4px;
-  background: rgba(90, 74, 58, 0.12);
+  background: rgba(90, 74, 58, 0.14);
   overflow: hidden;
 }
 .war-fbar-bar {
   display: block;
   height: 100%;
   border-radius: 4px;
-  opacity: 0.82;
+  opacity: 0.85;
 }
 .war-fbar-bar.is-claimed {
   background-image: repeating-linear-gradient(
     45deg,
-    rgba(255, 255, 255, 0.55) 0 3px,
+    rgba(255, 255, 255, 0.5) 0 3px,
     transparent 3px 6px
   );
   opacity: 0.55;
@@ -5458,87 +5469,108 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   opacity: 0.62;
 }
 .war-fbar-num {
-  font-family: var(--sans-stack, sans-serif);
+  font-family: var(--sans-stack);
   font-size: 11px;
   font-weight: 700;
   text-align: right;
-  color: var(--text-primary, #33261c);
+  color: var(--text-main);
   white-space: nowrap;
 }
 
 .war-steps {
+  position: relative; /* 使 .war-step 的 offsetTop 相对列表自身，自动滚动定位才正确 */
   display: flex;
   flex-direction: column;
   max-height: 148px;
   overflow-y: auto;
-  border-top: 1px solid rgba(90, 74, 58, 0.12);
+  border-top: 1px solid var(--hairline);
+  padding-top: 4px;
 }
 .war-step {
+  position: relative;
   display: flex;
   align-items: baseline;
   gap: 8px;
-  padding: 4.5px 4px;
-  font-family: var(--sans-stack, sans-serif);
+  padding: 4.5px 6px 4.5px 9px;
+  font-family: var(--sans-stack);
   font-size: 11.8px;
   cursor: pointer;
   border-radius: 5px;
 }
 .war-step:hover {
-  background: rgba(181, 69, 47, 0.08);
+  background: rgba(181, 69, 47, 0.07);
 }
 .war-step .wy {
   font-weight: 700;
   font-size: 10.5px;
   min-width: 30px;
   text-align: right;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 .war-step .wt {
-  color: var(--text-primary, #33261c);
+  color: var(--text-main);
 }
 .war-step.is-cur {
-  background: rgba(181, 69, 47, 0.12);
+  background: rgba(181, 69, 47, 0.09);
+}
+.war-step.is-cur::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--vermilion);
+}
+.war-step.is-cur .wy {
+  color: var(--vermilion);
 }
 .war-step.is-cur .wt {
   font-weight: 700;
-  color: var(--vermilion, #b5452f);
+  color: var(--vermilion);
 }
 
 .war-ctrl {
   display: flex;
-  gap: 6px;
+  gap: 5px;
 }
 .war-btn {
   flex: 1;
-  padding: 5.5px 6px;
+  min-width: 0;
+  padding: 5.5px 2px;
   border-radius: 6px;
-  border: 1px solid var(--hairline, rgba(90, 74, 58, 0.25));
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--text-primary, #33261c);
-  font-family: var(--sans-stack, sans-serif);
-  font-size: 11.5px;
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--text-main);
+  font-family: var(--sans-stack);
+  font-size: 11px;
+  white-space: nowrap;
   cursor: pointer;
-  transition: border-color 0.14s, color 0.14s;
+  transition: border-color 0.14s, color 0.14s, background 0.14s;
 }
 .war-btn:hover {
-  border-color: var(--vermilion, #b5452f);
-  color: var(--vermilion, #b5452f);
+  border-color: var(--vermilion);
+  color: var(--vermilion);
 }
 .war-btn.is-play {
-  background: var(--vermilion, #b5452f);
-  border-color: var(--vermilion, #b5452f);
+  flex: 1.35;
+  background: var(--vermilion);
+  border-color: var(--vermilion);
   color: #fffaf2;
   font-weight: 700;
 }
 .war-btn.is-play:hover {
   color: #fffaf2;
-  filter: brightness(1.06);
+  filter: brightness(1.05);
 }
 
 .war-foot {
-  font-family: var(--sans-stack, sans-serif);
-  font-size: 10px;
-  line-height: 1.5;
-  color: var(--text-secondary, #7a6a55);
+  font-family: var(--sans-stack);
+  font-size: 9.8px;
+  line-height: 1.55;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 900px) {
