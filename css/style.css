@@ -5151,9 +5151,9 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 
 /* --- control zones (战线推移 · 示意复原) --- */
 #grp-war .war-zone {
-  fill-opacity: 0.09;
-  stroke-opacity: 0.55;
-  stroke-width: 1.4;
+  fill-opacity: 0.14;
+  stroke-opacity: 0.7;
+  stroke-width: 1.8;
   stroke-dasharray: 6 4;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
@@ -5165,8 +5165,8 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 
 @keyframes warZoneGhost {
   from {
-    fill-opacity: 0.09;
-    stroke-opacity: 0.55;
+    fill-opacity: 0.14;
+    stroke-opacity: 0.7;
   }
   100% {
     fill-opacity: 0;
@@ -5188,7 +5188,7 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 #grp-war .war-march.t2 { --war-w: 4.5px; }
 #grp-war .war-march.t3 { --war-w: 6.3px; }
 #grp-war .war-march.is-past {
-  stroke-opacity: 0.72;
+  stroke-opacity: 0.8;
   stroke-dasharray: none;
 }
 #grp-war .war-march.is-cur {
@@ -5544,4 +5544,142 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   .war-fbar-row {
     grid-template-columns: 72px 1fr 54px;
   }
+}
+
+/* --- 战争态势浮签（战争年份接管自动叙事；与里程碑气泡互斥出现） --- */
+#war-balloon {
+  position: absolute;
+  z-index: 6;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(348px, calc(100vw - 24px));
+  background: rgba(252, 248, 240, 0.95);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(166, 58, 40, 0.5);
+  border-radius: 9px;
+  padding: 7px 11px 8px;
+  box-shadow: var(--card-shadow);
+  font-size: 12.2px;
+  line-height: 1.42;
+  pointer-events: auto;
+  transition: opacity 0.16s ease;
+}
+
+#war-balloon::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgba(252, 248, 240, 0.96);
+  border: 0 solid rgba(166, 58, 40, 0.52);
+  pointer-events: none;
+}
+
+#war-balloon[data-caret="left"]::before {
+  left: -4.5px;
+  top: var(--caret-y, 24px);
+  transform: translateY(-50%) rotate(45deg);
+  border-left-width: 1px;
+  border-bottom-width: 1px;
+}
+
+#war-balloon[data-caret="right"]::before {
+  right: -4.5px;
+  top: var(--caret-y, 24px);
+  transform: translateY(-50%) rotate(45deg);
+  border-right-width: 1px;
+  border-top-width: 1px;
+}
+
+#war-balloon[data-caret="bottom"]::before {
+  bottom: -4.5px;
+  left: var(--caret-x, 50%);
+  transform: translateX(-50%) rotate(45deg);
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
+#war-balloon[data-caret="top"]::before {
+  top: -4.5px;
+  left: var(--caret-x, 50%);
+  transform: translateX(-50%) rotate(45deg);
+  border-left-width: 1px;
+  border-top-width: 1px;
+}
+
+#war-balloon.is-offscreen {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#war-balloon .ep-head {
+  display: flex;
+  align-items: center;
+  gap: 4px 6px;
+  flex-wrap: wrap;
+  padding-right: 22px;
+}
+
+#war-balloon .ep-year {
+  font-family: var(--serif-stack);
+  font-weight: 700;
+  color: var(--vermilion);
+  font-size: 11.8px;
+}
+
+#war-balloon .ep-text {
+  color: var(--text-main);
+  margin-top: 4px;
+  font-weight: 500;
+  overflow-wrap: break-word;
+}
+
+#war-balloon .ep-close {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(166, 58, 40, 0.08);
+  color: var(--text-secondary);
+  font-family: var(--sans-stack);
+  font-size: 13px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+
+#war-balloon .ep-close:hover {
+  background: var(--vermilion);
+  color: #fffaf2;
+}
+
+.war-balloon-forces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-top: 5px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(90, 74, 58, 0.14);
+  font-family: var(--sans-stack);
+  font-size: 10.8px;
+  color: var(--text-secondary);
+}
+.war-bf-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.war-bf-item i {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  display: inline-block;
 }

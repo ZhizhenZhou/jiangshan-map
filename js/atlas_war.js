@@ -335,6 +335,7 @@
             },
             g
           );
+          if (isCur) this._warCurSpot = { x: sx, y: sy };
           this._svgNode('circle', { class: 'war-ring', r: 8.5, stroke: side.color }, node);
           const core = this._svgNode(
             'g',
@@ -346,7 +347,8 @@
             { class: 'war-diamond', points: '0,-4.6 4.6,0 0,4.6 -4.6,0', fill: side.color },
             core
           );
-          if (isCur || (i === 0 && idx > 0)) {
+          // 当前步战役名交给态势浮签，SVG 只留起兵锚点标签
+          if (i === 0 && idx > 0) {
             lblNodes.push({
               x: sx,
               y: sy,
@@ -653,6 +655,11 @@
           this._cycleWarSpeed();
           return;
         }
+        if (a === 'play') {
+          // toggle 自管定时器：先 stop 再 toggle 会把"暂停"变成"重启"
+          this._toggleWarPlay();
+          return;
+        }
         this._stopWarPlay();
         if (a === 'prev' || a === 'next') {
           this._gotoWarStep(w, this._warStepIndex(w) + (a === 'next' ? 1 : -1));
@@ -696,11 +703,128 @@
       }
       this._renderWarSvg(w, idx, zi);
       this._renderWarCard(w, idx);
+      this._syncWarBalloon(w, idx);
+    }
+
+    // ---------------- war situation balloon (战争态势浮签) ----------------
+    // 接管战争年份的自动叙事气泡：锚定当前战役、内容逐步跟随战局；
+    // 里程碑系统本体不动（手动点钉照常，浮签自动避让）。
+
+    _warBalloonEl() {
+      return this._id('war-balloon');
+    }
+
+    _hideWarBalloon() {
+      const el = this._warBalloonEl();
+      if (el && !el.classList.contains('is-hidden')) el.classList.add('is-hidden');
+      this._warBalloonState = null;
+    }
+
+    _syncWarBalloon(w, idx) {
+      const el = this._warBalloonEl();
+      if (!el) return;
+      const battle = w && idx >= 0 ? ((w.steps[idx] || {}).battles || [])[0] : null;
+      const milestoneOpen =
+        this.milestoneBalloon && !this.milestoneBalloon.classList.contains('is-hidden');
+      const usable =
+        battle &&
+        this._warCurSpot &&
+        this._warLayerOn() &&
+        !this.challenge &&
+        !this.activePerson &&
+        !this.activeTrace &&
+        !milestoneOpen;
+      if (!usable || this._warBalloonDismissedIdx === `${w.key}:${idx}`) {
+        this._hideWarBalloon();
+        return;
+      }
+      const sig = [this.locale, w.key, idx].join('|');
+      if (sig !== this._warBalloonSig) {
+        this._warBalloonSig = sig;
+        const title = this._warField(battle, 'name') || this._warStepTitle(w, w.steps[idx]);
+        const desc = this._warField(battle, 'desc') || '';
+        const zh = this.locale !== 'en';
+        const forces = this._warStepForces(w, w.steps[idx])
+          .map((f) => {
+            const sd = this._warSide(w, f.side);
+            return `<span class="war-bf-item"><i style="background:${sd.color}"></i>${esc(this._warField(sd, 'name'))} ${esc(this._warFormatN(f.n, f.quality))}</span>`;
+          })
+          .join('');
+        el.innerHTML =
+          `<div class="ep-head"><span class="ep-year">${esc(this.formatYear(w.steps[idx].y))} · ${esc(title)}</span></div>` +
+          (desc ? `<div class="ep-text">${esc(desc)}</div>` : '') +
+          (forces ? `<div class="war-balloon-forces">${forces}</div>` : '') +
+          `<button type="button" class="ep-close" aria-label="${zh ? '关闭战报浮签' : 'Dismiss campaign callout'}">×</button>`;
+        const closeBtn = el.querySelector('.ep-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this._warBalloonDismissedIdx = `${w.key}:${idx}`;
+            this._hideWarBalloon();
+          });
+        }
+        if (this.locale === 'zh-tw') this._applyZhHantDom(el);
+      }
+      this._warBalloonState = {
+        sx: this._warCurSpot.x,
+        sy: this._warCurSpot.y,
+      };
+      el.classList.remove('is-hidden', 'is-offscreen');
+      this._positionWarBalloon();
+    }
+
+    _positionWarBalloon() {
+      const el = this._warBalloonEl();
+      if (!el || el.classList.contains('is-hidden') || !this._warBalloonState) return;
+      const { sx, sy } = this._warBalloonState;
+      const rect =
+        (this.dragState && this.dragState.rect) ||
+        (this.pinchState && this.pinchState.rect) ||
+        this._cameraViewportRect ||
+        this.svg.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      this._cameraViewportRect = rect;
+      const scale = Math.min(rect.width / this.camera.w, rect.height / this.camera.h);
+      const padX = (rect.width - this.camera.w * scale) * 0.5;
+      const padY = (rect.height - this.camera.h * scale) * 0.5;
+      const px = padX + (sx - this.camera.x) * scale;
+      const py = padY + (sy - this.camera.y) * scale;
+      if (px < -16 || px > rect.width + 16 || py < -16 || py > rect.height + 16) {
+        el.classList.add('is-offscreen');
+        return;
+      }
+      el.classList.remove('is-offscreen');
+      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 900;
+      const bW = el.offsetWidth || 260;
+      const bH = el.offsetHeight || 70;
+      const minLeft = isMobile ? 8 : 12;
+      const rightLimit = Math.max(minLeft, rect.width - bW - (isMobile ? 8 : 12));
+      const minTop = isMobile ? 48 : 12;
+      const maxTop = Math.max(minTop, rect.height - bH - (isMobile ? 56 : 16));
+      const pinGap = isMobile ? 10 : 12;
+      let left;
+      let top = Math.max(minTop, Math.min(maxTop, py - bH * 0.42));
+      let caretDir = 'left';
+      if (px + pinGap <= rightLimit) {
+        left = px + pinGap;
+        caretDir = 'left';
+      } else if (px - bW - pinGap >= minLeft) {
+        left = px - bW - pinGap;
+        caretDir = 'right';
+      } else {
+        left = Math.max(minLeft, Math.min(rightLimit, px - bW / 2));
+        caretDir = py < rect.height / 2 ? 'top' : 'bottom';
+      }
+      el.style.left = `${left.toFixed(1)}px`;
+      el.style.top = `${top.toFixed(1)}px`;
+      el.style.setProperty('--caret-y', `${Math.max(14, Math.min(bH - 14, py - top)).toFixed(1)}px`);
+      el.dataset.caret = caretDir;
     }
 
     _onWarLocaleChange() {
       this._warSvgSig = null;
       this._warCardSig = null;
+      this._warBalloonSig = null;
       const chk = this._id('chk-war');
       const lbl = this._id('lbl-war');
       if (lbl) {
@@ -831,6 +955,53 @@
         ) {
           this._warSeekTo(frac);
         }
+      } catch (e) {
+        /* non-fatal */
+      }
+      return r;
+    };
+
+    // 战争年份：自动里程碑气泡让位给战争态势浮签（手动点钉不受影响）
+    const baseAutoSync = Ctrl.prototype._syncAutoMilestoneBalloon;
+    Ctrl.prototype._syncAutoMilestoneBalloon = function (...args) {
+      if (this._activeWar && this._activeWar()) {
+        if (this.activeMilestone && this.activeMilestone.isAuto) this.closeMilestoneBalloon();
+        return;
+      }
+      return baseAutoSync.apply(this, args);
+    };
+
+    // 手动里程碑气泡打开 → 战争浮签避让；关闭 → 战争浮签复位
+    const baseOpenMb = Ctrl.prototype.openMilestoneBalloon;
+    Ctrl.prototype.openMilestoneBalloon = function (...args) {
+      const r = baseOpenMb.apply(this, args);
+      try {
+        if (this.milestoneBalloon && !this.milestoneBalloon.classList.contains('is-hidden')) {
+          this._hideWarBalloon();
+        }
+      } catch (e) {
+        /* non-fatal */
+      }
+      return r;
+    };
+    const baseCloseMb = Ctrl.prototype.closeMilestoneBalloon;
+    Ctrl.prototype.closeMilestoneBalloon = function (...args) {
+      const r = baseCloseMb.apply(this, args);
+      try {
+        const w = this._activeWar ? this._activeWar() : null;
+        if (w) this._syncWarBalloon(w, this._warStepIndex(w));
+      } catch (e) {
+        /* non-fatal */
+      }
+      return r;
+    };
+
+    // 态势浮签逐帧跟随相机（与里程碑气泡同一重定位通道）
+    const baseApplyCam = Ctrl.prototype._applyCamera;
+    Ctrl.prototype._applyCamera = function (...args) {
+      const r = baseApplyCam.apply(this, args);
+      try {
+        this._positionWarBalloon();
       } catch (e) {
         /* non-fatal */
       }
