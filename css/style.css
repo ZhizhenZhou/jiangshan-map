@@ -5689,3 +5689,10 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   transform: rotate(45deg);
   display: inline-block;
 }
+
+.war-side-hint {
+  font-family: var(--sans-stack, sans-serif);
+  font-size: 10.2px;
+  color: var(--text-secondary, #7a6a55);
+  margin-left: auto;
+}

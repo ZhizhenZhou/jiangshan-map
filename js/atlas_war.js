@@ -495,6 +495,7 @@
       const sidesHtml = (w.sides || [])
         .map((sd) => `<span class="war-side"><i style="background:${sd.color}"></i>${esc(this._warField(sd, 'name'))}</span>`)
         .join('');
+      const sideHint = `<span class="war-side-hint">${esc(this._warTxt('sideHint'))}</span>`;
       const step = idx >= 0 ? w.steps[idx] : null;
       const narrHtml = idx < 0
         ? `<b>${this.formatYear(w.span[0])}</b> · ${esc(this._warTxt('upcoming'))}`
@@ -522,7 +523,7 @@
         `<button class="war-fold" data-act="fold" aria-expanded="${folded ? 'false' : 'true'}" title="${esc(this._warTxt('fold'))}">▾</button>` +
         `</div>` +
         `<div class="war-body${folded ? ' is-folded' : ''}">` +
-        `<div class="war-sides">${sidesHtml}</div>` +
+        `<div class="war-sides">${sidesHtml}${sideHint}</div>` +
         `<div class="war-narr">${narrHtml}</div>` +
         (idx >= 0 ? this._warForceBarsHtml(w, step) : '') +
         `<div class="war-steps">${listHtml}</div>` +
@@ -561,6 +562,7 @@
         upcoming: zh ? '大战将启——拖动时间轴或点"播放"逐步推进战局。' : 'The campaign is about to begin — drag the timeline or press Play.',
         fold: zh ? '折叠/展开战报' : 'Fold/unfold the report',
         foot: zh ? '行军路线与控制区均为示意复原；兵力标注附史料出处（实录 / 号称 / 约数）' : 'Routes and control zones are schematic; strength figures carry their sources (recorded / claimed / approx.)',
+        sideHint: zh ? '◆ 战役点按该役得手方着色' : '◆ Battle diamonds colored by the side that held the field',
         jumpHint: zh ? '点击跳到该步' : 'Click to jump to this step',
         speed: zh ? '播放速度' : 'Playback speed',
         rewind: zh ? '回到战役起点，从头完整重放' : 'Back to step zero and replay the whole campaign',
@@ -926,11 +928,15 @@
       const place = this._warField(b, 'place');
       const title = esc(this._warField(b, 'name')) || esc(this._warStepTitle(w, w.steps[i]));
       const yr = this.formatYear(w.steps[i].y);
+      const sideNote = zh
+        ? `此役${esc(this._warField(side, 'name'))}得手/占优`
+        : `${esc(this._warField(side, 'name'))} held the field`;
       this._showHoverTip(
         e,
         `<b style="color:${side.color}">◆ ${title}</b>` +
         `<div class="tt-sub">${yr}${place ? ' · ' + esc(place) : ''}</div>` +
         (forces ? `<div class="tt-sub">${forces}</div>` : '') +
+        `<div class="tt-sub" style="color:${side.color}">${sideNote}</div>` +
         `<div class="tt-sub">${esc(this._warTxt('jumpHint'))}</div>`
       );
     }
