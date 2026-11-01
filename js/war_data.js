@@ -823,4 +823,155 @@ window.WAR_DATA = [
       },
     ],
   },
+  {
+    key: 'guandu',
+    titleZh: '官渡之战',
+    titleEn: 'The battle of Guandu',
+    span: [199, 201],
+    descZh: '建安五年，袁绍精兵十万压向黄河，曹操以不满万人的孤军守官渡——许攸夜奔，乌巢一把火，北方归属一夜间定盘。',
+    descEn: 'In 200 Yuan Shao drove 100,000 men at the Yellow River; Cao Cao held Guandu with a lone under-strength army — until one night, one defector, one granary on fire.',
+    sides: [
+      { key: 'cao', nameZh: '曹军（曹操）', nameEn: 'Cao Cao\'s army', color: '#46647a' },
+      { key: 'yuan', nameZh: '袁军（袁绍）', nameEn: 'Yuan Shao\'s army', color: '#7a6230' },
+    ],
+    zones: [
+      {
+        y: 200.2, side: 'yuan',
+        rings: [[[113.4, 34.6], [116.8, 34.7], [117.2, 37.2], [114.8, 38.2], [113.3, 36.5]]],
+        noteZh: '袁绍据幽并青冀四州，精兵十万南压', noteEn: 'Yuan Shao presses south from four provinces',
+      },
+      {
+        y: 200.8, side: 'yuan',
+        rings: [[[113.9, 34.85], [116.8, 34.9], [117.1, 37.1], [114.9, 38.1], [113.8, 36.3]]],
+        noteZh: '两军官渡相持，袁军垒东西数十里', noteEn: 'The armies dig in facing each other at Guandu',
+      },
+      {
+        y: 201.2, side: 'cao',
+        rings: [[[113.4, 34.5], [116.9, 34.6], [117.2, 37.2], [114.7, 38.3], [113.2, 36.4]]],
+        noteZh: '袁军主力溃散，河北自此门户洞开', noteEn: 'The Yuan host shatters; Hebei lies open',
+      },
+    ],
+    steps: [
+      {
+        y: 200.17,
+        moves: [{ side: 'yuan', from: [114.61, 36.34], to: [114.55, 35.53],
+          titleZh: '袁绍南压，颜良攻白马', titleEn: 'Yuan Shao drives south; Yan Liang at Baima',
+          force: { n: 110000, quality: 'recorded', srcZh: '《三国志·袁绍传》："简精兵十万、骑万匹"', srcEn: 'Sanguozhi, Yuan Shao bio: "100,000 picked men and 10,000 horse".' },
+          descZh: '袁绍简精兵十万、骑万匹，欲南渡河直取许都——二月，进军黎阳，遣颜良攻东郡太守刘延于白马。',
+          descEn: 'Yuan Shao crossed toward Baima with Yan Liang in the van — the largest army in the land, aimed at Xuchang.' }],
+      },
+      {
+        y: 200.25,
+        battles: [{ side: 'cao', at: [114.55, 35.53], nameZh: '白马之战，关羽斩颜良', nameEn: 'Baima; Guan Yu slays Yan Liang', placeZh: '今河南滑县', placeEn: 'Huaxian, Henan',
+          descZh: '曹操声东击西，佯渡延津——颜良来救，羽望见麾盖「策马刺良于万众之中，斩其首还」，绍诸将莫能当者。白马之围遂解。',
+          descEn: 'Cao feinted at Yanjin, then struck: Guan Yu speared Yan Liang amid ten thousand men — the siege of Baima dissolved.' }],
+      },
+      {
+        y: 200.33,
+        battles: [{ side: 'cao', at: [114.42, 35.28], nameZh: '延津南诱敌', nameEn: 'The ambush at Yanjin', placeZh: '今河南延津', placeEn: 'Yanjin, Henan',
+          descZh: '曹操以辎重饵敌，骑兵不满六百纵击——文丑死于乱军，刘备走。袁军初战两折，锐气大挫。',
+          descEn: 'Cao baited Yuan\'s horse with baggage and broke them with under 600 riders — Wen Chou died in the melee.' }],
+      },
+      {
+        y: 200.5, titleZh: '相持官渡', titleEn: 'Digging in at Guandu',
+        descZh: '八月，袁军垒东西数十里前临官渡——曹「兵不满万，伤者十二三」（学界多疑之，推算当有二三万），粮亦将尽。曹操与荀彧书议退师，彧答：「此用奇之时，不可失也。」',
+        descEn: 'Months of stalemate, grain running out, Cao considering retreat — Xun Yu\'s reply: "this is the moment for the unexpected move."',
+      },
+      {
+        y: 200.8,
+        battles: [{ side: 'cao', at: [113.97, 34.86], nameZh: '乌巢烧粮', nameEn: 'The granary fire at Wuchao', placeZh: '今河南原阳（乌巢）', placeEn: 'Wuchao, Henan',
+          forces: [
+            { side: 'cao', n: 5000, quality: 'recorded', srcZh: '《三国志·武帝纪》：曹公"自将步骑五千人，皆用袁军旗帜"夜袭乌巢', srcEn: 'Sanguozhi: 5,000 night-raiders in Yuan colors.' },
+            { side: 'yuan', n: 10000, quality: 'recorded', srcZh: '淳于琼督粮军万余人守乌巢', srcEn: 'Chunyu Qiong\'s 10,000 guarded the grain.' },
+          ],
+          descZh: '许攸夜奔，献计「袁军辎重万余乘在故市乌巢，屯军无严备——今轻兵袭之，燔其积聚，不过三日，袁氏自败」。曹公大喜，亲率五千步骑夜袭，火燒粮谷。',
+          descEn: 'Xu You defected at midnight with the location of Yuan\'s grain. Cao led 5,000 in Yuan colors and burned Wuchao to the ground.' }],
+      },
+      {
+        y: 200.85,
+        battles: [{ side: 'cao', at: [113.9, 34.79], nameZh: '张郃高览降，袁军大溃', nameEn: 'Zhang He defects; the rout', placeZh: '今河南中牟（官渡）', placeEn: 'Guandu, Zhongmu',
+          descZh: '乌巢火起，张郃、高览临阵倒戈降曹——袁军遂大溃。袁绍与谭单骑渡河，追之不及者八万余人皆被坑杀。',
+          descEn: 'With the granary burning, Zhang He and Gao Lan defected on the spot; Yuan Shao crossed the river with his sons alone — tens of thousands of his men were buried.' }],
+      },
+      {
+        y: 201.2, titleZh: '袁绍忧死，河北崩解', titleEn: 'Yuan Shao dies; Hebei breaks apart',
+        descZh: '建安七年，袁绍惭愤呕血而亡，诸子相争——曹操各各击破，至建安十二年定河北。北方既一，天下大势尽在掌中。',
+        descEn: 'Yuan Shao died of shame in 201, his sons at each other\'s throats; by 207 Cao Cao held all the north.',
+      },
+    ],
+  },
+  {
+    key: 'feishui',
+    titleZh: '淝水之战',
+    titleEn: 'The battle of Fei River',
+    span: [383, 384],
+    descZh: '太元八年，苻坚「投鞭于江，足断其流」南下八十余万；谢安以八万北府兵应之——淝水一渡，风声鹤唳，南北格局定于此役。',
+    descEn: 'In 383 Fu Jian marched south with 800,000 ("whip-drop the river"); Xie An met him with 80,000 Beifu men — one crossing, one panic, and the north-south divide was fixed.',
+    sides: [
+      { key: 'qianqin', nameZh: '前秦（苻坚）', nameEn: 'Former Qin (Fu Jian)', color: '#7a3b2e' },
+      { key: 'jin', nameZh: '东晋（北府兵）', nameEn: 'Eastern Jin (Beifu army)', color: '#2f5d7c' },
+    ],
+    zones: [
+      {
+        y: 383.84, side: 'qianqin',
+        rings: [[[112.5, 32.2], [117.3, 32.1], [117.5, 33.6], [116.4, 34.2], [114.0, 34.0], [112.6, 33.4]]],
+        noteZh: '前秦东西万里水陆齐进，兵锋至淮南', noteEn: 'Former Qin pours into Huainan',
+      },
+      {
+        y: 383.92, side: 'jin',
+        rings: [[[112.5, 32.2], [117.3, 32.1], [117.5, 33.6], [116.4, 34.2], [114.0, 34.0], [112.6, 33.4]]],
+        noteZh: '前秦崩解，南北格局自此定', noteEn: 'Qin collapses; the divide holds',
+      },
+    ],
+    steps: [
+      {
+        y: 383.79,
+        moves: [{ side: 'qianqin', from: [108.94, 34.27], to: [114.87, 33.45],
+          path: [[108.94, 34.27], [111.5, 33.4], [113.5, 33.2], [114.87, 33.45]],
+          titleZh: '苻坚发长安，投鞭断流', titleEn: 'Fu Jian marches from Chang\'an',
+          force: { n: 870000, quality: 'recorded', srcZh: '《晋书·苻坚载记》："戎卒六十余万，骑二十七万，旗鼓相望，前后千里"', srcEn: 'Jinshu: "600,000+ foot and 270,000 horse, banners a thousand li".' },
+          descZh: '苻坚下诏大举入寇：「以吾之众旅，投鞭于江，足断其流！」戎卒六十余万、骑二十七万，东西万里水陆齐进。',
+          descEn: '"My men need only drop their whips in the river to dam it." 870,000 men marched — the largest army China had ever fielded.' }],
+      },
+      {
+        y: 383.83,
+        battles: [{ side: 'qianqin', at: [116.79, 32.58], nameZh: '苻融陷寿阳', nameEn: 'Shouyang falls', placeZh: '今安徽寿县', placeEn: 'Shouxian, Anhui',
+          forces: [{ side: 'qianqin', n: 250000, quality: 'recorded', srcZh: '《晋书》：苻融"率步骑二十五万为前锋"', srcEn: 'Jinshu: Fu Rong\'s 250,000-strong vanguard.' }],
+          descZh: '前锋苻融攻陷寿阳，执晋平南将军——苻坚闻晋兵少，留大军于项城，自率轻骑八千赶赴寿阳。',
+          descEn: 'The vanguard took Shouyang; Fu Jian, hearing the Jin force was small, raced ahead with 8,000 light horse.' }],
+      },
+      {
+        y: 383.85,
+        battles: [{ side: 'jin', at: [116.72, 32.44], nameZh: '洛涧之战', nameEn: 'The night raid on Luojian', placeZh: '今安徽淮南（洛涧）', placeEn: 'Luojian, Huainan',
+          forces: [{ side: 'jin', n: 5000, quality: 'recorded', srcZh: '《晋书·刘牢之传》：牢之率"精兵五千"夜袭，破秦军五万', srcEn: 'Jinshu, Liu Laozhi bio: 5,000 picked men broke 50,000.' }],
+          descZh: '刘牢之率五千精兵夜袭洛涧，斩梁成及弟梁云——秦军五万土崩，水陆大进。',
+          descEn: 'Liu Laozhi\'s 5,000 swam the stream by night and broke Qin\'s 50,000 — the road to the Fei opened.' }],
+      },
+      {
+        y: 383.86, titleZh: '八公山上，草木皆兵', titleEn: 'Trees on Bagong Mountain',
+        descZh: '苻坚与苻融登寿阳城望之——见八公山上草木皆类人形，「此亦劲敌也，何谓少乎？」怃然有惧色。晋军次淝水，遣使请秦军「小退」以便决战。',
+        descEn: 'From the walls the trees on Bagong Mountain looked like soldiers. The Jin envoy proposed the Qin army "step back a little" so the allies could cross and fight.',
+      },
+      {
+        y: 383.87,
+        battles: [{ side: 'jin', at: [116.8, 32.55], nameZh: '淝水决战', nameEn: 'Decision at the Fei', placeZh: '今寿县淝水', placeEn: 'The Fei River',
+          forces: [
+            { side: 'jin', n: 80000, quality: 'recorded', srcZh: '《晋书》：谢玄"以精锐八万涉淮淝"', srcEn: 'Jinshu: 80,000 Beifu regulars.' },
+            { side: 'qianqin', n: 870000, quality: 'recorded', srcZh: '《晋书·苻坚载记》"戎卒六十余万，骑二十七万"', srcEn: 'Jinshu: 870,000 on paper (most still on the road).' },
+          ],
+          descZh: '秦军半退，朱序在阵后大呼「秦兵败矣！」——众遂大奔。谢玄等以精锐八千渡淝水追击，苻融驰骑掠阵马倒被杀。',
+          descEn: 'As the Qin army stepped back, the defector Zhu Xu cried "Qin is broken!" — and the withdrawal became a rout; Fu Rong died in the collapse.' }],
+      },
+      {
+        y: 383.9, titleZh: '风声鹤唳，草木皆兵', titleEn: 'Wind and cranes, grass and trees',
+        descZh: '秦军大溃，自相蹈藉而死者蔽野塞川——其走者闻风声鹤唳，皆以为王师已至，昼夜不敢息。苻坚中流矢，单骑走至淮北。',
+        descEn: 'The fleeing host heard wind and cranes as pursuers; Fu Jian took an arrow and rode north alone.',
+      },
+      {
+        y: 383.95, titleZh: '南北格局自此定', titleEn: 'The divide is fixed',
+        descZh: '苻坚收拾残部还长安，众才十数万——两年后身死国灭。东晋乘胜北进至黎阳；此后南北对峙近两百年，直至隋唐再统。',
+        descEn: 'Fu Jian returned to Chang\'an with a remnant and was dead within two years. The north-south divide would hold for two centuries.',
+      },
+    ],
+  },
 ];
