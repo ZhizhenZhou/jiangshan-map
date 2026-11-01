@@ -268,7 +268,7 @@
           const tier = mv.force ? this._warForceTier(mv.force.n) : 0;
           const claimed = mv.force && mv.force.quality === 'claimed';
           // 浅色底衬把彩色箭头从繁杂地形里托出来（宣纸制图惯例）
-          this._svgNode(
+          const casing = this._svgNode(
             'path',
             { d: info.d, class: `war-march-casing t${tier}${isCur ? ' is-cur' : ''}` },
             g
@@ -279,14 +279,18 @@
             { d: info.d, class: cls, stroke: side.color },
             g
           );
-          // 当前步行军箭头从起点渐进画向终点（reduced-motion 直接呈现）
+          // 当前步行军箭头从起点渐进画向终点（底衬同步绘制，否则会露出
+          // 一条全长白色预铺线——用户看到的"头部变白后变彩色"正是它）；
+          // reduced-motion 直接呈现
           if (isCur && !claimed && typeof p.getTotalLength === 'function') {
             try {
               const L = p.getTotalLength();
               if (L > 2 && !reducedMotion()) {
-                p.style.strokeDasharray = `${L.toFixed(1)}`;
-                p.style.strokeDashoffset = `${L.toFixed(1)}`;
-                p.style.animation = `warMarchDraw ${drawMs}ms cubic-bezier(0.3,0.6,0.35,1) forwards`;
+                for (const q of [casing, p]) {
+                  q.style.strokeDasharray = `${L.toFixed(1)}`;
+                  q.style.strokeDashoffset = `${L.toFixed(1)}`;
+                  q.style.animation = `warMarchDraw ${drawMs}ms cubic-bezier(0.3,0.6,0.35,1) forwards`;
+                }
               }
             } catch (e) {
               /* drawing reveal is cosmetic */
