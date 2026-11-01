@@ -478,6 +478,7 @@
         `<button class="war-btn" data-act="prev">◀ ${esc(this._warTxt('prev'))}</button>` +
         `<button class="war-btn is-play" data-act="play">${this._warPlayTimer ? esc(this._warTxt('pause')) : '▶ ' + esc(this._warTxt('play'))}</button>` +
         `<button class="war-btn" data-act="next">${esc(this._warTxt('next'))} ▶</button>` +
+        `<button class="war-btn" data-act="rewind" title="${esc(this._warTxt('rewind'))}">⟲</button>` +
         `<button class="war-btn is-speed" data-act="speed" title="${esc(this._warTxt('speed'))}">${this._warPlaySpeed || 1}×</button>` +
         `</div>` +
         `<div class="war-foot">${esc(this._warTxt('foot'))}${zone && zone.noteZh ? ' · ' + esc(this.locale === 'en' ? this._warField(zone, 'note') : zone.noteZh) : ''}</div>` +
@@ -510,6 +511,7 @@
         foot: zh ? '行军路线与控制区均为示意复原；兵力标注附史料出处（实录 / 号称 / 约数）' : 'Routes and control zones are schematic; strength figures carry their sources (recorded / claimed / approx.)',
         jumpHint: zh ? '点击跳到该步' : 'Click to jump to this step',
         speed: zh ? '播放速度' : 'Playback speed',
+        rewind: zh ? '回到战役起点，从头完整重放' : 'Back to step zero and replay the whole campaign',
       };
       return dict[key] || key;
     }
@@ -663,6 +665,13 @@
         }
         if (a === 'play') {
           // toggle 自管定时器：先 stop 再 toggle 会把"暂停"变成"重启"
+          this._toggleWarPlay();
+          return;
+        }
+        if (a === 'rewind') {
+          // 回到战役起点并从第一步开始完整重放（含蓝轴登场）
+          this._stopWarPlay();
+          this._gotoWarStep(w, 0, { gentle: true });
           this._toggleWarPlay();
           return;
         }
