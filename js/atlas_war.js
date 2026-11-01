@@ -132,7 +132,20 @@
         pts[pts.length - 1],
         pts.slice(1, -1)
       );
-      if (info) return info;
+      // end tangent for the arrowhead tip (direction of the final leg)
+      let endX = null, endY = null, endAngleDeg = 0;
+      if (this.projector) {
+        let prev = null;
+        for (const pt of pts) {
+          const sc = this.projector.toScreen(pt[0], pt[1]);
+          if (prev && (Math.abs(sc[0] - prev[0]) > 0.4 || Math.abs(sc[1] - prev[1]) > 0.4)) {
+            endAngleDeg = (Math.atan2(sc[1] - prev[1], sc[0] - prev[0]) * 180) / Math.PI;
+          }
+          prev = sc;
+        }
+        if (prev) { endX = prev[0]; endY = prev[1]; }
+      }
+      if (info) return { ...info, endX, endY, endAngleDeg };
       // 和弦过短（<8px）时 trajectory 构建器会返回 null；
       // 沙盘短轴（如城内出击）退化为直线段，保证当前步箭头始终在场。
       if (!this.projector) return null;
@@ -146,6 +159,9 @@
         my: (a[1] + b[1]) / 2,
         angleDeg: (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI,
         chord,
+        endX: b[0],
+        endY: b[1],
+        endAngleDeg: (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI,
       };
     }
 
@@ -182,6 +198,11 @@
       ].join('|');
       if (sig === this._warSvgSig) return;
       this._warSvgSig = sig;
+      // 战局变化即作废旧悬停签（内容只随 pointermove 重算，陈旧内容比没有更糟）
+      if (this.hoverTip) {
+        this.hoverTip.classList.add('is-hidden');
+        this.hoverTip.classList.remove('is-interactive');
+      }
       grp.innerHTML = '';
       this._warUsedSpots = {};
 
@@ -230,7 +251,11 @@
         };
       }
 
-      // --- march arrows: past as solid traces, current flowing ---
+      // --- march arrows: past as solid traces, current drawing progressively ---
+      const drawMs = Math.max(
+        380,
+        Math.min(1100, PLAY_INTERVAL / (this._warPlaySpeed || 1) - 320)
+      );
       for (let i = 0; i <= idx; i++) {
         const s = w.steps[i];
         const isCur = i === idx;
@@ -241,24 +266,42 @@
           const info = this._warSegInfo(pts);
           if (!info) continue;
           const tier = mv.force ? this._warForceTier(mv.force.n) : 0;
-          const cls = `war-march t${tier}${isCur ? ' is-cur' : ' is-past'}${mv.force && mv.force.quality === 'claimed' ? ' is-claimed' : ''}`;
-          this._svgNode(
+          const claimed = mv.force && mv.force.quality === 'claimed';
+          const cls = `war-march t${tier}${isCur ? ' is-cur' : ' is-past'}${claimed ? ' is-claimed' : ''}`;
+          const p = this._svgNode(
             'path',
             { d: info.d, class: cls, stroke: side.color },
             g
           );
-          // directional chevron at mid-point, angled along the tangent
+          // 当前步行军箭头从起点渐进画向终点（reduced-motion 直接呈现）
+          if (isCur && !claimed && typeof p.getTotalLength === 'function') {
+            try {
+              const L = p.getTotalLength();
+              if (L > 2 && !reducedMotion()) {
+                p.style.strokeDasharray = `${L.toFixed(1)}`;
+                p.style.strokeDashoffset = `${L.toFixed(1)}`;
+                p.style.animation = `warMarchDraw ${drawMs}ms cubic-bezier(0.3,0.6,0.35,1) forwards`;
+              }
+            } catch (e) {
+              /* drawing reveal is cosmetic */
+            }
+          }
+          // directional chevron at the DESTINATION tip, angled along the final leg
+          if (info.endX === null) continue;
           const dir = this._svgNode(
             'g',
             {
               class: `war-dir t${tier}${isCur ? ' is-cur' : ''}`,
-              'data-x': info.mx.toFixed(1),
-              'data-y': info.my.toFixed(1),
-              'data-rot': info.angleDeg.toFixed(1),
+              'data-x': info.endX.toFixed(1),
+              'data-y': info.endY.toFixed(1),
+              'data-rot': info.endAngleDeg.toFixed(1),
             },
             g
           );
           dir.style.color = side.color;
+          if (isCur && !claimed && !reducedMotion()) {
+            dir.style.setProperty('--war-chev-delay', `${drawMs}ms`);
+          }
           this._svgNode(
             'path',
             { d: 'M-4.5 -3.15L3.55 0L-4.5 3.15L-2.3 0Z', class: 'war-chevron' },
@@ -427,6 +470,7 @@
         `<button class="war-btn" data-act="prev">◀ ${esc(this._warTxt('prev'))}</button>` +
         `<button class="war-btn is-play" data-act="play">${this._warPlayTimer ? esc(this._warTxt('pause')) : '▶ ' + esc(this._warTxt('play'))}</button>` +
         `<button class="war-btn" data-act="next">${esc(this._warTxt('next'))} ▶</button>` +
+        `<button class="war-btn is-speed" data-act="speed" title="${esc(this._warTxt('speed'))}">${this._warPlaySpeed || 1}×</button>` +
         `</div>` +
         `<div class="war-foot">${esc(this._warTxt('foot'))}${zone && zone.noteZh ? ' · ' + esc(this.locale === 'en' ? this._warField(zone, 'note') : zone.noteZh) : ''}</div>` +
         `</div>`;
@@ -457,6 +501,7 @@
         fold: zh ? '折叠/展开战报' : 'Fold/unfold the report',
         foot: zh ? '行军路线与控制区均为示意复原；兵力标注附史料出处（实录 / 号称 / 约数）' : 'Routes and control zones are schematic; strength figures carry their sources (recorded / claimed / approx.)',
         jumpHint: zh ? '点击跳到该步' : 'Click to jump to this step',
+        speed: zh ? '播放速度' : 'Playback speed',
       };
       return dict[key] || key;
     }
@@ -488,14 +533,15 @@
       }
     }
 
-    _gotoWarStep(w, i) {
+    _gotoWarStep(w, i, opts = {}) {
       if (!w || i < 0 || i >= (w.steps || []).length) return;
       const s = w.steps[i];
       this._warSeekTo(s.y);
-      if (!reducedMotion()) this._warFocusStep(w, s);
+      // 播放中只做"保持战场在视野内"的轻量相机；手动跳步才全幅聚焦
+      if (!reducedMotion()) this._warFocusStep(w, s, Boolean(opts.gentle));
     }
 
-    _warFocusStep(w, s) {
+    _warFocusStep(w, s, gentle = false) {
       const pts = [];
       (s.moves || []).forEach((mv) => this._warPointList(mv).forEach((p) => pts.push(p)));
       (s.battles || []).forEach((b) => b.at && pts.push(b.at));
@@ -508,6 +554,26 @@
         if (sx > maxX) maxX = sx;
         if (sy > maxY) maxY = sy;
       });
+      const cx = (minX + maxX) / 2;
+      const cy = (minY + maxY) / 2;
+      if (gentle) {
+        // 轻量相机：战场已在视野内则完全不动作，不打断行军绘制动画
+        const cam = this._cameraTarget || this.camera;
+        const inView =
+          cx > cam.x + cam.w * 0.18 &&
+          cx < cam.x + cam.w * 0.82 &&
+          cy > cam.y + cam.h * 0.2 &&
+          cy < cam.y + cam.h * 0.8;
+        if (inView) return;
+        const w2 = cam.w, h2 = cam.h;
+        this._animateCameraTo({
+          x: Math.max(-180, Math.min(1000 - w2 + 140, cx - w2 / 2)),
+          y: Math.max(-150, Math.min(700 - h2 + 120, cy - h2 / 2)),
+          w: w2,
+          h: h2,
+        });
+        return;
+      }
       const padX = 110, padY = 90;
       let bw = maxX - minX + padX * 2;
       let bh = maxY - minY + padY * 2;
@@ -517,8 +583,8 @@
       if (bw / bh > 1000 / 700) bh = (bw * 700) / 1000;
       else bw = (bh * 1000) / 700;
       this._animateCameraTo({
-        x: Math.max(-180, Math.min(1000 - bw + 140, (minX + maxX) / 2 - bw / 2)),
-        y: Math.max(-150, Math.min(700 - bh + 120, (minY + maxY) / 2 - bh / 2)),
+        x: Math.max(-180, Math.min(1000 - bw + 140, cx - bw / 2)),
+        y: Math.max(-150, Math.min(700 - bh + 120, cy - bh / 2)),
         w: bw,
         h: bh,
       });
@@ -531,6 +597,7 @@
         this._stopWarPlay();
         return;
       }
+      const speed = this._warPlaySpeed || 1;
       this._warPlayTimer = setInterval(() => {
         const w2 = this._activeWar();
         if (!w2 || w2.key !== w.key || this.playing || this.isScrubbing) {
@@ -542,12 +609,27 @@
           this._stopWarPlay();
           return;
         }
-        this._gotoWarStep(w2, i);
-      }, PLAY_INTERVAL);
+        this._gotoWarStep(w2, i, { gentle: true });
+      }, PLAY_INTERVAL / speed);
       // 已在末步时按播放 → 从头播放（修复 yutu 末步空转）
       let start = this._warStepIndex(w) + 1;
       if (start >= w.steps.length) start = 0;
-      this._gotoWarStep(w, start);
+      this._gotoWarStep(w, start, { gentle: true });
+    }
+
+    _cycleWarSpeed() {
+      const speeds = [1, 2, 4];
+      this._warPlaySpeed = speeds[(speeds.indexOf(this._warPlaySpeed || 1) + 1) % speeds.length];
+      // 播放中变速：以新间隔重启定时器，当前位置不变
+      if (this._warPlayTimer) {
+        clearInterval(this._warPlayTimer);
+        this._warPlayTimer = null;
+        const w = this._activeWar();
+        if (w) this._toggleWarPlay();
+      }
+      this._warCardSig = null;
+      this._renderWarCard(this._activeWar(), this._warStepIndex(this._activeWar() || { steps: [] }));
+      return this._warPlaySpeed;
     }
 
     // ---------------- sync entry ----------------
@@ -567,6 +649,10 @@
         }
         const w = this._activeWar();
         if (!w) return;
+        if (a === 'speed') {
+          this._cycleWarSpeed();
+          return;
+        }
         this._stopWarPlay();
         if (a === 'prev' || a === 'next') {
           this._gotoWarStep(w, this._warStepIndex(w) + (a === 'next' ? 1 : -1));
@@ -686,6 +772,14 @@
       if (!this._warInternalSeek && this._warPlayTimer) this._stopWarPlay();
       const r = baseJump.apply(this, args);
       try {
+        // 沙盘内部跳步不等相位变化：吞掉边界幽灵残影，避免与行军动画打架
+        if (this._warInternalSeek && this.grpGhostDiff && this.grpGhostDiff.childNodes.length) {
+          this.grpGhostDiff.innerHTML = '';
+          if (this.ghostTimer) {
+            clearTimeout(this.ghostTimer);
+            this.ghostTimer = null;
+          }
+        }
         const raw = args.length ? Number(args[0]) : NaN;
         if (
           Number.isFinite(raw) &&
