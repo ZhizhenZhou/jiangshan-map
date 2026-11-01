@@ -12570,7 +12570,7 @@
             e.target &&
             e.target.closest &&
             e.target.closest(
-              '#genealogy-card, #journey-card, #milestone-balloon, #map-search-results, #challenge-card'
+              '#genealogy-card, #journey-card, #milestone-balloon, #map-search-results, #challenge-card, #war-card, #war-balloon'
             )
           ) {
             return;
