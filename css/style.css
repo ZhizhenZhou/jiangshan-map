@@ -5756,3 +5756,32 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   display: inline-block;
 }
 
+
+/* --- 战争沙盘深 zoom 可读性 + 双标记去重 + 名签显隐 --- */
+/* 深 zoom（<120 单位 ≈ 9°）：zone 与底衬降噪，名签顶上 */
+#atlas-svg.war-deep #grp-war .war-zone {
+  fill-opacity: 0.1;
+}
+#atlas-svg.war-deep #grp-war .war-march-casing {
+  stroke-opacity: 0.5;
+}
+#atlas-svg .war-lbl {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+#atlas-svg.war-deep .war-lbl {
+  opacity: 1;
+}
+/* 同事件里程碑钉让位战役菱形 */
+#grp-milestones .milestone-pin.war-shadowed {
+  opacity: 0.18;
+}
+#grp-milestones .milestone-pin.war-shadowed .ev-ring {
+  animation: none;
+}
+.war-balloon-side {
+  margin-top: 3px;
+  font-family: var(--sans-stack);
+  font-size: 10.8px;
+  font-weight: 700;
+}

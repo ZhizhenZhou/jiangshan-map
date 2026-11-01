@@ -140,9 +140,14 @@
     }
 
     _warSegInfo(pts) {
+      // 同址/极短轴按【地理距离】过滤——屏幕距离随缩放变化，
+      // 用屏幕阈值会让箭头在广角下凭空消失（长平 step5/6 曾实测少箭）。
+      const g0 = pts[0];
+      const g1 = pts[pts.length - 1];
+      if (Math.hypot(g1[0] - g0[0], g1[1] - g0[1]) < 0.1) return null;
       const info = this._buildJourneySegmentInfo(
-        pts[0],
-        pts[pts.length - 1],
+        g0,
+        g1,
         pts.slice(1, -1)
       );
       // end tangent for the arrowhead tip (direction of the final leg)
@@ -159,13 +164,12 @@
         if (prev) { endX = prev[0]; endY = prev[1]; }
       }
       if (info) return { ...info, endX, endY, endAngleDeg };
-      // 和弦过短（<8px）时 trajectory 构建器会返回 null；
-      // 沙盘短轴（如城内出击）退化为直线段，保证当前步箭头始终在场。
+      // 和弦过短时 trajectory 构建器会返回 null；退化直线段保证当前步箭头在场
+      // （真同址残段已被上方 geo 门过滤；此处 chord 为用户单位，不再设屏幕阈值）
       if (!this.projector) return null;
       const a = this.projector.toScreen(pts[0][0], pts[0][1]);
       const b = this.projector.toScreen(pts[pts.length - 1][0], pts[pts.length - 1][1]);
       const chord = Math.hypot(b[0] - a[0], b[1] - a[1]);
-      if (chord < 0.8) return null;
       return {
         d: `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`,
         mx: (a[0] + b[0]) / 2,
@@ -179,13 +183,14 @@
     }
 
     // 同场战争内多役同址时做微小偏移（登记偏移后落点，避免二次重叠）。
+    // 0.3° 档 ≈ 战场全境 zoom 下 20px 间距（0.15° 曾实测挤到 14.8px）。
     _warOffset(w, coord) {
       const offs = [
         [0, 0],
-        [0.15, 0.11],
-        [-0.15, 0.11],
-        [0.13, -0.14],
-        [-0.13, -0.14],
+        [0.3, 0.22],
+        [-0.3, 0.22],
+        [0.26, -0.28],
+        [-0.26, -0.28],
       ];
       if (!this._warUsedSpots) this._warUsedSpots = {};
       const list = this._warUsedSpots[w.key] || (this._warUsedSpots[w.key] = []);
@@ -418,8 +423,8 @@
             { class: 'war-diamond', points: '0,-4.6 4.6,0 0,4.6 -4.6,0', fill: side.color },
             core
           );
-          // 当前步战役名交给态势浮签，SVG 只留起兵锚点标签
-          if (i === 0 && idx > 0) {
+          // 当前步战役名签（仅 war-deep 深 zoom 显示，广角由浮签命名）
+          if (isCur) {
             lblNodes.push({
               x: sx,
               y: sy,
@@ -644,8 +649,11 @@
         if (sx > maxX) maxX = sx;
         if (sy > maxY) maxY = sy;
       });
-      const cx = (minX + maxX) / 2;
-      const cy = (minY + maxY) / 2;
+      // 取景中心向到达端偏移 25%：行动终点是叙事焦点
+      //（修"相机对准巨钉/标签，当前箭头被切出画外"）
+      const tip = scr[scr.length - 1];
+      let cx = (minX + maxX) / 2 * 0.75 + tip[0] * 0.25;
+      let cy = (minY + maxY) / 2 * 0.75 + tip[1] * 0.25;
       if (gentle) {
         // 轻量相机：战场已在视野内则完全不动作，不打断行军绘制动画
         const cam = this._cameraTarget || this.camera;
@@ -830,6 +838,8 @@
       this._renderWarSvg(w, idx, zi);
       this._renderWarCard(w, idx);
       this._syncWarBalloon(w, idx);
+      this._dedupeMilestonePins();
+      this._syncZoomDependentState();
       // 战局激活（从无到有）→ 相机自动飞入战场全境；
       // 战局失活清登记，下次进入重新飞。拖轴途中不抢相机。
       if (w && this._warTheaterKey !== w.key) {
@@ -886,8 +896,12 @@
       if (sig !== this._warBalloonSig) {
         this._warBalloonSig = sig;
         const title = this._warField(battle, 'name') || this._warStepTitle(w, w.steps[idx]);
-        const desc = this._warField(battle, 'desc') || '';
         const zh = this.locale !== 'en';
+        const side = this._warSide(w, battle.side);
+        // 浮签瘦身：不放 desc（与卡片逐字重复），只留 标题 + 得手方 + 兵力
+        const sideNote = zh
+          ? `此役${esc(this._warField(side, 'name'))}得手/占优`
+          : `${esc(this._warField(side, 'name'))} held the field`;
         const forces = this._warStepForces(w, w.steps[idx])
           .map((f) => {
             const sd = this._warSide(w, f.side);
@@ -896,7 +910,7 @@
           .join('');
         el.innerHTML =
           `<div class="ep-head"><span class="ep-year">${esc(this.formatYear(w.steps[idx].y))} · ${esc(title)}</span></div>` +
-          (desc ? `<div class="ep-text">${esc(desc)}</div>` : '') +
+          `<div class="war-balloon-side" style="color:${side.color}">${sideNote}</div>` +
           (forces ? `<div class="war-balloon-forces">${forces}</div>` : '') +
           `<button type="button" class="ep-close" aria-label="${zh ? '关闭战报浮签' : 'Dismiss campaign callout'}">×</button>`;
         const closeBtn = el.querySelector('.ep-close');
@@ -915,6 +929,51 @@
       };
       el.classList.remove('is-hidden', 'is-offscreen');
       this._positionWarBalloon();
+    }
+
+    // 态势浮签逐帧跟随相机（与里程碑气泡同一重定位通道）；
+    // 同时承担两项随缩放的联动：war-deep 类切换 + 战局激活时地形贴图淡出
+    // （深 zoom 下位图地形糊成软泥，淡出后露素底，战争层全矢量不受影响）。
+    _syncZoomDependentState() {
+      const svg = this.svg;
+      if (!svg || !this.camera) return;
+      const w = this.camera.w;
+      svg.classList.toggle('war-deep', w < 120);
+      const warActive = Boolean(this._activeWar && this._activeWar());
+      const terrain = document.getElementById('terrain-relief-img');
+      if (!terrain) return;
+      let targetOpacity = 1;
+      if (warActive && w < 150) {
+        targetOpacity = Math.max(0.3, Math.min(1, (w - 45) / 105));
+      }
+      const cur = parseFloat(terrain.style.opacity || '1');
+      if (Math.abs(cur - targetOpacity) > 0.01) terrain.style.opacity = targetOpacity.toFixed(2);
+    }
+
+    // 里程碑钉与战役菱形同事件去重：钉落在任一战役点 10 用户单位（≈0.76°）内
+    // 即加 .war-shadowed 降透明度（同一事件两套"红菱+白环"是双标记混淆的根源）。
+    _dedupeMilestonePins() {
+      const grp = this.grpMilestones || (this.svg && this.svg.querySelector('#grp-milestones'));
+      if (!grp) return;
+      const active = Boolean(this._activeWar && this._activeWar());
+      const nodes = active
+        ? Array.from((this.grpWar || this.svg.querySelector('#grp-war') || { querySelectorAll: () => [] }).querySelectorAll('.war-node[data-x]'))
+        : [];
+      grp.querySelectorAll('.milestone-pin.war-shadowed').forEach((n) => n.classList.remove('war-shadowed'));
+      if (!active || !nodes.length) return;
+      grp.querySelectorAll('.milestone-pin[data-x]').forEach((pin) => {
+        const px = parseFloat(pin.dataset.x);
+        const py = parseFloat(pin.dataset.y);
+        if (!Number.isFinite(px)) return;
+        for (const nd of nodes) {
+          const nx = parseFloat(nd.dataset.x);
+          const ny = parseFloat(nd.dataset.y);
+          if (Math.hypot(nx - px, ny - py) < 10) {
+            pin.classList.add('war-shadowed');
+            return;
+          }
+        }
+      });
     }
 
     _positionWarBalloon() {
@@ -1149,7 +1208,9 @@
     Ctrl.prototype._applyCamera = function (...args) {
       const r = baseApplyCam.apply(this, args);
       try {
+        this._syncZoomDependentState();
         this._positionWarBalloon();
+        this._dedupeMilestonePins();
       } catch (e) {
         /* non-fatal */
       }
