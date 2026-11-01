@@ -69,6 +69,15 @@ window.WAR_DATA = [
           descEn: 'Within days Tongzhou, Jizhou, Zunhua, Miyun and Juyongguan fell; Song Zhong\'s relief column, staffed by Beiping kin, defected to Yan.' }],
       },
       {
+        y: 1399.66,
+        moves: [{ side: 'chao', from: [118.8, 32.06], to: [114.57, 38.14],
+          path: [[118.8, 32.06], [117.4, 33.9], [116.2, 35.8], [116.07, 37.44], [115.3, 37.9], [114.57, 38.14]],
+          titleZh: '耿炳文北伐', titleEn: 'Geng Bingwen marches north',
+          force: { n: 130000, quality: 'recorded', srcZh: '《明太宗实录》张保对："先至者十三万"', srcEn: 'Tai-zong Shilu: "130,000 in the vanguard".' },
+          descZh: '朝廷以六十五岁的宿将耿炳文佩大将军印，率师自京师沿运河北进，八月抵真定——号称三十万，先至者十三万，分营滹沱河南北。',
+          descEn: 'The court sent the 65-year-old veteran Geng Bingwen north along the canal to Zhending — 300,000 claimed, 130,000 in the vanguard, camped on both banks of the Hutuo.' }],
+      },
+      {
         y: 1399.72,
         moves: [{ side: 'yan', from: [116.35, 39.90], to: [114.57, 38.14],
           path: [[116.35, 39.90], [116.15, 39.05], [115.0, 38.60], [114.57, 38.14]],
@@ -93,6 +102,15 @@ window.WAR_DATA = [
           titleZh: '出塞袭大宁', titleEn: 'Raid on Daning',
           descZh: '闻李景隆五十万大军北上，朱棣留世子守北平，亲率主力出刘家口袭大宁，挟持宁王，尽收边镇精锐与朵颜三卫骑兵。',
           descEn: 'Hearing of Li Jinglong\'s advance, Zhu Di left his heir at Beiping, raided Daning beyond the wall, and took over the frontier elite and the Duoyan horsemen.' }],
+      },
+      {
+        y: 1399.85,
+        moves: [{ side: 'chao', from: [116.07, 37.44], to: [116.35, 39.90],
+          path: [[116.07, 37.44], [116.15, 38.45], [116.35, 39.90]],
+          titleZh: '李景隆第一次北伐', titleEn: "Li Jinglong's first northern push",
+          force: { n: 500000, quality: 'recorded', srcZh: '《明史·李景隆传》："合兵五十万"', srcEn: 'Ming Shi, Li Jinglong bio: "assembled 500,000 men".' },
+          descZh: '曹国公李景隆接掌帅印，自德州合兵五十万北上，乘虚直趋北平——五十万人的赌注压向这座孤城。',
+          descEn: 'Li Jinglong took over the command and drove 500,000 men from Dezhou straight at the lonely city of Beiping.' }],
       },
       {
         y: 1399.90,
@@ -124,6 +142,14 @@ window.WAR_DATA = [
           forces: [{ side: 'chao', n: 100000, quality: 'recorded', srcZh: '《明太宗实录》："丧师十余万"', srcEn: 'Tai-zong Shilu: "the host lost over 100,000".' }],
           descZh: '内外夹击，连破李景隆七营；南军十余万人连夜拔营南遁，"委弃粮械山积"。北平之围遂解，攻守之势自此渐移。',
           descEn: 'Seven camps broken in succession; the southerners fled by night, abandoning grain and arms in hills. The siege lifted, and momentum began to turn.' }],
+      },
+      {
+        y: 1400.25,
+        moves: [{ side: 'chao', from: [116.07, 37.44], to: [116.15, 39.05],
+          titleZh: '李景隆再合大军北上', titleEn: 'Li Jinglong advances again',
+          force: { n: 500000, quality: 'recorded', srcZh: '《明史·李景隆传》（一作六十万）', srcEn: 'Ming Shi, Li Jinglong bio (some sources: 600,000).' },
+          descZh: '李景隆败而不诛，回德州再合六十万大军，耀武白沟河——朝廷的战争潜力仍占绝对优势。',
+          descEn: 'Undeterred by defeat, Li Jinglong massed another vast host at Dezhou and paraded it on the Baigou — the court still held overwhelming numbers.' }],
       },
       {
         y: 1400.30,
@@ -160,6 +186,13 @@ window.WAR_DATA = [
           descEn: 'Three months of siege failed. Tie Xuan and Sheng Yong feigned surrender, hung Hongwu\'s tablets on the walls, and nearly crushed Zhu Di under a dropping gate-trap. Yan lifted the siege; the court had its first great win.' }],
       },
       {
+        y: 1400.88,
+        moves: [{ side: 'chao', from: [117.02, 36.68], to: [115.99, 36.45],
+          titleZh: '盛庸进屯东昌', titleEn: 'Sheng Yong moves to Dongchang',
+          descZh: '盛庸、铁铉自济南进屯东昌，背城列阵，以火器、毒弩候燕军——南军第一次主动设场待敌。',
+          descEn: 'Sheng Yong and Tie Xuan advanced from Jinan to Dongchang, posting guns and poisoned crossbows with a city at their backs — the court\'s first deliberate set-piece.' }],
+      },
+      {
         y: 1400.90,
         moves: [{ side: 'yan', from: [116.35, 39.90], to: [115.99, 36.45],
           titleZh: '再出，趋东昌', titleEn: 'Out again, toward Dongchang',
@@ -186,6 +219,13 @@ window.WAR_DATA = [
           forces: [],
           descZh: '谭渊战死，燕军阵脚几动；次日再战，又是东北风骤起，燕军乘风大胜——白沟河、夹河，"风助燕，三矣"，将士皆以为天命。',
           descEn: 'Tan Yuan died and Yan\'s line wavered; next day another northeast gale rose and Yan swept the field. Baigouhe, Jiahe — "the wind has sided with Yan thrice".' }],
+      },
+      {
+        y: 1401.30,
+        moves: [{ side: 'chao', from: [114.57, 38.14], to: [114.85, 38.03],
+          titleZh: '吴杰出真定牵制', titleEn: 'Wu Jie sorties from Zhending',
+          descZh: '真定守将吴杰引军出城，欲与盛庸夹河夹击燕军——朝廷的两面钳形，反成了燕军各个击破的靶子。',
+          descEn: 'Wu Jie marched out of Zhending to pincer Yan with Sheng Yong — a two-front plan that played into Zhu Di\'s hands.' }],
       },
       {
         y: 1401.33,
