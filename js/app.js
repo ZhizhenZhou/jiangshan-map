@@ -363,12 +363,10 @@
   class HistoricalAtlasController {
     constructor() {
       this.dynasties = window.DYNASTY_DATA || [];
-      this.provinces = window.PROVINCE_OUTLINES || [];
+      this.provinces = [];   // 本 fork 不绘制现代省界（去现代化裁剪）
       this.corridors = window.CORRIDOR_DATA || [];
       this.snapshots = window.ATLAS_SNAPSHOTS || {};
-      this._fullSnapshotsLoaded = Boolean(
-        window.ATLAS_FULL_SNAPSHOTS_LOADED || (this.snapshots && this.snapshots.s_prc)
-      );
+      this._fullSnapshotsLoaded = Boolean(window.ATLAS_FULL_SNAPSHOTS_LOADED);
       this._fullSnapshotsPromise = null;
       this._enLocalePromise = null;
       this._hydrateSnapshots();
@@ -492,71 +490,7 @@
           s.regions = this.snapshots[s.regionRef].regions || [];
         }
       }
-      if (
-        this.snapshots.s_prc &&
-        (!this.snapshots.s_prc.regions || !this.snapshots.s_prc.regions.length) &&
-        this.provinces.length
-      ) {
-        const cityProvSet = new Set([
-          '北京市',
-          '天津市',
-          '上海市',
-          '重庆市',
-          '香港特别行政区',
-          '澳门特别行政区',
-        ]);
-        const provAnchors = {
-          河北省: [115.55, 38.65],
-          山西省: [112.15, 36.65],
-          内蒙古自治区: [114.08, 44.33],
-          辽宁省: [122.45, 41.15],
-          吉林省: [126.55, 43.45],
-          黑龙江省: [128.1, 47.65],
-          江苏省: [119.55, 33.15],
-          浙江省: [120.05, 29.05],
-          安徽省: [117.15, 32.95],
-          福建省: [117.95, 26.05],
-          江西省: [115.65, 27.35],
-          山东省: [118.45, 36.25],
-          河南省: [113.55, 33.65],
-          湖北省: [112.15, 31.15],
-          湖南省: [111.55, 27.45],
-          广东省: [114.55, 23.95],
-          广西壮族自治区: [108.85, 24.05],
-          海南省: [109.7, 19.15],
-          四川省: [102.35, 30.75],
-          贵州省: [107.55, 27.25],
-          云南省: [101.25, 24.75],
-          西藏自治区: [88.39, 31.56],
-          陕西省: [108.95, 35.65],
-          甘肃省: [100.45, 38.95],
-          青海省: [96.15, 35.55],
-          宁夏回族自治区: [106.05, 37.25],
-          新疆维吾尔自治区: [85.15, 41.35],
-          台湾省: [120.95, 23.65],
-        };
-        this.snapshots.s_prc.regions = this.provinces
-          .filter((prov) => !String(prov.code).includes('_JD'))
-          .map((prov) => {
-            const shortTitle = prov.title.replace(
-              /(省|市|壮族自治区|回族自治区|维吾尔自治区|自治区|特别行政区)$/,
-              ''
-            );
-            return {
-              title: shortTitle,
-              fullTitle: prov.title,
-              category: '',
-              anchor: cityProvSet.has(prov.title) ? null : provAnchors[prov.title] || prov.hub,
-              shape: { type: 'MultiPolygon', coordinates: prov.rings },
-            };
-          });
-        Object.defineProperty(this.snapshots.s_prc, '_skipRegionBoundaryStroke', {
-          value: true,
-          writable: true,
-          enumerable: false,
-          configurable: true,
-        });
-      }
+      // 本 fork 不注入现代省界到任何快照（去现代化裁剪：s_prc 已随数据删除）
     }
 
     _loadScriptOnce(src) {
@@ -590,10 +524,7 @@
 
     _ensureFullSnapshots() {
       if (this._fullSnapshotsLoaded) return Promise.resolve(this.snapshots);
-      if (
-        window.ATLAS_FULL_SNAPSHOTS_LOADED ||
-        (window.ATLAS_SNAPSHOTS && window.ATLAS_SNAPSHOTS.s_prc)
-      ) {
+      if (window.ATLAS_FULL_SNAPSHOTS_LOADED) {
         this.snapshots = window.ATLAS_SNAPSHOTS;
         this._hydrateSnapshots();
         this._fullSnapshotsLoaded = true;
@@ -1488,7 +1419,7 @@
         homeLink.href = this.locale === 'en' ? './?lang=en' : this.locale === 'zh-tw' ? './?lang=zh-tw' : './';
         homeLink.title = this.locale === 'en' ? 'Back to home' : this._zh('回到首页');
       }
-      this._id('txt-subtitle').textContent = this.uiStr('brand_sub', '中国历史地图 · 战国 → 今');
+      this._id('txt-subtitle').textContent = this.uiStr('brand_sub', '中国历史地图 · 战国 → 1912');
       const lblLayersBtn = this._id('lbl-layers-btn');
       if (lblLayersBtn) {
         lblLayersBtn.textContent = this.uiStr('btn_layers', '图层');
@@ -1510,8 +1441,6 @@
       if (grpMod) {
         grpMod.textContent = this.uiStr('layer_grp_mod', '山川与现代参照');
       }
-      this._id('lbl-provinces').textContent = this.uiStr('toggle_modern', '现代省界');
-      this._id('lbl-prov-names').textContent = this.uiStr('toggle_modern_labels', '现代省名');
       this._id('lbl-polities').textContent = this.uiStr('toggle_realms', '历史疆域');
       this._id('lbl-prefectures').textContent =
         this.locale === 'en' ? 'Admin Divisions' : '州道政区';
@@ -5371,7 +5300,7 @@
       const peerKeys = Array.isArray(opts && opts.peerKeys) ? opts.peerKeys : [];
       const canCacheSolo = !isMulti && !peerKeys.length && typeof profile === 'object';
       const snapRef = canCacheSolo ? this.snapshots : null;
-      const snapFull = Boolean(snapRef && snapRef.s_prc);
+      const snapFull = Boolean(snapRef && window.ATLAS_FULL_SNAPSHOTS_LOADED);
       const hasEn = canCacheSolo ? this._hasEnDict() : false;
       const enRef = canCacheSolo ? this.enLocale : null;
       if (canCacheSolo) {
@@ -7883,7 +7812,7 @@
         ? this._passName(matchedPass, this.year, this.locale)
         : modernTitle
           ? this.trTerm(modernTitle)
-          : this.uiStr('outside_modern', '现代省界外 / 海域');
+          : '域外 / 海域';
       const titleSuffix = matchedPass
         ? ` · ${this.locale === 'en' ? matchedPass.modernEn : '今' + matchedPass.modernZh}`
         : identityModern
@@ -12322,8 +12251,6 @@
           this.toggleTerrainMode(e.target.checked);
         });
       }
-      bindToggle('chk-provinces', this.grpProvinces);
-      bindToggle('chk-prov-names', this.grpProvNames);
       this._id('chk-polities').addEventListener('change', (e) => {
         this.grpPolities.classList.toggle('is-hidden', !e.target.checked);
         if (this.grpGhostDiff) {
@@ -13374,7 +13301,7 @@
         this._resolvePlaceCache = new Map();
         this._resolvePlaceCacheSnapRef = this.snapshots;
       }
-      const snapFull = this.snapshots && this.snapshots.s_prc ? 1 : 0;
+      const snapFull = window.ATLAS_FULL_SNAPSHOTS_LOADED ? 1 : 0;
       const hasEn = this._hasEnDict() ? 1 : 0;
       const cacheKey = `${rawInput}\0${targetDyn ? targetDyn.key : ''}\0${targetSnapKey}\0${snapFull}\0${hasEn}`;
       if (this._resolvePlaceCache.has(cacheKey)) {

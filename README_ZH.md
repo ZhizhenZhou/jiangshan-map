@@ -4,7 +4,9 @@
   <a href="README.md">English</a> · <strong>简体中文</strong>
 </p>
 
-**一幅可以拖动时间、点城读史、追随古人足迹的中国历史交互舆图（公元前 403 年三家分晋 — 今）**
+> **ℹ️ 关于本 Fork** — 本仓库 fork 自 [DeanChensj/jiangshan-map](https://github.com/DeanChensj/jiangshan-map)（GPL-3.0）。舆图引擎、历史数据与设计的全部功劳属于上游作者。本 fork 只做了一件事：**去现代化——时间轴止于 1912 年（帝制中国终结）**。已移除：中华民国 / 中华人民共和国时期及其相位快照、现代省界与省名图层、现代 X-Ray 透镜、现代时期的里程碑事件与政权档案；深链（`?year=`）钳制到 1912。其余全部（引擎、历史数据、城池沿革、名人行迹、quiz、多语言）与上游保持一致。
+
+**一幅可以拖动时间、点城读史、追随古人足迹的中国历史交互舆图（公元前 403 年三家分晋 — 1912 年）**
 
 [**立即在线把玩 → https://deanchen.me/jiangshan-map/**](https://deanchen.me/jiangshan-map/)
 

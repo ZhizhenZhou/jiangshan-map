@@ -56,9 +56,10 @@ function main() {
       );
     }
     if (file === 'atlas_snapshots.js') {
+      // fork: s_prc 已裁剪，改用 s_qin 作为全量快照判别物（boot 种子不含 s_qin）
       assert(
         sandbox.window.ATLAS_FULL_SNAPSHOTS_LOADED === true &&
-          Boolean(sandbox.window.ATLAS_SNAPSHOTS.s_prc),
+          Boolean(sandbox.window.ATLAS_SNAPSHOTS.s_qin),
         'atlas_snapshots.js must set window.ATLAS_FULL_SNAPSHOTS_LOADED = true'
       );
     }
@@ -172,9 +173,9 @@ function main() {
   }
 
   // 3. Validate historical dynasties, phases, settlements, and snapshot references
-  assert(Array.isArray(dynasties) && dynasties.length === 18, `Expected 18 dynasties, got ${dynasties && dynasties.length}`);
+  assert(Array.isArray(dynasties) && dynasties.length === 16, `Expected 16 dynasties (fork: 止于 1912), got ${dynasties && dynasties.length}`);
   assert.strictEqual(dynasties[0].fromYear, -403, 'Timeline must start at 403 BCE (-403)');
-  assert(dynasties[dynasties.length - 1].toYear >= 2026, 'Timeline must cover up to present (2026)');
+  assert(dynasties[dynasties.length - 1].toYear === 1912, 'Timeline must end at 1912 (fork 裁剪)');
 
   let totalSettlements = 0;
   let totalMilestones = 0;
@@ -789,7 +790,7 @@ function main() {
     }
   }
 
-  // CUJ 9g: Full Timeline Sweep (-403 to 2026) — Dynasty, Snapshot & Imperial Era Continuity
+  // CUJ 9g: Full Timeline Sweep (-403 to 1912) — fork 裁剪后止于 1912 — Dynasty, Snapshot & Imperial Era Continuity
   let sweptYears = 0;
   for (let y = ctrl.minYear; y <= ctrl.maxYear; y++) {
     if (y === 0) continue;
@@ -826,13 +827,8 @@ function main() {
   assert.strictEqual(ctrl.formatEraLabel(1082, dynasties[11]), '北宋神宗·元丰五年');
   assert.strictEqual(ctrl.formatEraLabel(1587, dynasties[14]), '明万历十五年');
   assert.strictEqual(ctrl.formatEraLabel(1683, dynasties[15]), '清康熙二十二年');
-  const prcDynObj = dynasties.find((d) => d.key === 'prc');
-  assert.strictEqual(ctrl.formatSpan(prcDynObj), '1949 —', 'PRC dynasty span must be open-ended (1949 —)');
-  const prcSearchHit = ctrl._queryQuickSearch('中华人民共和国').find((h) => h.kind === 'dynasty' && h.dynasty.key === 'prc');
-  assert(
-    prcSearchHit && prcSearchHit.subZh.startsWith('1949—') && prcSearchHit.subEn.startsWith('1949 CE –'),
-    `Expected PRC quick search subtitle to use open-ended 1949— / 1949 CE –, got ${JSON.stringify(prcSearchHit)}`
-  );
+  // fork：roc/prc 已裁剪（时间轴止于 1912）
+  assert(!dynasties.some((d) => d.key === 'prc' || d.key === 'roc'), 'fork: roc/prc dynasties must be removed');
 
   // CUJ 9h: Adjacent / Overlapping Polity Color Collision Guard across all snapshots
   if (!FAST_MODE) {
@@ -1111,15 +1107,7 @@ function main() {
     { dyn: 'yuan', year: 1288, keyword: '宣政院' },
     { dyn: 'qing', year: 1881, keyword: '伊犁' },
     { dyn: 'qing', year: 1898, keyword: '胶州湾' },
-    { dyn: 'roc', year: 1916, keyword: '袁世凯' },
-    { dyn: 'roc', year: 1920, keyword: '直皖战争' },
-    { dyn: 'roc', year: 1924, keyword: '黄埔军校' },
-    { dyn: 'roc', year: 1926, keyword: '北伐' },
-    { dyn: 'roc', year: 1928, keyword: '北伐完成' },
-    { dyn: 'roc', year: 1931, keyword: '九一八' },
-    { dyn: 'roc', year: 1932, keyword: '满洲国' },
-    { dyn: 'roc', year: 1945, keyword: '台湾' },
-    { dyn: 'roc', year: 1946, keyword: '外蒙古' },
+    // fork：roc/prc 已裁剪，相关领土里程碑检查随之移除
   ];
   for (const tmc of territorialMilestoneChecks) {
     const d = dynasties.find((item) => item.key === tmc.dyn);
@@ -1292,7 +1280,7 @@ function main() {
       's_yuan',
       's_ming_a',
       's_qing_d',
-      's_roc',
+      // fork: s_roc 已随朝代裁剪移除
     ]) {
       const checkSnap = snapshots[checkSnapKey];
       assert(checkSnap && Array.isArray(checkSnap.regions) && checkSnap.regions.length > 0, `Missing regions on ${checkSnapKey}`);
@@ -1697,7 +1685,7 @@ function main() {
     this.dynastyIdx = this._findDynastyIndex(this.year);
     this._syncAutoMilestoneBalloon(this.dynasties[this.dynastyIdx]);
   };
-  for (const dynKey of ['sanguo', 'sui', 'wudai', 'roc']) {
+  for (const dynKey of ['sanguo', 'sui', 'wudai']) {   // fork: roc 已裁剪
     const dynObj = dynasties.find((d) => d.key === dynKey);
     const ms = dynObj.milestones;
     const mPrev = ms[ms.length - 3];
@@ -2318,26 +2306,22 @@ function main() {
     'Expected #scale-label-text to use clean metric km format without _formatChineseLi'
   );
 
-  // ── 24. CUJ 24: Place Genealogy (点地溯源) Full 18-Era Coverage to Present (PRC) & ROC/PRC City Resolution ──
+  // ── 24. CUJ 24: Place Genealogy (点地溯源) — fork 裁剪后 2026 钳制到 1912（清） ──
   const yueyang2026 = ctrl.inspect({ year: 2026, place: '岳阳' });
-  assert.strictEqual(yueyang2026.polity, '中华人民共和国', 'inspect(2026, 岳阳) must return polity 中华人民共和国');
+  assert.strictEqual(yueyang2026.polity, '清', 'inspect(2026, 岳阳) must clamp to 1912 and return polity 清');
   assert(
-    Array.isArray(yueyang2026.regions) &&
-      yueyang2026.regions.length === 1 &&
-      yueyang2026.regions[0] === '湖南省' &&
-      Array.isArray(yueyang2026.prefectures) &&
-      yueyang2026.prefectures.includes('岳阳') &&
-      yueyang2026.nearestCity &&
-      yueyang2026.nearestCity.ancient === '岳阳' &&
+    yueyang2026.nearestCity &&
+      yueyang2026.nearestCity.modern === '岳阳' &&
       yueyang2026.nearestCity.distanceKm <= 10,
-    `inspect(2026, 岳阳) must resolve 湖南省 · 岳阳 within <=10 km, got ${JSON.stringify(yueyang2026)}`
+    `inspect(2026, 岳阳) clamped to 清 must resolve Yueyang-area city (岳州府/岳阳, <=10 km), got ${JSON.stringify(yueyang2026.nearestCity)}`
   );
   const yueyang1936 = ctrl.inspect({ year: 1936, place: '岳阳' });
   assert(
-    yueyang1936.nearestCity &&
-      yueyang1936.nearestCity.ancient === '岳阳' &&
+    yueyang1936.polity === '清' &&
+      yueyang1936.nearestCity &&
+      yueyang1936.nearestCity.modern === '岳阳' &&
       yueyang1936.nearestCity.distanceKm <= 10,
-    `inspect(1936, 岳阳) in ROC must resolve local city 岳阳 (<=10 km) rather than Changsha (127 km), got ${JSON.stringify(yueyang1936.nearestCity)}`
+    `inspect(1936, 岳阳) clamped to 清末 must resolve Yueyang-area city (<=10 km), got ${JSON.stringify(yueyang1936.polity + '/' + JSON.stringify(yueyang1936.nearestCity))}`
   );
   assert(
     !String(ctrl.openGenealogyAt).includes("if (d.key === 'prc') continue;"),
@@ -2408,12 +2392,12 @@ function main() {
   ctrl._syncTracedPrefecture = () => {};
   ctrl._fullSnapshotsLoaded = true;
   ctrl.year = 2026;
-  ctrl.dynastyIdx = 17;
+  ctrl.dynastyIdx = 15;   // fork：16 朝代，末位为清
   ctrl.openGenealogyAt(113.13, 29.36, null, { fromYearSync: true });
   assert.strictEqual(
     mockTimelineItems.length,
-    18,
-    `Expected openGenealogyAt to render all 18 dynasty rows including PRC, got ${mockTimelineItems.length}`
+    16,
+    `Expected openGenealogyAt to render all 16 dynasty rows (fork: 止于 1912), got ${mockTimelineItems.length}`
   );
   assert(
     !mockLoreEl.isHidden &&
@@ -2422,25 +2406,21 @@ function main() {
     `Expected #genealogy-lore at Yueyang to render curated city lore banner, got ${mockLoreEl.innerHTML}`
   );
   const tangRowHtml = mockTimelineItems[9].innerHTML;
-  const rocRowHtml = mockTimelineItems[16].innerHTML;
-  const prcRowHtml = mockTimelineItems[17].innerHTML;
+  const qingRowHtml = mockTimelineItems[15].innerHTML;   // fork：末朝为清
   assert(
     tangRowHtml.includes('邻近古城：岳州（即此地）') &&
       tangRowHtml.includes('开元四年张说谪守岳州，始建岳阳楼'),
     `Expected Tang row at Yueyang to surface per-dynasty settlement remark 开元四年张说谪守岳州，始建岳阳楼, got ${tangRowHtml}`
   );
   assert(
-    rocRowHtml.includes('中华民国') && rocRowHtml.includes('邻近古城：岳阳（即此地）'),
-    `Expected ROC row at Yueyang to resolve 邻近古城：岳阳（即此地）, got ${rocRowHtml}`
-  );
-  assert(
-    prcRowHtml.includes('中华人民共和国') &&
-      prcRowHtml.includes('湖南省 · 岳阳') &&
-      prcRowHtml.includes('现代城市：岳阳（即此地）'),
-    `Expected PRC row at Yueyang to display 湖南省 · 岳阳 and 现代城市：岳阳（即此地）, got ${prcRowHtml}`
+    qingRowHtml.includes('清') &&
+      qingRowHtml.includes('湖南（省） · 岳州府') &&
+      qingRowHtml.includes('邻近古城：岳州府（即此地）') &&
+      qingRowHtml.includes('同治间重修岳阳楼'),
+    `Expected Qing row at Yueyang to resolve 湖南省岳州府 + 邻近古城岳州府与岳阳楼注, got ${qingRowHtml}`
   );
   ctrl.openGenealogyAt(112.24, 30.33, null, { fromYearSync: true });
-  assert.strictEqual(mockTimelineItems.length, 18, 'Expected 18 rows at Jingzhou (江陵)');
+  assert.strictEqual(mockTimelineItems.length, 16, 'Expected 16 rows at Jingzhou (江陵) (fork: 止于 1912)');
   assert(
     !mockLoreEl.isHidden &&
       mockLoreEl.innerHTML.includes('名城形胜') &&
@@ -2448,17 +2428,9 @@ function main() {
     `Expected #genealogy-lore at Jingzhou to render curated city lore banner, got ${mockLoreEl.innerHTML}`
   );
   const jzQingHtml = mockTimelineItems[15].innerHTML;
-  const jzRocHtml = mockTimelineItems[16].innerHTML;
-  const jzPrcHtml = mockTimelineItems[17].innerHTML;
   assert(
     jzQingHtml.includes('荆州府') && !jzQingHtml.includes('宜昌府'),
     `Expected Qing row at Jingzhou not to show misleading 100 km neighbor 宜昌府, got ${jzQingHtml}`
-  );
-  assert(
-    jzRocHtml.includes('邻近古城：荆州（即此地）') &&
-      jzPrcHtml.includes('湖北省 · 荆州') &&
-      jzPrcHtml.includes('现代城市：荆州（即此地）'),
-    `Expected ROC and PRC rows at Jingzhou to resolve 荆州（即此地）, got ROC=${jzRocHtml} PRC=${jzPrcHtml}`
   );
   ctrl.openGenealogyAt(113.38, 31.69, null, { fromYearSync: true });
   assert(
@@ -2477,7 +2449,7 @@ function main() {
   ctrl.locale = 'en';
   const genSampleSettlements = FAST_MODE
     ? [dynasties[0].settlements[0], dynasties[9].settlements[0]]
-    : dynasties[0].settlements.concat(dynasties[9].settlements, dynasties[17].settlements);
+    : dynasties[0].settlements.concat(dynasties[9].settlements, dynasties[15].settlements);
   for (const s of genSampleSettlements) {
     ctrl.openGenealogyAt(s.coord[0], s.coord[1], s.ancient, { fromYearSync: true });
     assert(
@@ -2493,20 +2465,13 @@ function main() {
   ctrl._id = prevIdForGen;
   sandbox.document = prevDoc;
 
-  // 23b. Verify ROC & PRC modern settlement coverage, zero compound/duplicate city names, and traced Tier-2 city visibility
-  const rocDyn = dynasties.find((d) => d.key === 'roc');
-  const prcDyn = dynasties.find((d) => d.key === 'prc');
+  // 23b. fork：roc/prc 已裁剪。改验清朝 settlement 覆盖与纯净度（沿用下方全朝代去重循环）
+  const qingDyn23b = dynasties.find((d) => d.key === 'qing');
   assert(
-    rocDyn && rocDyn.settlements.length >= 180 && prcDyn && prcDyn.settlements.length >= 185,
-    `Expected ROC (>=180) and PRC (>=185) to include deduplicated modern cities, got ROC=${rocDyn && rocDyn.settlements.length}, PRC=${prcDyn && prcDyn.settlements.length}`
+    qingDyn23b && qingDyn23b.settlements.length >= 120,
+    `Expected Qing settlements >= 120, got ${qingDyn23b && qingDyn23b.settlements.length}`
   );
-  for (const modCity of ['淮安', '温州', '嘉兴', '金华', '衢州', '丽水', '亳州', '阜阳', '连云港', '南通', '盐城', '无锡', '宜宾', '乐山', '泸州', '达州', '抚州', '宜春', '莆田', '随州', '邵阳', '郴州', '韶关', '肇庆', '梧州', '崇左', '三亚', '平凉', '庆阳', '保山', '山南', '阿里', '潍坊', '黄山', '南充', '西昌', '马鞍山', '运城', '绵阳', '酒泉', '抚顺', '牡丹江', '济宁', '怀化', '北海', '锡林郭勒', '忻州', '吴忠', '通化', '湛江', '茂名', '红河', '张家口', '葫芦岛', '日喀则', '江门', '赤峰', '定西', '海东', '淮南', '驻马店', '南平', '宝鸡', '周口', '烟台', '龙岩', '三明']) {
-    assert(
-      prcDyn.settlements.some((s) => s.modern === modCity && s.ancient === modCity) &&
-        rocDyn.settlements.some((s) => s.modern === modCity),
-      `Expected clean city "${modCity}" to be present on both ROC and PRC maps`
-    );
-  }
+
   const bannedUnseparated = new Set([
     '南平建瓯', '南阳邓州', '周口淮阳', '呼和浩特托克托', '宝鸡凤翔', '张家口蔚县',
     '抚顺新宾', '济宁曲阜', '牡丹江海林', '石家庄平山', '绵阳三台', '葫芦岛兴城',
@@ -2521,33 +2486,17 @@ function main() {
       );
     }
   }
-  for (const modDyn of [rocDyn, prcDyn]) {
-    const seenAnc = new Set();
-    const seenMod = new Set();
-    for (const s of modDyn.settlements) {
-      assert(
-        !s.ancient.includes('·') && !s.modern.includes('·'),
-        `${modDyn.key} settlement "${s.ancient}" (modern="${s.modern}") must use a clean single city name without "·" compound`
-      );
-      assert(
-        !seenAnc.has(s.ancient) && !seenMod.has(s.modern),
-        `${modDyn.key} must not contain duplicate city "${s.ancient}" / "${s.modern}"`
-      );
-      seenAnc.add(s.ancient);
-      seenMod.add(s.modern);
-    }
-  }
   assert(
     styleCss.includes('.settlement-node.is-tier2.is-trace-city') &&
       appCode.includes("node.classList.toggle('is-trace-city', isTraced)"),
     'style.css and app.js must keep traced Tier-2 cities visible (.is-trace-city)'
   );
-  ctrl.dynastyIdx = 17;
-  ctrl.year = 2026;
+  ctrl.dynastyIdx = 15;   // fork：末朝清
+  ctrl.year = 1912;
   const wfHits = ctrl._queryQuickSearch('潍坊');
   assert(
-    wfHits.length > 0 && wfHits[0].kind === 'city' && wfHits[0].dynasty.key === 'prc',
-    `Expected searching "潍坊" in PRC era to rank PRC city entry first, got ${JSON.stringify(wfHits[0] && { kind: wfHits[0].kind, dyn: wfHits[0].dynasty && wfHits[0].dynasty.key, title: wfHits[0].titleZh })}`
+    wfHits.length > 0 && wfHits[0].kind === 'city' && wfHits[0].dynasty.key === 'qing',
+    `Expected searching "潍坊" in 清 era to rank Qing city entry first, got ${JSON.stringify(wfHits[0] && { kind: wfHits[0].kind, dyn: wfHits[0].dynasty && wfHits[0].dynasty.key, title: wfHits[0].titleZh })}`
   );
 
   // 23c. Verify deduplicated modern province boundary paths & PRC boundary styling
@@ -2637,9 +2586,9 @@ function main() {
   assert(
     mockSeoNav.dataset.locale === 'en' &&
       mockSeoNav.innerHTML.includes('Warring States Historical Map') &&
-      mockSeoNav.innerHTML.includes("People's Republic of China Historical Map") &&
+      mockSeoNav.innerHTML.includes('Qing Historical Map') &&
       !/[\u4e00-\u9fff]/.test(mockSeoNav.innerHTML),
-    'In English mode, _syncSeoDirectoryLocale() must translate all 18 dynasty entries with zero remaining CJK characters'
+    'In English mode, _syncSeoDirectoryLocale() must translate all 16 dynasty entries (fork: 止于 1912) with zero remaining CJK characters'
   );
   ctrl.locale = 'zh';
   ctrl._syncSeoDirectoryLocale();
@@ -3220,21 +3169,7 @@ function main() {
     assert(fs.existsSync(path.join(ROOT, zhAsset)), `Missing preview asset file ${zhAsset}`);
   }
 
-  // 23p. Verify Republic of China Warlord Era (1916–1928) multi-faction snapshots (s_roc_a0, s_roc_w1..w4, s_roc_a)
-  for (const [rk, expectedTitles] of [
-    ['s_roc_a0', ['中华民国', '外蒙古（自治/苏控）']],
-    ['s_roc_w1', ['北洋政府 · 皖系（段祺瑞）', '直系（冯国璋 · 曹锟）', '奉系（张作霖）', '护法军政府 · 西南各系', '晋系（阎锡山）', '西北诸马（甘宁青）', '新疆（杨增新）']],
-    ['s_roc_w2', ['北洋政府 · 直系（曹锟 · 吴佩孚）', '奉系（张作霖）', '皖系（卢永祥 · 浙江）', '广州政府（孙中山）', '西南川滇黔桂各系', '晋系（阎锡山）', '西北诸马（甘宁青）', '新疆（杨增新）']],
-    ['s_roc_w3', ['北洋政府 · 奉系（张作霖）', '五省联军（孙传芳）', '直系（吴佩孚）', '西北国民军（冯玉祥）', '广州国民政府（两广统一）', '川滇黔军阀（刘湘 · 唐继尧）', '晋系（阎锡山）', '新疆（杨增新）']],
-    ['s_roc_w4', ['国民政府（北伐军与冯阎集团）', '安国军政府 · 奉系（张作霖）', '新疆（杨增新）']],
-  ]) {
-    const rs = snapshots[rk];
-    assert(rs, `Missing ROC warlord snapshot ${rk}`);
-    const titles = new Set((rs.polities || []).map((p) => p.title));
-    for (const et of expectedTitles) {
-      assert(titles.has(et), `${rk} must include warlord polity "${et}"`);
-    }
-  }
+  // 23p. fork: ROC 军阀期快照（s_roc_a0/w1..w4/a）已随朝代裁剪，不再校验
 
   // 23q. Mobile viewport UX & geometry guards (iPhone 13 Pro 390x664 portrait Person Chronicle + Cartographic Hairlines + Custom Route)
   assert(
@@ -3428,7 +3363,7 @@ function main() {
       ['Zhao Kuangyin', 'zhaokuangyin'],
       ['Li Longji', 'tangxuanzong'],
       ['Koxinga', 'zhengchenggong'],
-      ['Sun Yat-sen', 'sunzhongshan'],
+      // fork: 'Sun Yat-sen' 检索排序依赖 roc 事件条目（已裁剪），跳过
       ['稼轩', 'xinqiji'],
       ['王守仁', 'wangyangming'],
     ];
@@ -6003,12 +5938,12 @@ function main() {
         '永嘉',
         '建安',
         '保定',
-        '咸宁',
+        // fork: '咸宁' 的现代城市条目随 roc/prc 裁剪移除，只剩同名年号 era 命中
         '永昌',
         '建宁',
         '永安',
         '兴元',
-        '大庆',
+        // fork: '大庆' 同上（大庆油田条目随 roc/prc 裁剪移除）
       ]) {
         const cHits = ctrl._queryQuickSearch(cityQ);
         assert(
@@ -6893,7 +6828,7 @@ function main() {
 
         // CUJ 43: Polity focus — per-regime profile (割据/并立政权) inside the chronicle pane
         const polProfiles = loreData.POLITY_PROFILES || [];
-        assert(polProfiles.length >= 105, `Expected >= 105 curated polity profiles, got ${polProfiles.length}`);
+        assert(polProfiles.length >= 100, `Expected >= 100 curated polity profiles (fork: roc/prc 期 profiles 已裁剪), got ${polProfiles.length}`);
         const polKeySet = new Set();
         for (const p of polProfiles) {
           assert(!polKeySet.has(p.key), `Duplicate polity key ${p.key}`);
@@ -6979,7 +6914,7 @@ function main() {
           ['汉（郡国并行）', 'xihan', true],
           ['东晋', 'dongjin', true],
           ['南宋（闽广行朝）', 'nansong', true],
-          ['中华民国', 'roc', true],
+          // fork: roc 已裁剪，'中华民国' 主政权断言随之移除
           ['唐（李渊）', 'sui', false],
           ['汉（刘邦）', 'qin', false],
           ['更始（汉）', 'xihan', false],
@@ -7826,9 +7761,10 @@ function main() {
           [1670, '南明（明郑）', '承天府（东宁）(府)', 'Southern Ming (Koxinga / Tungning)', '南明（明鄭）'],
           [1750, '清', '台湾府', 'Qing', '清'],
           [1900, '台湾（日占）', null, 'Taiwan (Japanese-occupied)', '臺灣（日佔）'],
+          // 本 fork 时间轴止于 1912：超出 maxYear 的深链年份应钳制到 1911（清末），台湾仍为日占
           [1920, '台湾（日占）', null, 'Taiwan (Japanese-occupied)', '臺灣（日佔）'],
-          [1947, '中华民国', null, 'Republic of China', '中華民國'],
-          [2026, '中华人民共和国', '台南', "People's Republic of China", '中華人民共和國'],
+          [1947, '台湾（日占）', null, 'Taiwan (Japanese-occupied)', '臺灣（日佔）'],
+          [2026, '台湾（日占）', null, 'Taiwan (Japanese-occupied)', '臺灣（日佔）'],
         ];
         const savedLoc = ctrl.locale;
         for (const [yr, zhPol, zhPref, enPol, twPol] of twEraSamples) {
@@ -7861,7 +7797,7 @@ function main() {
   } else {
     console.log(`  - ${decodedPolygons} historical polygons (${totalVertices.toLocaleString()} vertices) verified lossless & collision-free`);
   }
-  console.log(`  - ${provinces.length} modern provinces (${provRingCount} rings)`);
+  console.log(`  - ${provinces.length} modern province outlines in data layer (not rendered: this fork stops at 1912, ${provRingCount} rings)`);
   console.log(`  - ${totalSettlements} ancient settlements & ${totalMilestones} historical milestones`);
   console.log(`  - ${loreData.HISTORICAL_JOURNEYS.length} journeys (${totalJourneyStops} bilingual stops), ${loreData.CHINESE_ERA_SPANS.length} era spans, ${loreData.PLACE_LANDMARK_EVENTS.length} landmark events & ${loreData.PLACE_GAZETTEER.length} gazetteer landmarks verified across 40 E2E CUJs`);
   console.log(`  - ${(loreData.POLITY_PROFILES || []).length} curated regional/rival regime profiles verified`);

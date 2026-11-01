@@ -4,7 +4,9 @@
   <strong>English</strong> · <a href="README_ZH.md">简体中文 (Chinese)</a>
 </p>
 
-**An Interactive Historical Atlas of China from the Warring States (403 BCE) to the Present — Scrub Through Time, Trace Ancient Cities, and Walk in the Footsteps of History**
+> **ℹ️ Fork Notes** — This is a fork of [DeanChensj/jiangshan-map](https://github.com/DeanChensj/jiangshan-map) (GPL-3.0). All credit for the atlas engine, historical data and design belongs to the upstream author. This fork applies one editorial change: **de-modernization — the atlas now ends at 1912 (the end of imperial China)**. Removed: Republic of China / People's Republic of China periods and phases, the modern province-boundary & province-name layers, the modern X-Ray lens, and modern-era landmark events & regime profiles. Deep links (`?year=`) clamp to 1912. Everything else — engine, historical data, place genealogy, journeys, quiz, i18n — is upstream as-is.
+
+**An Interactive Historical Atlas of China from the Warring States (403 BCE) to 1912 — Scrub Through Time, Trace Ancient Cities, and Walk in the Footsteps of History**
 
 [**Play Live Demo (English UI) → https://deanchen.me/jiangshan-map/?lang=en**](https://deanchen.me/jiangshan-map/?lang=en)
 

@@ -4113,18 +4113,7 @@ window.ATLAS_LORE_DATA = {
       "zh": "李自成攻克西安，次年正月于西安建国号大顺",
       "en": "Li Zicheng captures Xi'an and proclaims the Dashun Dynasty"
     },
-    {
-      "dynastyKey": "roc",
-      "year": 1936,
-      "coord": [
-        108.94,
-        34.26
-      ],
-      "site": "西安",
-      "siteEn": "Xi'an",
-      "zh": "张学良、杨虎城发动西安事变，促成抗日民族统一战线",
-      "en": "Xi'an Incident sparks the Second United Front against Japanese aggression"
-    },
+    
     {
       "dynastyKey": "zhanguo",
       "year": -403,
@@ -4485,18 +4474,7 @@ window.ATLAS_LORE_DATA = {
         "zuozongtang"
       ]
     },
-    {
-      "dynastyKey": "roc",
-      "year": 1912,
-      "coord": [
-        118.78,
-        32.06
-      ],
-      "site": "南京",
-      "siteEn": "Nanjing",
-      "zh": "孙中山于南京就任中华民国临时大总统，宣告共和",
-      "en": "Sun Yat-sen inaugurated in Nanjing as Provisional President of the Republic of China"
-    },
+    
     {
       "dynastyKey": "zhanguo",
       "year": -226,
@@ -4714,34 +4692,8 @@ window.ATLAS_LORE_DATA = {
       "zh": "第二次鸦片战争英法联军攻入北京，劫掠并焚毁圆明园",
       "en": "Anglo-French forces enter Beijing and burn the Old Summer Palace (Yuanmingyuan)"
     },
-    {
-      "dynastyKey": "roc",
-      "year": 1919,
-      "coord": [
-        116.4,
-        39.9
-      ],
-      "site": "北京",
-      "siteEn": "Beijing",
-      "zh": "北京爆发五四爱国运动，揭开新民主主义革命序幕",
-      "en": "May Fourth Movement erupts in Beijing"
-    },
-    {
-      "dynastyKey": "roc",
-      "year": 1949,
-      "coord": [
-        116.4,
-        39.9
-      ],
-      "site": "北平（北京）",
-      "siteEn": "Beijing",
-      "zh": "北平和平解放，同年10月1日于北京天安门宣告新中国成立",
-      "en": "Peaceful liberation of Beiping; founding of the PRC proclaimed at Tiananmen",
-      "persons": [
-        "maozedong",
-        "dengxiaoping"
-      ]
-    },
+    
+    
     {
       "dynastyKey": "zhanguo",
       "year": -364,
@@ -6175,18 +6127,7 @@ window.ATLAS_LORE_DATA = {
       "zh": "张经、卢镗与俞大猷统兵于嘉兴王江泾大破倭寇，获抗倭首捷",
       "en": "Ming commanders Zhang Jing and Yu Dayou crush Wokou pirates at Wangjiangjing in Jiaxing"
     },
-    {
-      "dynastyKey": "roc",
-      "year": 1921,
-      "coord": [
-        120.75,
-        30.75
-      ],
-      "site": "嘉兴南湖（今浙江嘉兴）",
-      "siteEn": "South Lake, Jiaxing (Zhejiang)",
-      "zh": "中共一大自上海转移至嘉兴南湖红船续会闭幕，宣告中国共产党成立",
-      "en": "The First National Congress concludes aboard the Red Boat on South Lake in Jiaxing"
-    },
+    
     {
       "dynastyKey": "yuan",
       "year": 1358,
@@ -6343,18 +6284,7 @@ window.ATLAS_LORE_DATA = {
       "zh": "范仲淹任西溪盐官倡议重修海堰，筑百里范公堤护淮南盐场良田",
       "en": "Fan Zhongyan initiates construction of the coastal Fan Gong Dike at Yancheng"
     },
-    {
-      "dynastyKey": "roc",
-      "year": 1941,
-      "coord": [
-        120.16,
-        33.35
-      ],
-      "site": "盐城（今江苏盐城）",
-      "siteEn": "Yancheng (Jiangsu)",
-      "zh": "皖南事变后新四军于江苏盐城重建军部，陈毅代军长、刘少奇政委",
-      "en": "After the Southern Anhui Incident, the New Fourth Army rebuilds its headquarters at Yancheng"
-    },
+    
     {
       "dynastyKey": "ming",
       "year": 1604,
@@ -6684,18 +6614,7 @@ window.ATLAS_LORE_DATA = {
       "zh": "王昌龄贬龙标（今怀化）尉筑芙蓉楼，李白寄诗“随君直到夜郎西”",
       "en": "Poet Wang Changling is exiled to Longbiao (Huaihua), inspiring Li Bai's famous farewell poem"
     },
-    {
-      "dynastyKey": "roc",
-      "year": 1945,
-      "coord": [
-        109.68,
-        27.44
-      ],
-      "site": "芷江（今湖南怀化芷江）",
-      "siteEn": "Zhijiang (Huaihua, Hunan)",
-      "zh": "中国陆军总司令部于湖南芷江受降堂接受侵华日军今井武夫洽降",
-      "en": "Chinese forces accept the preliminary surrender of Japanese troops in China at Zhijiang"
-    },
+    
     {
       "dynastyKey": "tang",
       "year": 677,
@@ -6984,18 +6903,7 @@ window.ATLAS_LORE_DATA = {
       "zh": "李鸿章于芝罘签订《烟台条约》，增开宜昌、芜湖、温州、北海通商",
       "en": "Li Hongzhang signs the Chefoo Convention at Yantai, opening four more treaty ports"
     },
-    {
-      "dynastyKey": "roc",
-      "year": 1929,
-      "coord": [
-        117.02,
-        25.08
-      ],
-      "site": "上杭古田（今福建龙岩）",
-      "siteEn": "Gutian, Shanghang (Longyan, Fujian)",
-      "zh": "红四军在闽西龙岩上杭召开古田会议，确立思想建党、政治建军原则",
-      "en": "Gutian Conference in Longyan establishes the foundational principle of political army building"
-    },
+    
     {
       "dynastyKey": "donghan",
       "year": 166,
@@ -9327,75 +9235,11 @@ window.ATLAS_LORE_DATA = {
       "zh": "辛亥革命武昌起义：湖北新军工程营打响第一枪光复武汉三镇",
       "en": "Wuchang Uprising: New Army engineers seize Wuchang sparking nationwide provincial secessions"
     },
-    {
-      "dynastyKey": "roc",
-      "year": 1925,
-      "coord": [
-        116.41,
-        39.93
-      ],
-      "site": "北京铁狮子胡同",
-      "siteEn": "Beijing",
-      "zh": "孙中山扶病北上主张召开国民会议废除不平等条约",
-      "en": "Traveling north for national reunification talks, Sun Yat-sen dies in Beijing leaving his Will"
-    },
-    {
-      "dynastyKey": "roc",
-      "year": 1927,
-      "coord": [
-        114.17,
-        26.57
-      ],
-      "site": "文家市→井冈山茨坪",
-      "siteEn": "Jinggangshan (Jiangxi-Hunan Border)",
-      "zh": "毛泽东领导湘赣边界秋收起义，三湾改编确立党对军队领导",
-      "en": "Following the Autumn Harvest Uprising, Mao Zedong leads forces into the Jinggang Mountains"
-    },
-    {
-      "dynastyKey": "roc",
-      "year": 1935,
-      "coord": [
-        106.92,
-        27.7
-      ],
-      "site": "遵义",
-      "siteEn": "Zunyi (Guizhou)",
-      "zh": "中央红军长征突破乌江占领遵义，召开遵义会议确立毛泽东领导地位",
-      "en": "During the Long March, the Zunyi Conference establishes Mao Zedong’s leadership of the Red Army",
-      "persons": [
-        "maozedong",
-        "dengxiaoping"
-      ]
-    },
-    {
-      "dynastyKey": "roc",
-      "year": 1938,
-      "coord": [
-        109.49,
-        36.59
-      ],
-      "site": "延安杨家岭",
-      "siteEn": "Yan'an (Shaanxi)",
-      "zh": "毛泽东于延安窑洞著《论持久战》，系统阐明抗日战略三阶段",
-      "en": "In Yan'an cave dwellings, Mao Zedong writes On Protracted War outlining China's strategy"
-    },
-    {
-      "dynastyKey": "roc",
-      "year": 1948,
-      "coord": [
-        113.94,
-        38.34
-      ],
-      "site": "西柏坡（平山）",
-      "siteEn": "Xibaipo (Hebei)",
-      "zh": "毛泽东与中共中央在太行山麓西柏坡运筹指挥辽沈、淮海、平津三大战役",
-      "en": "From Xibaipo headquarters Mao Zedong directs the Liaoshen, Huaihai, and Pingjin campaigns",
-      "persons": [
-        "maozedong",
-        "dengxiaoping",
-        "jiangjieshi"
-      ]
-    },
+    
+    
+    
+    
+    
     {
       "dynastyKey": "xihan",
       "year": -145,
@@ -12508,54 +12352,10 @@ window.ATLAS_LORE_DATA = {
       "zh": "清肃亲王豪格统兵入川，大西帝张献忠于西充凤凰山拒战中箭身亡",
       "en": "Fighting Qing prince Haoge's invasion of Sichuan, Zhang Xianzhong is killed by an arrow at Mount Fenghuang"
     },
-    {
-      "dynastyKey": "roc",
-      "year": 1917,
-      "coord": [
-        113.26,
-        23.13
-      ],
-      "site": "广州",
-      "siteEn": "Guangzhou",
-      "zh": "孙中山率驻沪海军南下广州召开国会非常会议，成立护法军政府",
-      "en": "Sun Yat-sen sails south to Guangzhou and establishes the Constitutional Protection Military Government"
-    },
-    {
-      "dynastyKey": "roc",
-      "year": 1922,
-      "coord": [
-        116.15,
-        39.82
-      ],
-      "site": "长辛店·山海关",
-      "siteEn": "Changxindian / Shanhaiguan",
-      "zh": "第一次直奉战争：吴佩孚直系军击败张作霖奉系军，独占北京政权",
-      "en": "First Zhili–Fengtian War: Wu Peifu's Zhili forces defeat Zhang Zuolin's Fengtian army to control Beijing"
-    },
-    {
-      "dynastyKey": "roc",
-      "year": 1924,
-      "coord": [
-        116.4,
-        39.9
-      ],
-      "site": "北京·山海关",
-      "siteEn": "Beijing / Shanhaiguan",
-      "zh": "第二次直奉战争冯玉祥发动北京政变囚曹锟，张作霖、段祺瑞入京执政",
-      "en": "During the Second Zhili–Fengtian War, Feng Yuxiang stages the Beijing Coup and Zhang Zuolin enters Beijing"
-    },
-    {
-      "dynastyKey": "roc",
-      "year": 1928,
-      "coord": [
-        123.4,
-        41.8
-      ],
-      "site": "奉天皇姑屯（沈阳）",
-      "siteEn": "Huanggutun (Shenyang)",
-      "zh": "张作霖退返奉天于皇姑屯遭日军炸死，年底张学良宣布“东北易帜”",
-      "en": "Zhang Zuolin is killed at Huanggutun; Zhang Xueliang declares Northeast Flag Replacement"
-    },
+    
+    
+    
+    
     {
       "dynastyKey": "ming",
       "year": 1624,
@@ -20993,94 +20793,10 @@ window.ATLAS_LORE_DATA = {
         "新疆建省"
       ]
     },
-    {
-      "key": "sunzhongshan",
-      "zh": "孙中山",
-      "en": "Sun Yat-sen",
-      "courtesyZh": "孙文 · 字逸仙 · 近代民主革命先行者",
-      "courtesyEn": "Founder of the Republic of China",
-      "dynastyKey": "roc",
-      "span": [
-        1866,
-        1925
-      ],
-      "aliases": [
-        "孙文",
-        "孙逸仙",
-        "中山先生"
-      ],
-      "tokens": [
-        "孙中山",
-        "中华民国成立",
-        "黄埔军校"
-      ]
-    },
-    {
-      "key": "jiangjieshi",
-      "zh": "蒋介石",
-      "en": "Chiang Kai-shek",
-      "courtesyZh": "蒋中正 · 北伐与抗战统帅",
-      "courtesyEn": "Chiang Chung-cheng",
-      "dynastyKey": "roc",
-      "span": [
-        1887,
-        1975
-      ],
-      "aliases": [
-        "蒋中正"
-      ],
-      "tokens": [
-        "蒋介石",
-        "誓师北伐",
-        "四一二",
-        "南京国民政府",
-        "西安事变",
-        "重庆陪都",
-        "渡江战役"
-      ]
-    },
-    {
-      "key": "maozedong",
-      "zh": "毛泽东",
-      "en": "Mao Zedong",
-      "courtesyZh": "字润之 · 中华人民共和国主要缔造者",
-      "courtesyEn": "Founding Leader of the PRC",
-      "dynastyKey": "prc",
-      "span": [
-        1893,
-        1976
-      ],
-      "aliases": [
-        "毛润之",
-        "润之"
-      ],
-      "tokens": [
-        "毛泽东",
-        "中国共产党第一次全国代表大会",
-        "开国大典"
-      ]
-    },
-    {
-      "key": "dengxiaoping",
-      "zh": "邓小平",
-      "en": "Deng Xiaoping",
-      "courtesyZh": "改革开放总设计师",
-      "courtesyEn": "Architect of Reform & Opening-Up",
-      "dynastyKey": "prc",
-      "span": [
-        1904,
-        1997
-      ],
-      "aliases": [
-        "邓希贤"
-      ],
-      "tokens": [
-        "邓小平",
-        "改革开放",
-        "经济特区",
-        "香港回归"
-      ]
-    },
+    
+    
+    
+    
     {
       "key": "chensheng",
       "zh": "陈胜",
@@ -24964,155 +24680,10 @@ window.ATLAS_LORE_DATA = {
       "rulersZh": "天王洪秀全 → 幼天王洪天贵福",
       "rulersEn": "Heavenly King Hong Xiuquan → Young Heavenly King Hong Tianguifu"
     },
-    {
-      "key": "beiyang_wanxi",
-      "zh": "北洋 · 皖系",
-      "en": "Anhui Clique (Beiyang)",
-      "titles": [
-        "北洋政府 · 皖系（段祺瑞）",
-        "皖系（卢永祥 · 浙江）"
-      ],
-      "from": 1916,
-      "to": 1924,
-      "seatZh": "北京（1916—1920）→ 杭州（1920—1924）",
-      "seatEn": "Beijing (1916–1920) → Hangzhou (1920–1924)",
-      "rulersZh": "国务总理段祺瑞 → 浙江督军卢永祥",
-      "rulersEn": "Duan Qirui → Lu Yongxiang",
-      "keywords": [
-        "皖系",
-        "段祺瑞",
-        "卢永祥",
-        "直皖战争",
-        "皖、直、奉系"
-      ],
-      "aliases": [
-        "皖系军阀"
-      ],
-      "summaryZh": "袁世凯死后北洋军分裂，安徽合肥人段祺瑞以国务总理掌控北京中央政权（1916—1920），拒绝恢复《临时约法》引发孙中山南下护法，并向日本大举借款编练参战军。1920年直皖战争五日即败，段祺瑞下野，皖系仅存卢永祥据守浙江、上海，至1924年江浙战争为孙传芳、齐燮元所败。",
-      "summaryEn": "Led by Premier Duan Qirui after Yuan Shikai's death in 1916, the Anhui Clique dominated the Beijing government until its defeat by the Zhili and Fengtian cliques in the July 1920 Zhili–Anhui War; its last stronghold under Lu Yongxiang in Zhejiang and Shanghai fell in the 1924 Jiangsu–Zhejiang War."
-    },
-    {
-      "key": "beiyang_zhixi",
-      "zh": "北洋 · 直系",
-      "en": "Zhili Clique (Beiyang)",
-      "titles": [
-        "直系（冯国璋 · 曹锟）",
-        "北洋政府 · 直系（曹锟 · 吴佩孚）",
-        "直系（吴佩孚）",
-        "五省联军（孙传芳）"
-      ],
-      "from": 1916,
-      "to": 1927,
-      "seatZh": "南京 · 保定 → 北京 · 洛阳 → 汉口 · 南京",
-      "seatEn": "Baoding & Luoyang → Beijing → Hankou & Nanjing",
-      "rulersZh": "冯国璋 → 曹锟 → 吴佩孚 · 孙传芳（东南五省联军）",
-      "rulersEn": "Feng Guozhang → Cao Kun → Wu Peifu & Sun Chuanfang",
-      "keywords": [
-        "直系",
-        "冯国璋",
-        "曹锟",
-        "吴佩孚",
-        "孙传芳",
-        "直皖战争",
-        "直奉战争",
-        "武昌"
-      ],
-      "aliases": [
-        "直系军阀",
-        "五省联军"
-      ],
-      "summaryZh": "以直隶人冯国璋、曹锟为首的北洋派系。1920年直皖战争、1922年第一次直奉战争连胜后独占北京政权，吴佩孚驻洛阳练兵；1924年第二次直奉战争中冯玉祥发动北京政变，曹锟被囚，直系失势。此后吴佩孚复起于武汉，孙传芳组苏皖赣浙闽“五省联军”，1926—1927年先后为国民革命军北伐击溃。",
-      "summaryEn": "Formed under Feng Guozhang and Cao Kun, the Zhili Clique controlled Beijing after winning the 1920 Zhili–Anhui and 1922 First Zhili–Fengtian wars until Feng Yuxiang's 1924 Beijing Coup. Wu Peifu at Wuhan and Sun Chuanfang's Five-Province Allied Army at Nanjing were subsequently defeated by the 1926–1927 Northern Expedition."
-    },
-    {
-      "key": "beiyang_fengxi",
-      "zh": "北洋 · 奉系",
-      "en": "Fengtian Clique (Beiyang)",
-      "titles": [
-        "奉系（张作霖）",
-        "北洋政府 · 奉系（张作霖）",
-        "安国军政府 · 奉系（张作霖）"
-      ],
-      "from": 1916,
-      "to": 1928,
-      "seatZh": "奉天（沈阳）→ 北京（1924—1928）",
-      "seatEn": "Fengtian (Shenyang) → Beijing (1924–1928)",
-      "rulersZh": "安国军大元帅张作霖 → 东北保安总司令张学良",
-      "rulersEn": "Zhang Zuolin → Zhang Xueliang",
-      "keywords": [
-        "奉系",
-        "张作霖",
-        "张学良",
-        "直奉战争",
-        "皇姑屯"
-      ],
-      "aliases": [
-        "奉系军阀",
-        "安国军政府"
-      ],
-      "summaryZh": "张作霖据奉天、吉林、黑龙江东北三省形成奉系军阀。1922年第一次直奉战争败退关外后整军经武；1924年第二次直奉战争大胜入关，控制北洋政府，1927年于北京就任中华民国陆海军大元帅（安国军政府）。1928年北伐军进逼京津，张作霖退返奉天途中于皇姑屯被日军炸死，年底张学良宣布东北易帜。",
-      "summaryEn": "Based in the three northeastern provinces under Zhang Zuolin, the Fengtian Clique entered Shanhai Pass to take Beijing in the 1924 Second Zhili–Fengtian War, with Zhang becoming Generalissimo of the Beijing government in 1927. Retreating before the Northern Expedition in June 1928, Zhang Zuolin was assassinated by the Kwantung Army at Huanggutun, and his son Zhang Xueliang declared Northeast Flag Replacement that December."
-    },
-    {
-      "key": "guangzhou_gov",
-      "zh": "广州护法 · 国民政府",
-      "en": "Guangzhou Constitutional Protection & Nationalist Government",
-      "titles": [
-        "护法军政府 · 西南各系",
-        "广州政府（孙中山）",
-        "广州国民政府（两广统一）",
-        "国民政府（北伐军与冯阎集团）"
-      ],
-      "from": 1917,
-      "to": 1927,
-      "matchFrom": 1916,
-      "matchTo": 1928,
-      "seatZh": "广州 → 武汉 · 南京（1927）",
-      "seatEn": "Guangzhou → Wuhan & Nanjing (1927)",
-      "rulersZh": "海陆军大元帅 · 非常大总统孙中山 → 汪精卫 · 蒋介石",
-      "rulersEn": "Sun Yat-sen → Wang Jingwei & Chiang Kai-shek",
-      "keywords": [
-        "护法",
-        "孙中山",
-        "广州",
-        "黄埔军校",
-        "北伐"
-      ],
-      "aliases": [
-        "护法军政府",
-        "广州国民政府"
-      ],
-      "summaryZh": "1917年孙中山南下广州召开国会非常会议，成立中华民国军政府展开护法运动；1921年就非常大总统职，1923年重建陆海军大元帅大本营。1924年召开国民党一大实现第一次国共合作、创办黄埔军校；1925年于广州正式成立国民政府并东征南征统一两广，1926年7月誓师北伐，1927—1928年推进至长江与京津。",
-      "summaryEn": "Established by Sun Yat-sen in Guangzhou in 1917 to defend the provisional constitution against Beiyang warlords, reorganized in 1924 with the First United Front and Whampoa Military Academy, and formally inaugurated as the Nationalist Government in 1925. After unifying Guangdong and Guangxi, it launched the Northern Expedition in July 1926."
-    },
-    {
-      "key": "manchukuo",
-      "zh": "伪满洲国（日占）",
-      "en": "Manchukuo (Japanese Occupation)",
-      "titles": [
-        "辽吉（日军侵占）",
-        "伪满洲国（日占）"
-      ],
-      "from": 1932,
-      "to": 1945,
-      "matchFrom": 1931,
-      "seatZh": "新京（长春）",
-      "seatEn": "Xinjing (Changchun)",
-      "rulersZh": "日本关东军殖民统治（傀儡溥仪）",
-      "rulersEn": "Japanese Kwantung Army Occupation (puppet Puyi)",
-      "keywords": [
-        "九一八",
-        "满洲国",
-        "溥仪",
-        "东北抗日联军",
-        "收回台湾"
-      ],
-      "aliases": [
-        "伪满洲国",
-        "满洲国"
-      ],
-      "summaryZh": "1931年9月18日日本关东军发动九一八事变侵占东北三省，1932年3月于长春扶植清逊帝溥仪建立傀儡政权伪“满洲国”，改长春为“新京”，次年侵占热河。东北抗日联军杨靖宇、赵尚志等在白山黑水间浴血抗战十四载；1945年8月日本无条件投降，伪满覆灭，东北光复。",
-      "summaryEn": "After the Kwantung Army seized Manchuria following the Mukden Incident of September 18, 1931, Japan installed the deposed Qing emperor Puyi at Changchun (renamed Xinjing) in March 1932 as a puppet regime. Northeast Anti-Japanese United Army guerrillas fought for fourteen years until Japan's surrender in August 1945 restored the Northeast to China."
-    }
+    
+    
+    
+    
+    
   ]
 };
