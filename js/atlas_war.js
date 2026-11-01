@@ -17,9 +17,9 @@
   let HistoricalAtlasController = null;
 
   const TAIL_YEARS = 3;           // post-war replay window (map + panel share it)
-  const PLAY_INTERVAL = 1600;     // ms per step while playing
-  const TIER_WIDTHS = [2.1, 3.1, 4.5, 6.3];   // screen px per strength tier
-  const TIER_SCALES = [0.85, 1.0, 1.2, 1.45]; // battle-diamond core scales
+  const PLAY_INTERVAL = 2600;     // ms per step while playing (1× 档，叙事节奏)
+  const TIER_WIDTHS = [3, 4.6, 6.6, 9.2];     // screen px per strength tier
+  const TIER_SCALES = [1, 1.3, 1.6, 2];       // battle-diamond core scales
 
   const reducedMotion = () =>
     typeof window !== 'undefined' &&
@@ -253,8 +253,8 @@
 
       // --- march arrows: past as solid traces, current drawing progressively ---
       const drawMs = Math.max(
-        380,
-        Math.min(1100, PLAY_INTERVAL / (this._warPlaySpeed || 1) - 320)
+        420,
+        Math.min(1900, PLAY_INTERVAL / (this._warPlaySpeed || 1) - 550)
       );
       for (let i = 0; i <= idx; i++) {
         const s = w.steps[i];
@@ -267,6 +267,12 @@
           if (!info) continue;
           const tier = mv.force ? this._warForceTier(mv.force.n) : 0;
           const claimed = mv.force && mv.force.quality === 'claimed';
+          // 浅色底衬把彩色箭头从繁杂地形里托出来（宣纸制图惯例）
+          this._svgNode(
+            'path',
+            { d: info.d, class: `war-march-casing t${tier}${isCur ? ' is-cur' : ''}` },
+            g
+          );
           const cls = `war-march t${tier}${isCur ? ' is-cur' : ' is-past'}${claimed ? ' is-claimed' : ''}`;
           const p = this._svgNode(
             'path',
@@ -304,7 +310,7 @@
           }
           this._svgNode(
             'path',
-            { d: 'M-4.5 -3.15L3.55 0L-4.5 3.15L-2.3 0Z', class: 'war-chevron' },
+            { d: 'M-7 -5.2L8 0L-7 5.2L-3 0Z', class: 'war-chevron' },
             dir
           );
         }
@@ -336,7 +342,7 @@
             g
           );
           if (isCur) this._warCurSpot = { x: sx, y: sy };
-          this._svgNode('circle', { class: 'war-ring', r: 8.5, stroke: side.color }, node);
+          this._svgNode('circle', { class: 'war-ring', r: 10, stroke: side.color }, node);
           const core = this._svgNode(
             'g',
             { class: `war-core t${tier}` },
