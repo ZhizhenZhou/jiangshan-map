@@ -192,38 +192,54 @@
     }
 
     // 当前步行军箭头从起点渐进画到终点：rAF 逐帧写 dashoffset。
-    // 不用 CSS 动画——is-camera-moving 守卫会杀掉它，导致飞行期间箭头
-    // 消失、飞完从头重画（用户看到的"中断"）。rAF 不受该守卫影响，
-    // 相机飞行与绘制并行（西点战史片的标准观感）。底衬与彩线同一节奏。
+    // 三个踩过的坑，都在这条注释里：
+    // ① CSS 动画会被 is-camera-moving 守卫杀掉（飞行中箭头消失重画）→ rAF 驱动；
+    // ② non-scaling-stroke 下 dasharray 按【屏幕像素】解释且 pathLength 不生效
+    //    （放大地图后箭头断成数截的根因）→ 每帧按当前缩放把用户单位长度
+    //    换算成屏幕像素再写 dash，缩放变化下一帧立即跟上；
+    // ③ 画完立即清除 dash——否则完成后用户再缩放，固定的 dash 值又会切碎线。
     _startWarDraw(casing, p, dirG, drawMs) {
       const reduced = reducedMotion();
-      let L = 0;
-      try {
-        L = typeof p.getTotalLength === 'function' ? p.getTotalLength() : 0;
-      } catch (e) {
-        L = 0;
-      }
-      if (!(L > 2) || reduced) {
-        for (const q of [casing, p]) q.style.strokeDashoffset = '0';
+      if (reduced) {
         if (dirG) dirG.classList.add('is-arrived');
         return;
       }
-      for (const q of [casing, p]) {
-        q.style.strokeDasharray = `${L.toFixed(1)}`;
-        q.style.strokeDashoffset = `${L.toFixed(1)}`;
+      let Lu = 0;
+      try {
+        Lu = typeof p.getTotalLength === 'function' ? p.getTotalLength() : 0;
+      } catch (e) {
+        Lu = 0;
+      }
+      if (!(Lu > 2)) {
+        if (dirG) dirG.classList.add('is-arrived');
+        return;
       }
       const t0 = performance.now();
       const ease = (k) => 1 - Math.pow(1 - k, 3);
       const stepFn = (now) => {
+        let kScreen = 1;
+        try {
+          const rect = this.svg.getBoundingClientRect();
+          kScreen = rect.width > 0 ? rect.width / this.camera.w : 1;
+        } catch (e) {
+          /* keep last scale */
+        }
+        const Ls = Lu * kScreen;
         const k = Math.min(1, (now - t0) / drawMs);
-        const off = (L * (1 - ease(k))).toFixed(1);
-        casing.style.strokeDashoffset = off;
-        p.style.strokeDashoffset = off;
+        const off = Ls * (1 - ease(k));
+        for (const q of [casing, p]) {
+          q.style.strokeDasharray = `${Ls.toFixed(1)}`;
+          q.style.strokeDashoffset = `${off.toFixed(1)}`;
+        }
         if (k < 1) {
           const h = requestAnimationFrame(stepFn);
           this._warDrawRafs.push(h);
-        } else if (dirG) {
-          dirG.classList.add('is-arrived');
+        } else {
+          for (const q of [casing, p]) {
+            q.style.strokeDasharray = 'none';
+            q.style.strokeDashoffset = '0';
+          }
+          if (dirG) dirG.classList.add('is-arrived');
         }
       };
       const h = requestAnimationFrame(stepFn);
