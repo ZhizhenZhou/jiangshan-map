@@ -5396,14 +5396,6 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   display: inline-block;
   border: 1px solid rgba(36, 28, 20, 0.28);
 }
-.war-side-hint {
-  display: block;
-  font-family: var(--sans-stack);
-  font-size: 10px;
-  letter-spacing: 0.02em;
-  color: var(--text-secondary);
-}
-
 .war-narr {
   position: relative;
   font-family: var(--sans-stack);
@@ -5534,34 +5526,53 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 
 .war-ctrl {
   display: flex;
-  gap: 5px;
+  align-items: center;
+  gap: 3px;
+}
+.war-ctrl-gap {
+  flex: 0.35;
 }
 .war-btn {
-  flex: 1;
   min-width: 0;
-  padding: 5.5px 2px;
+  padding: 5px 6px;
+  border: none;
   border-radius: 6px;
-  border: 1px solid var(--hairline);
   background: transparent;
   color: var(--text-main);
   font-family: var(--sans-stack);
   font-size: 11px;
   white-space: nowrap;
   cursor: pointer;
-  transition: border-color 0.14s, color 0.14s, background 0.14s;
+  transition: background 0.14s, color 0.14s;
 }
 .war-btn:hover {
-  border-color: var(--vermilion);
+  background: rgba(181, 69, 47, 0.1);
+  color: var(--vermilion);
+}
+.war-btn.is-ico {
+  flex: 0 0 auto;
+  min-width: 30px;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1;
+}
+.war-btn.is-speed {
+  font-weight: 700;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+.war-btn.is-speed:hover {
   color: var(--vermilion);
 }
 .war-btn.is-play {
-  flex: 1.35;
+  flex: 1;
+  padding: 5.5px 10px;
   background: var(--vermilion);
-  border-color: var(--vermilion);
   color: #fffaf2;
   font-weight: 700;
 }
 .war-btn.is-play:hover {
+  background: var(--vermilion);
   color: #fffaf2;
   filter: brightness(1.05);
 }
@@ -5722,9 +5733,3 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   display: inline-block;
 }
 
-.war-side-hint {
-  font-family: var(--sans-stack, sans-serif);
-  font-size: 10.2px;
-  color: var(--text-secondary, #7a6a55);
-  margin-left: auto;
-}
