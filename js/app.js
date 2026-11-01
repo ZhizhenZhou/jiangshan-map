@@ -9244,7 +9244,7 @@
       // Scale static markers (milestones, journey waypoints, directional chevrons, challenge pins, genealogy overlays)
       this.svg
         .querySelectorAll(
-          '.milestone-pin, #grp-journey g[data-x], #grp-challenge g[data-x], #grp-genealogy g[data-x]'
+          '.milestone-pin, #grp-journey g[data-x], #grp-challenge g[data-x], #grp-genealogy g[data-x], #grp-war g[data-x]'
         )
         .forEach((node) => {
           if (this.activePerson && node.classList && node.classList.contains('journey-node')) {
@@ -12754,6 +12754,11 @@
           return null;
         };
         const journeyNodeEl = findClosest('.journey-node');
+        const warHoverEl = findClosest('.war-node');
+        if (warHoverEl && typeof this._warHoverTip === 'function') {
+          this._warHoverTip(warHoverEl, e);
+          return;
+        }
         const settlementNameEl = findClosest('.settlement-node .name, .cap-hint-tag');
         const settlementEl = findClosest('.settlement-node');
         const corridorEl = findClosest('.corridor-line');
@@ -13087,6 +13092,13 @@
             milestoneEl = near.milestoneEl;
           }
           const cur = this.dynasties[this.dynastyIdx];
+
+          // War sandbox battle diamond -> jump to that campaign step
+          const warClickEl = findClosest('.war-node');
+          if (warClickEl && typeof this._warClickNode === 'function') {
+            this._warClickNode(warClickEl);
+            return;
+          }
 
           // Clicking the city name text (e.g. "长安"), the onboarding whisper tag, or a city dot without an overlapping event pin -> trace place history
           if (

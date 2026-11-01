@@ -14,6 +14,7 @@ window.EN_LOCALE = {
     "toggle_cities": "Cities",
     "toggle_routes": "Routes & Walls",
     "toggle_events": "Events",
+    "toggle_war": "War Sandbox",
     "btn_reset": "Reset",
     "hint": "Scroll to zoom · Drag to pan · Click city or double-click to trace history · ← → jump events (Shift+← → ±10 yrs) · Space play",
     "capital_k": "Capital",

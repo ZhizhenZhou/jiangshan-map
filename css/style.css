@@ -5146,3 +5146,391 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 .cr-stop-pill.is-converge {
   box-shadow: 0 0 0 1.4px rgba(189, 45, 34, 0.42);
 }
+
+/* ============================== War Sandbox Overlay (战争沙盘 · 西点式) ============================== */
+
+/* --- control zones (战线推移 · 示意复原) --- */
+#grp-war .war-zone {
+  fill-opacity: 0.09;
+  stroke-opacity: 0.55;
+  stroke-width: 1.4;
+  stroke-dasharray: 6 4;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+#grp-war .war-zone.is-ghost {
+  animation: warZoneGhost 2.6s ease-out forwards;
+}
+
+@keyframes warZoneGhost {
+  from {
+    fill-opacity: 0.09;
+    stroke-opacity: 0.55;
+  }
+  100% {
+    fill-opacity: 0;
+    stroke-opacity: 0;
+  }
+}
+
+/* --- march arrows (行军箭头 · 宽度编码兵力四档) --- */
+#grp-war .war-march {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: var(--war-w, 2.1px);
+  pointer-events: none;
+}
+#grp-war .war-march.t0 { --war-w: 2.1px; }
+#grp-war .war-march.t1 { --war-w: 3.1px; }
+#grp-war .war-march.t2 { --war-w: 4.5px; }
+#grp-war .war-march.t3 { --war-w: 6.3px; }
+#grp-war .war-march.is-past {
+  stroke-opacity: 0.72;
+  stroke-dasharray: none;
+}
+#grp-war .war-march.is-cur {
+  stroke-opacity: 0.95;
+  stroke-width: calc(var(--war-w, 2.1px) + 0.9px);
+  stroke-dasharray: 8 5;
+  animation: warDashFlow 0.85s linear infinite;
+}
+#grp-war .war-march.is-claimed,
+#grp-war .war-march.is-claimed.is-cur {
+  stroke-dasharray: 2.5 3.5;
+  animation: none;
+}
+
+@keyframes warDashFlow {
+  to {
+    stroke-dashoffset: -13;
+  }
+}
+
+/* --- directional chevrons (随缩放反向定标) --- */
+#grp-war .war-dir {
+  pointer-events: none;
+}
+#grp-war .war-chevron {
+  fill: currentColor;
+  stroke: none;
+  opacity: 0.85;
+  transform: scale(var(--dir-s, 1));
+}
+#grp-war .war-dir.t0 { --dir-s: 1; }
+#grp-war .war-dir.t1 { --dir-s: 1.22; }
+#grp-war .war-dir.t2 { --dir-s: 1.5; }
+#grp-war .war-dir.t3 { --dir-s: 1.82; }
+#grp-war .war-dir.is-cur .war-chevron {
+  opacity: 1;
+}
+
+/* --- battle diamonds (战役点 · 同址微散在 JS 侧) --- */
+#grp-war .war-node {
+  cursor: pointer;
+}
+#grp-war .war-ring {
+  fill: #f6f1e6;
+  fill-opacity: 0.85;
+  stroke-width: 1.6;
+}
+#grp-war .war-node.is-cur .war-ring {
+  animation: warPulse 1.7s ease-out infinite;
+}
+#grp-war .war-core {
+  transform: scale(var(--core-s, 1));
+}
+#grp-war .war-core.t0 { --core-s: 0.85; }
+#grp-war .war-core.t1 { --core-s: 1; }
+#grp-war .war-core.t2 { --core-s: 1.2; }
+#grp-war .war-core.t3 { --core-s: 1.45; }
+#grp-war .war-diamond {
+  stroke: #f6f1e6;
+  stroke-width: 1.1;
+}
+
+@keyframes warPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+/* --- battle name labels (当前步战名牌) --- */
+#grp-war .war-lbl {
+  pointer-events: none;
+}
+#grp-war .war-lbl-text {
+  font-family: var(--serif-stack, Georgia, serif);
+  font-size: 12.5px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #f6f1e6;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+/* --- campaign card (#war-card, 与 #journey-card 同槽互斥) --- */
+#war-card {
+  position: absolute;
+  left: 14px;
+  bottom: 26px;
+  z-index: 8;
+  width: min(340px, calc(100% - 28px));
+  border-radius: 10px;
+  border: 1px solid rgba(181, 69, 47, 0.36);
+  background: rgba(248, 243, 233, 0.96);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(36, 28, 20, 0.18);
+  overflow: hidden;
+  animation: warCardIn 0.32s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+#viewport-frame.is-camera-moving #war-card {
+  animation: none;
+}
+
+@keyframes warCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.war-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(90, 74, 58, 0.15);
+  cursor: pointer;
+  user-select: none;
+}
+.war-title {
+  font-family: var(--serif-stack, Georgia, serif);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text-primary, #33261c);
+  letter-spacing: 0.02em;
+}
+.war-years {
+  font-family: var(--sans-stack, sans-serif);
+  font-size: 11px;
+  color: var(--text-secondary, #7a6a55);
+  white-space: nowrap;
+}
+.war-fold {
+  margin-left: auto;
+  border: 1px solid var(--hairline, rgba(90, 74, 58, 0.25));
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-secondary, #7a6a55);
+  width: 22px;
+  height: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.18s;
+}
+.war-card-folded .war-fold,
+#war-card.is-folded .war-fold {
+  transform: rotate(-90deg);
+}
+
+.war-body {
+  padding: 8px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  max-height: min(58vh, 430px);
+  overflow-y: auto;
+}
+#war-card.is-folded .war-body {
+  display: none;
+}
+
+.war-sides {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+}
+.war-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--sans-stack, sans-serif);
+  font-size: 11.5px;
+  color: var(--text-primary, #33261c);
+}
+.war-side i {
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  display: inline-block;
+  border: 1px solid rgba(36, 28, 20, 0.28);
+}
+
+.war-narr {
+  font-family: var(--sans-stack, sans-serif);
+  font-size: 12.2px;
+  line-height: 1.62;
+  color: var(--text-primary, #33261c);
+}
+.war-narr b {
+  color: var(--vermilion, #b5452f);
+}
+
+/* 兵力对比条（附史料出处 tooltip） */
+.war-fbars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border: 1px solid rgba(90, 74, 58, 0.14);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.5);
+}
+.war-fbars-head {
+  font-family: var(--sans-stack, sans-serif);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary, #7a6a55);
+}
+.war-fbar-row {
+  display: grid;
+  grid-template-columns: 88px 1fr 62px;
+  align-items: center;
+  gap: 7px;
+}
+.war-fbar-name {
+  font-family: var(--sans-stack, sans-serif);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.war-fbar-track {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(90, 74, 58, 0.12);
+  overflow: hidden;
+}
+.war-fbar-bar {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  opacity: 0.82;
+}
+.war-fbar-bar.is-claimed {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.55) 0 3px,
+    transparent 3px 6px
+  );
+  opacity: 0.55;
+}
+.war-fbar-bar.is-est {
+  opacity: 0.62;
+}
+.war-fbar-num {
+  font-family: var(--sans-stack, sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--text-primary, #33261c);
+  white-space: nowrap;
+}
+
+.war-steps {
+  display: flex;
+  flex-direction: column;
+  max-height: 148px;
+  overflow-y: auto;
+  border-top: 1px solid rgba(90, 74, 58, 0.12);
+}
+.war-step {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4.5px 4px;
+  font-family: var(--sans-stack, sans-serif);
+  font-size: 11.8px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.war-step:hover {
+  background: rgba(181, 69, 47, 0.08);
+}
+.war-step .wy {
+  font-weight: 700;
+  font-size: 10.5px;
+  min-width: 30px;
+  text-align: right;
+}
+.war-step .wt {
+  color: var(--text-primary, #33261c);
+}
+.war-step.is-cur {
+  background: rgba(181, 69, 47, 0.12);
+}
+.war-step.is-cur .wt {
+  font-weight: 700;
+  color: var(--vermilion, #b5452f);
+}
+
+.war-ctrl {
+  display: flex;
+  gap: 6px;
+}
+.war-btn {
+  flex: 1;
+  padding: 5.5px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--hairline, rgba(90, 74, 58, 0.25));
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-primary, #33261c);
+  font-family: var(--sans-stack, sans-serif);
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: border-color 0.14s, color 0.14s;
+}
+.war-btn:hover {
+  border-color: var(--vermilion, #b5452f);
+  color: var(--vermilion, #b5452f);
+}
+.war-btn.is-play {
+  background: var(--vermilion, #b5452f);
+  border-color: var(--vermilion, #b5452f);
+  color: #fffaf2;
+  font-weight: 700;
+}
+.war-btn.is-play:hover {
+  color: #fffaf2;
+  filter: brightness(1.06);
+}
+
+.war-foot {
+  font-family: var(--sans-stack, sans-serif);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--text-secondary, #7a6a55);
+}
+
+@media (max-width: 900px) {
+  #war-card {
+    width: calc(100% - 20px);
+    left: 10px;
+    bottom: 14px;
+  }
+  .war-fbar-row {
+    grid-template-columns: 72px 1fr 54px;
+  }
+}
