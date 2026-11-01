@@ -484,7 +484,10 @@
       const sig = [this.locale, w.key, idx, folded ? 1 : 0].join('|');
       if (sig === this._warCardSig) {
         const btn = card.querySelector('[data-act="play"]');
-        if (btn) btn.textContent = this._warPlayTimer ? this._warTxt('pause') : this._warTxt('play');
+        if (btn) {
+          btn.textContent = this._warPlayTimer ? '❚❚' : '▶';
+          btn.title = this._warPlayTimer ? this._warTxt('pause') : this._warTxt('play');
+        }
         return;
       }
       this._warCardSig = sig;
@@ -496,14 +499,20 @@
         .map((sd) => `<span class="war-side"><i style="background:${sd.color}"></i>${esc(this._warField(sd, 'name'))}</span>`)
         .join('');
       const step = idx >= 0 ? w.steps[idx] : null;
+      const zi = this._warZoneIndex(w);
+      const zone = zi >= 0 ? (w.zones || [])[zi] : null;
+      const zoneNoteHtml =
+        idx >= 0 && zone
+          ? `<span class="war-zone-note">◈ ${esc(this._warTxt('zone'))} · ${esc(
+              this.locale === 'en' ? this._warField(zone, 'note') : zone.noteZh
+            )}</span>`
+          : '';
       const narrHtml = idx < 0
         ? `<b>${this.formatYear(w.span[0])}</b> · ${esc(this._warTxt('upcoming'))}`
         : `<b>${this.formatYear(step.y)} · ${esc(this._warStepTitle(w, step))}</b><br>${esc(
             this._warField(step.battles && step.battles[0] ? step.battles[0] : (step.moves || [])[0] || {}, 'desc') ||
               this._warField(step.moves && step.moves[0] ? step.moves[0] : {}, 'desc')
-          )}`;
-      const zi = this._warZoneIndex(w);
-      const zone = zi >= 0 ? (w.zones || [])[zi] : null;
+          )}${zoneNoteHtml}`;
       const listHtml = (w.steps || [])
         .map((s, i) => {
           const b0 = (s.battles || [])[0];
@@ -527,14 +536,15 @@
         (idx >= 0 ? this._warForceBarsHtml(w, step) : '') +
         `<div class="war-steps">${listHtml}</div>` +
         `<div class="war-ctrl">` +
-        `<button class="war-btn is-ico" data-act="prev" title="${esc(this._warTxt('prev'))}">◀</button>` +
-        `<button class="war-btn is-play" data-act="play">${this._warPlayTimer ? esc(this._warTxt('pause')) : '▶ ' + esc(this._warTxt('play'))}</button>` +
-        `<button class="war-btn is-ico" data-act="next" title="${esc(this._warTxt('next'))}">▶</button>` +
-        `<span class="war-ctrl-gap"></span>` +
         `<button class="war-btn is-ico" data-act="rewind" title="${esc(this._warTxt('rewind'))}">⟲</button>` +
+        `<button class="war-btn is-ico" data-act="prev" title="${esc(this._warTxt('prev'))}">◀</button>` +
+        `<button class="war-btn is-play" data-act="play" title="${this._warPlayTimer ? esc(this._warTxt('pause')) : esc(this._warTxt('play'))}">${this._warPlayTimer ? '❚❚' : '▶'}</button>` +
+        `<button class="war-btn is-ico" data-act="next" title="${esc(this._warTxt('next'))}">▶</button>` +
+        `<span class="war-stepcount">${Math.max(0, idx + 1)} / ${w.steps.length}</span>` +
+        `<span class="war-ctrl-gap"></span>` +
         `<button class="war-btn is-ico is-speed" data-act="speed" title="${esc(this._warTxt('speed'))}">${this._warPlaySpeed || 1}×</button>` +
         `</div>` +
-        `<div class="war-foot">${esc(this._warTxt('foot'))}${zone && zone.noteZh ? ' · ' + esc(this.locale === 'en' ? this._warField(zone, 'note') : zone.noteZh) : ''}</div>` +
+        `<div class="war-foot">${esc(this._warTxt('foot'))}</div>` +
         `</div>`;
       card.classList.remove('is-hidden');
       if (prevScroll) {
@@ -562,6 +572,7 @@
         upcoming: zh ? '大战将启——拖动时间轴或点"播放"逐步推进战局。' : 'The campaign is about to begin — drag the timeline or press Play.',
         fold: zh ? '折叠/展开战报' : 'Fold/unfold the report',
         foot: zh ? '路线与控制区为示意复原 · 兵力附出处（实录 / 号称 / 约数） · ◆ 战役点按得手方着色' : 'Routes & zones are schematic · strengths sourced (recorded / claimed / approx.) · ◆ diamonds colored by the winning side',
+        zone: zh ? '当前控制区' : 'Front line',
         jumpHint: zh ? '点击跳到该步' : 'Click to jump to this step',
         speed: zh ? '播放速度' : 'Playback speed',
         rewind: zh ? '回到战役起点，从头完整重放' : 'Back to step zero and replay the whole campaign',
@@ -577,7 +588,10 @@
       this._warPlayTimer = null;
       const card = this._warCardEl();
       const btn = card && card.querySelector('[data-act="play"]');
-      if (btn) btn.textContent = '▶ ' + this._warTxt('play');
+      if (btn) {
+        btn.textContent = '▶';
+        btn.title = this._warTxt('play');
+      }
     }
 
     _warSeekTo(y) {

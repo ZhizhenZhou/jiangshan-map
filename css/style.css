@@ -5565,16 +5565,39 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   color: var(--vermilion);
 }
 .war-btn.is-play {
-  flex: 1;
-  padding: 5.5px 10px;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
   background: var(--vermilion);
   color: #fffaf2;
-  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .war-btn.is-play:hover {
   background: var(--vermilion);
   color: #fffaf2;
-  filter: brightness(1.05);
+  filter: brightness(1.06);
+}
+.war-stepcount {
+  flex: 0 0 auto;
+  margin-left: 4px;
+  font-family: var(--sans-stack);
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.war-zone-note {
+  display: block;
+  margin-top: 5px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
 }
 
 .war-foot {
