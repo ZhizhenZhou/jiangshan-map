@@ -606,4 +606,96 @@ window.WAR_DATA = [
       },
     ],
   },
+  {
+    key: 'jiawu',
+    titleZh: '甲午战争',
+    titleEn: 'The First Sino-Japanese War',
+    span: [1894, 1895],
+    descZh: '光绪二十年夏，战端起于丰岛海面：平壤溃、黄海失、旅顺屠、威海覆——三十年洋务自强的家底，一战见底。',
+    descEn: 'War broke out off Feng Island in 1894: Pyongyang, the Yalu, Port Arthur, Weihaiwei — thirty years of self-strengthening settled in a single campaign.',
+    sides: [
+      { key: 'japan', nameZh: '日本军', nameEn: 'Japanese forces', color: '#a03a35' },
+      { key: 'qing', nameZh: '清军（北洋）', nameEn: 'Qing forces (Beiyang)', color: '#356b6e' },
+    ],
+    zones: [
+      {
+        y: 1894.55, side: 'japan',
+        rings: [[[125.4, 37.0], [127.3, 36.9], [127.5, 38.6], [126.4, 39.9], [125.3, 39.4], [125.2, 38.2]]],
+        noteZh: '日军据朝鲜西海岸，兵临平壤', noteEn: 'Japan holds Korea\'s west coast up to Pyongyang',
+      },
+      {
+        y: 1894.9, side: 'japan',
+        rings: [[[124.9, 34.4], [129.6, 34.9], [129.7, 40.3], [126.5, 40.6], [124.7, 40.0], [124.6, 38.5], [125.2, 35.6]]],
+        noteZh: '平壤溃后日军下朝鲜全境，制海权尽失', noteEn: 'All of Korea falls; the sea is Japanese',
+      },
+      {
+        y: 1894.98, side: 'japan',
+        rings: [[[121.0, 38.2], [125.2, 38.3], [125.3, 40.5], [121.4, 40.6], [120.8, 39.4]]],
+        noteZh: '辽东走廊：金州、大连、旅顺相继陷落', noteEn: 'The Liaodong corridor: Jinzhou, Dalian, Lüshun',
+      },
+      {
+        y: 1895.12, side: 'japan',
+        rings: [[[120.6, 36.9], [122.9, 36.9], [123.0, 38.0], [121.9, 38.1], [120.7, 37.7]]],
+        noteZh: '荣成登陆，威海卫成瓮中之鳖', noteEn: 'Landing at Rongcheng; Weihaiwei encircled',
+      },
+    ],
+    steps: [
+      {
+        y: 1894.56,
+        battles: [{ side: 'japan', at: [126.35, 36.62], nameZh: '丰岛海战', nameEn: 'Action off Feng Island', placeZh: '朝鲜丰岛海面', placeEn: 'Off Pungdo, Korea',
+          descZh: '六月二十一日，日舰浪速号突袭清军运兵船，击沉高升号、俘操江号——七百余淮军殉海，不宣而战。',
+          descEn: 'The cruiser Naniwa ambushed the troop convoy, sinking the Kowshing with over 700 men aboard — war without a declaration.' }],
+      },
+      {
+        y: 1894.59,
+        battles: [{ side: 'japan', at: [127.05, 36.75], nameZh: '成欢之战', nameEn: 'The fight at Seonghwan', placeZh: '朝鲜牙山', placeEn: 'Asan, Korea',
+          descZh: '日军混成旅团夜袭牙山清军大岛营垒，聂士成败走——叶志超绕道汉城北奔平壤，朝鲜西海岸门户尽失。',
+          descEn: 'A night assault scattered Nie Shicheng\'s camp at Asan; Ye Zhichao slipped north to Pyongyang, abandoning Korea\'s west coast.' }],
+      },
+      {
+        y: 1894.6, titleZh: '七月初一，两国宣战', titleEn: 'War declared',
+        descZh: '七月初一，光绪帝下诏宣战；同日明治天皇亦下宣战诏书——「以万国公法为例」，师出各有其名。甲午战争正式开场。',
+        descEn: 'On the same first day of the seventh month both the Guangxu and Meiji emperors declared war — each claiming law and civilization.' },
+      {
+        y: 1894.7,
+        battles: [{ side: 'japan', at: [125.75, 39.03], nameZh: '平壤之战', nameEn: 'The battle of Pyongyang', placeZh: '朝鲜平壤', placeEn: 'Pyongyang, Korea',
+          forces: [
+            { side: 'qing', n: 15000, quality: 'est', srcZh: '清军入朝各营合计约一万五千人（营官史料汇总）', srcEn: 'Qing garrison ~15,000 (unit returns).' },
+            { side: 'japan', n: 16000, quality: 'est', srcZh: '日军第一军混成旅团约一万六千人', srcEn: 'Japanese First Army column ~16,000.' },
+          ],
+          descZh: '日军四路合围平壤，玄武门、牡丹台血战竟日；左宝贵登城死战殉国——总兵叶志超悬白旗弃城，五百里溃逃回国。左宝贵战死后，平壤一日而失。',
+          descEn: 'Four Japanese columns stormed the walls; Zuo Baogui died on the gate tower — and Ye Zhichao hoisted the white flag, fleeing 500 li home in a day.' }],
+      },
+      {
+        y: 1894.71,
+        battles: [{ side: 'japan', at: [123.53, 39.52], nameZh: '黄海海战', nameEn: 'The battle of the Yalu (Yellow Sea)', placeZh: '鸭绿江口大东沟海面', placeEn: 'Off the Yalu mouth',
+          descZh: '大东沟海面，两支装甲舰队第一次铁甲对决——北洋十二艘对联合舰队十二艘（recorded），日舰纵队机动、速射炮倾泻，致远舰管带邓世昌弹尽冲撞吉野，全舰殉海。北洋损五舰，制海权自此拱手。',
+          descEn: 'The first clash of ironclad fleets in formation: twelve Beiyang warships against twelve Japanese (recorded) — Japanese line tactics and quick-fire guns sank five Beiyang ships; Deng Shichang died ramming the Yoshino. The sea was lost.' }],
+      },
+      {
+        y: 1894.83,
+        moves: [{ side: 'japan', from: [125.75, 39.03], to: [121.24, 38.81],
+          path: [[125.75, 39.03], [124.6, 40.2], [122.4, 39.9], [121.24, 38.81]],
+          titleZh: '跨鸭绿江，两路犯辽东', titleEn: 'Across the Yalu into Liaodong',
+          descZh: '日军第一军渡鸭绿江破虎山清军防线，第二军自花园口登陆——金州、大连湾相继失守，旅顺后路被抄。',
+          descEn: 'The First Army crossed the Yalu while the Second landed at Huayuankou; Jinzhou and Dalian fell in succession, turning Lüshun\'s flank.' }],
+      },
+      {
+        y: 1894.94,
+        battles: [{ side: 'japan', at: [121.24, 38.81], nameZh: '旅顺陷落', nameEn: 'The fall of Lüshun', placeZh: '今大连旅顺', placeEn: 'Lüshun (Port Arthur)',
+          descZh: '「东亚第一要塞」经营十六年、炮台三十余座——日军四日而下，继以四天三夜屠城，全城两万人存者仅三十六人。「远东第一军港」成修罗场。',
+          descEn: 'Sixteen years of fortress-building fell in four days, followed by a three-day massacre — of 20,000 inhabitants, 36 survived.' }],
+      },
+      {
+        y: 1895.08,
+        battles: [{ side: 'japan', at: [122.12, 37.51], nameZh: '威海卫之战，北洋覆没', nameEn: 'Weihaiwei; the fleet\'s end', placeZh: '今山东威海', placeEn: 'Weihaiwei, Shandong',
+          descZh: '日军荣成湾登陆抄后路，水陆夹击刘公岛——丁汝昌困守月余，援军绝望，服鸦片自尽；北洋舰队十二舰尽数损失，「洋务自强」的三十岁生日，在刘公岛的降旗上结束。',
+          descEn: 'Landing at Rongcheng, the Japanese closed the pincers on Liugong Island; Adm. Ding Ruchang took opium rather than surrender, and the Beiyang fleet ceased to exist.' }],
+      },
+      {
+        y: 1895.25, titleZh: '马关条约', titleEn: 'The Treaty of Shimonoseki',
+        descZh: '光绪二十一年三月，李鸿章与伊藤博文签《马关条约》于马关春帆楼：割台湾、澎湖、辽东（三国干涉还辽），赔款二万万两——甲午一役，赔款抵得上当时国家岁入三倍。',
+        descEn: 'Li Hongzhang and Ito Hirobumi signed at Shimonoseki: Taiwan and the Pescadores ceded, 200 million taels indemnified — three years of the state\'s entire revenue.' },
+    ],
+  },
 ];
