@@ -76,6 +76,8 @@
     }
 
     _warStepTitle(w, s) {
+      // 叙事步（无 battle/move，如"反间换将""宣战"）可直接带 step 级标题
+      if (s.titleZh || s.titleEn) return this._warField(s, 'title') || '';
       const b = (s.battles || [])[0];
       if (b) return this._warField(b, 'name') || this._warField(b, 'title') || '';
       const m = (s.moves || [])[0];
@@ -516,7 +518,7 @@
       const listHtml = (w.steps || [])
         .map((s, i) => {
           const b0 = (s.battles || [])[0];
-          const side = this._warSide(w, b0 ? b0.side : (s.moves || [])[0].side);
+          const side = this._warSide(w, b0 ? b0.side : ((s.moves || [])[0] || {}).side);
           return (
             `<div class="war-step${i === idx ? ' is-cur' : ''}" data-act="step" data-idx="${i}">` +
             `<span class="wy" style="color:${side.color}">${this.formatYear(s.y, true)}</span>` +
