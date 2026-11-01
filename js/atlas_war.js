@@ -186,6 +186,50 @@
       return coord;
     }
 
+    _cancelWarDraws() {
+      (this._warDrawRafs || []).forEach((h) => cancelAnimationFrame(h));
+      this._warDrawRafs = [];
+    }
+
+    // 当前步行军箭头从起点渐进画到终点：rAF 逐帧写 dashoffset。
+    // 不用 CSS 动画——is-camera-moving 守卫会杀掉它，导致飞行期间箭头
+    // 消失、飞完从头重画（用户看到的"中断"）。rAF 不受该守卫影响，
+    // 相机飞行与绘制并行（西点战史片的标准观感）。底衬与彩线同一节奏。
+    _startWarDraw(casing, p, dirG, drawMs) {
+      const reduced = reducedMotion();
+      let L = 0;
+      try {
+        L = typeof p.getTotalLength === 'function' ? p.getTotalLength() : 0;
+      } catch (e) {
+        L = 0;
+      }
+      if (!(L > 2) || reduced) {
+        for (const q of [casing, p]) q.style.strokeDashoffset = '0';
+        if (dirG) dirG.classList.add('is-arrived');
+        return;
+      }
+      for (const q of [casing, p]) {
+        q.style.strokeDasharray = `${L.toFixed(1)}`;
+        q.style.strokeDashoffset = `${L.toFixed(1)}`;
+      }
+      const t0 = performance.now();
+      const ease = (k) => 1 - Math.pow(1 - k, 3);
+      const stepFn = (now) => {
+        const k = Math.min(1, (now - t0) / drawMs);
+        const off = (L * (1 - ease(k))).toFixed(1);
+        casing.style.strokeDashoffset = off;
+        p.style.strokeDashoffset = off;
+        if (k < 1) {
+          const h = requestAnimationFrame(stepFn);
+          this._warDrawRafs.push(h);
+        } else if (dirG) {
+          dirG.classList.add('is-arrived');
+        }
+      };
+      const h = requestAnimationFrame(stepFn);
+      this._warDrawRafs.push(h);
+    }
+
     _renderWarSvg(w, idx, zi) {
       const grp = this._warGroup();
       if (!grp) return;
@@ -203,6 +247,7 @@
         this.hoverTip.classList.add('is-hidden');
         this.hoverTip.classList.remove('is-interactive');
       }
+      this._cancelWarDraws();
       grp.innerHTML = '';
       this._warUsedSpots = {};
 
@@ -267,6 +312,26 @@
           if (!info) continue;
           const tier = mv.force ? this._warForceTier(mv.force.n) : 0;
           const claimed = mv.force && mv.force.quality === 'claimed';
+          // directional chevron at the DESTINATION tip, angled along the final leg
+          let dir = null;
+          if (info.endX !== null) {
+            dir = this._svgNode(
+              'g',
+              {
+                class: `war-dir t${tier}${isCur ? ' is-cur' : ''}`,
+                'data-x': info.endX.toFixed(1),
+                'data-y': info.endY.toFixed(1),
+                'data-rot': info.endAngleDeg.toFixed(1),
+              },
+              g
+            );
+            dir.style.color = side.color;
+            this._svgNode(
+              'path',
+              { d: 'M-7 -5.2L8 0L-7 5.2L-3 0Z', class: 'war-chevron' },
+              dir
+            );
+          }
           // 浅色底衬把彩色箭头从繁杂地形里托出来（宣纸制图惯例）
           const casing = this._svgNode(
             'path',
@@ -279,44 +344,11 @@
             { d: info.d, class: cls, stroke: side.color },
             g
           );
-          // 当前步行军箭头从起点渐进画向终点（底衬同步绘制，否则会露出
-          // 一条全长白色预铺线——用户看到的"头部变白后变彩色"正是它）；
-          // reduced-motion 直接呈现
-          if (isCur && !claimed && typeof p.getTotalLength === 'function') {
-            try {
-              const L = p.getTotalLength();
-              if (L > 2 && !reducedMotion()) {
-                for (const q of [casing, p]) {
-                  q.style.strokeDasharray = `${L.toFixed(1)}`;
-                  q.style.strokeDashoffset = `${L.toFixed(1)}`;
-                  q.style.animation = `warMarchDraw ${drawMs}ms cubic-bezier(0.3,0.6,0.35,1) forwards`;
-                }
-              }
-            } catch (e) {
-              /* drawing reveal is cosmetic */
-            }
+          if (isCur && !claimed) {
+            this._startWarDraw(casing, p, dir, drawMs);
           }
-          // directional chevron at the DESTINATION tip, angled along the final leg
-          if (info.endX === null) continue;
-          const dir = this._svgNode(
-            'g',
-            {
-              class: `war-dir t${tier}${isCur ? ' is-cur' : ''}`,
-              'data-x': info.endX.toFixed(1),
-              'data-y': info.endY.toFixed(1),
-              'data-rot': info.endAngleDeg.toFixed(1),
-            },
-            g
-          );
-          dir.style.color = side.color;
-          if (isCur && !claimed && !reducedMotion()) {
-            dir.style.setProperty('--war-chev-delay', `${drawMs}ms`);
-          }
-          this._svgNode(
-            'path',
-            { d: 'M-7 -5.2L8 0L-7 5.2L-3 0Z', class: 'war-chevron' },
-            dir
-          );
+          // dir 创建于线之下，重挂到顶层保证楔形头盖住线端
+          if (dir) g.appendChild(dir);
         }
       }
 

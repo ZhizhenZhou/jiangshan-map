@@ -5234,20 +5234,14 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 #grp-war .war-dir.t2 { --dir-s: 1.95; }
 #grp-war .war-dir.t3 { --dir-s: 2.45; }
 #grp-war .war-dir.is-cur .war-chevron {
-  opacity: 1;
-  animation: warChevPop 240ms cubic-bezier(0.3, 0.7, 0.4, 1.15) both;
-  animation-delay: var(--war-chev-delay, 0ms);
+  opacity: 0;
+  transform: scale(calc(var(--dir-s, 1) * 0.4));
 }
-
-@keyframes warChevPop {
-  from {
-    opacity: 0;
-    transform: scale(calc(var(--dir-s, 1) * 0.4));
-  }
-  to {
-    opacity: 1;
-    transform: scale(var(--dir-s, 1));
-  }
+/* 绘制完成由 JS 加 .is-arrived（rAF 驱动，不受 is-camera-moving 守卫影响） */
+#grp-war .war-dir.is-cur.is-arrived .war-chevron {
+  opacity: 1;
+  transform: scale(var(--dir-s, 1));
+  transition: opacity 200ms ease-out, transform 230ms cubic-bezier(0.3, 0.7, 0.4, 1.15);
 }
 
 /* --- battle diamonds (战役点 · 同址微散在 JS 侧) --- */
