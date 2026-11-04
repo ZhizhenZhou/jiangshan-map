@@ -22,6 +22,11 @@
   const TIER_SCALES = [0.9, 1.1, 1.35, 1.65]; // battle-diamond core scales
   const WEDGE_D = "M-5.5 -3.8L6.5 0L-5.5 3.8L-2.4 0Z"; // 楔形头（12px 级，随档位缩放）
   const WEDGE_SCALES = [1, 1.15, 1.35, 1.6];  // 楔形头档位缩放（骑乘与静态共用）
+  const WAR_ICONS = {
+    rewind: '<svg class="wico" viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 2.5A5.5 5.5 0 1 0 13.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13.8 3.2v3.3h-3.3z" fill="currentColor"/></svg>',
+    prev: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M11.5 3v10L4.5 8z" fill="currentColor"/><rect x="12.3" y="3" width="1.8" height="10" fill="currentColor"/></svg>',
+    next: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4.5 3v10l7-5z" fill="currentColor"/><rect x="1.9" y="3" width="1.8" height="10" fill="currentColor"/></svg>',
+  };
 
   // 相机视野标定（全局唯一换算，无每战役特调）：
   // 投影画布 1000×700 用户单位覆盖东经 66°–142°（76°），即 1° 经度 = 13.16 单位。
@@ -583,11 +588,11 @@
         (idx >= 0 ? this._warForceBarsHtml(w, step) : '') +
         `<div class="war-steps">${listHtml}</div>` +
         `<div class="war-ctrl">` +
-        `<button class="war-btn is-ico" data-act="rewind" title="${esc(this._warTxt('rewind'))}">⟲</button>` +
-        `<button class="war-btn is-ico" data-act="prev" title="${esc(this._warTxt('prev'))}">◀</button>` +
+        `<button class="war-btn is-ico" data-act="rewind" title="${esc(this._warTxt('rewind'))}">${WAR_ICONS.rewind}</button>` +
+        `<button class="war-btn is-ico" data-act="prev" title="${esc(this._warTxt('prev'))}">${WAR_ICONS.prev}</button>` +
         `<button class="war-btn is-play" data-act="play" title="${this._warPlayTimer ? esc(this._warTxt('pause')) : esc(this._warTxt('play'))}">${this._warPlayTimer ? '❚❚' : '▶'}</button>` +
-        `<button class="war-btn is-ico" data-act="next" title="${esc(this._warTxt('next'))}">▶</button>` +
-        `<span class="war-stepcount">${Math.max(0, idx + 1)} / ${w.steps.length}</span>` +
+        `<button class="war-btn is-ico" data-act="next" title="${esc(this._warTxt('next'))}">${WAR_ICONS.next}</button>` +
+        `<span class="war-stepcount">${Math.max(0, idx + 1)}<i>/</i>${w.steps.length}</span>` +
         `<span class="war-ctrl-gap"></span>` +
         `<button class="war-btn is-ico is-speed" data-act="speed" title="${esc(this._warTxt('speed'))}">${this._warPlaySpeed || 1}×</button>` +
         `</div>` +
@@ -635,10 +640,7 @@
       this._warPlayTimer = null;
       const card = this._warCardEl();
       const btn = card && card.querySelector('[data-act="play"]');
-      if (btn) {
-        btn.textContent = '▶';
-        btn.title = this._warTxt('play');
-      }
+      this._syncWarPlayGlyph();
     }
 
     _warSeekTo(y) {
@@ -755,6 +757,18 @@
         this._stopWarPlay();
         return;
       }
+      // 已在末步时按播放 → 从头播放（修复 yutu 末步空转）
+      let start = this._warStepIndex(w) + 1;
+      if (start >= w.steps.length) start = 0;
+      this._gotoWarStep(w, start, { gentle: true });
+      this._startWarInterval(w);
+    }
+
+    // 定时推进器：rewind 与 play 共用。rewind 先 goto step 0 再启动定时器，
+    // 第一步完整展示一个间隔后才推进（此前 rewind 直接从 idx+1 起跳，
+    // 首步被瞬时跳过——用户报告的"重播 bug"）。
+    _startWarInterval(w) {
+      if (this._warPlayTimer) clearInterval(this._warPlayTimer);
       const speed = this._warPlaySpeed || 1;
       this._warPlayTimer = setInterval(() => {
         const w2 = this._activeWar();
@@ -769,10 +783,17 @@
         }
         this._gotoWarStep(w2, i, { gentle: true });
       }, PLAY_INTERVAL / speed);
-      // 已在末步时按播放 → 从头播放（修复 yutu 末步空转）
-      let start = this._warStepIndex(w) + 1;
-      if (start >= w.steps.length) start = 0;
-      this._gotoWarStep(w, start, { gentle: true });
+      // 启动即同步播放钮图标（否则要等下一次重建才变 ❚❚）
+      this._syncWarPlayGlyph();
+    }
+
+    _syncWarPlayGlyph() {
+      const btn = this._warCardEl && this._warCardEl();
+      const b = btn && btn.querySelector(String.raw`[data-act="play"]`);
+      if (b) {
+        b.textContent = this._warPlayTimer ? '❚❚' : '▶';
+        b.title = this._warPlayTimer ? this._warTxt('pause') : this._warTxt('play');
+      }
     }
 
     _cycleWarSpeed() {
@@ -817,10 +838,13 @@
           return;
         }
         if (a === 'rewind') {
-          // 回到战役起点并从第一步开始完整重放（含蓝轴登场）
+          // 回到战役起点：先展示第 0 步一个完整间隔，再逐帧推进
+          //（此前借道 _toggleWarPlay 会立刻跳到第 1 步，首步从未展示）
           this._stopWarPlay();
           this._gotoWarStep(w, 0, { gentle: true });
-          this._toggleWarPlay();
+          this._warCardSig = null;
+          this._renderWarCard(w, 0);
+          this._startWarInterval(w);
           return;
         }
         this._stopWarPlay();
