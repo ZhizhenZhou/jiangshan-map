@@ -1275,4 +1275,124 @@ window.WAR_DATA = [
       },
     ],
   },
+  {
+    key: 'julu',
+    titleZh: '巨鹿之战',
+    titleEn: 'The battle of Julu',
+    span: [-208, -206],
+    descZh: '秦二世三年，王离围巨鹿、章邯军棘原——项羽杀宋义，破釜沉舟持三日粮，九战九捷虏王离。诸侯作壁上观，战后「入辕门，无不膝行而前」。',
+    descEn: 'Xiang Yu smashed the cauldrons, burned the huts and marched on three days\' rations — nine battles, nine victories, and the feudal lords crawled on their knees into his gate.',
+    sides: [
+      { key: 'chu', nameZh: '楚军（项羽）', nameEn: 'Chu army (Xiang Yu)', color: '#a8442f' },
+      { key: 'qin', nameZh: '秦军（王离·章邯）', nameEn: 'Qin army (Wang Li · Zhang Han)', color: '#2f4858' },
+    ],
+    zones: [
+      {
+        y: -207.95, side: 'qin',
+        rings: [[[114.0, 36.0], [115.6, 36.1], [116.0, 37.6], [114.6, 37.9], [113.8, 36.8]]],
+        noteZh: '王离围巨鹿，章邯军棘原筑甬道输粮', noteEn: 'Wang Li besieges Julu; Zhang Han guards the grain road',
+      },
+      {
+        y: -207.2, side: 'chu',
+        rings: [[[113.6, 35.8], [115.9, 35.9], [116.3, 37.7], [114.5, 38.1], [113.5, 36.9]]],
+        noteZh: '楚军九战九捷，诸侯军皆属项羽', noteEn: 'Nine victories; the lords all submit to Chu',
+      },
+    ],
+    steps: [
+      {
+        y: -207.95, titleZh: '定陶之败，章邯北攻赵', titleEn: 'After Dingtao, Qin turns on Zhao',
+        descZh: '章邯夜袭定陶，项梁战死——「将士皆栗」。章邯以为楚地不足忧，引兵北渡河击赵，王离长城军南下合围：赵王歇与张耳入巨鹿城，被围月余，陈馀壁其北，诸侯救兵莫敢击。',
+        descEn: 'Xiang Liang died at Dingtao; Zhang Han turned north, and with Wang Li\'s Great Wall army besieged Julu — every relief army watched from behind its own walls.',
+      },
+      {
+        y: -207.4,
+        moves: [{ side: 'chu', from: [113.2, 34.4], to: [115.04, 37.22],
+          titleZh: '杀宋义，破釜沉舟', titleEn: 'Smashing the cauldrons',
+          force: { n: 50000, quality: 'est', srcZh: '楚军五万（《汉纪》载"五万"对秦四十万；项羽所部兵力通行估计）', srcEn: '~50,000 Chu troops (HANJI figure; scholarly consensus).' },
+          descZh: '项羽晨朝上将军宋义，即帐中斩之——「国家安危，在此一举」。乃引兵悉渡河，皆沉船，破釜甑，烧庐舍，持三日粮，以示士卒必死，无一还心。',
+          descEn: 'Xiang Yu beheaded Song Yi in his own tent, crossed the Zhang, and sank every boat — three days of rations, no way home.' }],
+      },
+      {
+        y: -207.3,
+        battles: [{ side: 'chu', at: [115.04, 37.22], nameZh: '九战九捷，虏王离', nameEn: 'Nine battles, nine victories', placeZh: '今河北平乡（巨鹿）', placeEn: 'Julu, Hebei',
+          forces: [
+            { side: 'qin', n: 200000, quality: 'est', srcZh: '王离长城军约二十万（《汉纪》"秦四十万"含章邯部；总数存争议）', srcEn: 'Wang Li\'s ~200,000 (with Zhang Han, "400,000" per HANJI — debated).' },
+            { side: 'chu', n: 50000, quality: 'est', srcZh: '楚军五万（通说）', srcEn: '~50,000 Chu troops.' },
+          ],
+          descZh: '楚战士无不一以当十，呼声动天——九战，绝甬道，大破之，杀苏角，虏王离；涉间不降，自烧杀。诸侯将救巨鹿者十余壁，莫敢纵兵——及楚击秦，「诸将皆从壁上观」。',
+          descEn: 'Every Chu soldier fought ten; the grain road was cut, Su Jiao killed, Wang Li captured — while a dozen relief armies watched from their own walls.' }],
+      },
+      {
+        y: -207.25, titleZh: '诸侯膝行，莫敢仰视', titleEn: 'The lords crawl into the gate',
+        descZh: '项羽由是始为诸侯上将军，诸侯皆属焉——召见诸侯将，入辕门，「无不膝行而前，莫敢仰视」。巨鹿一战，秦军主力尽丧，项羽实为天下兵马大元帅。',
+        descEn: 'After Julu the lords crawled on their knees into Xiang Yu\'s gate — he was now generalissimo of the realm, and Qin\'s main force was gone.',
+      },
+      {
+        y: -207.1, titleZh: '章邯殷墟降楚', titleEn: 'Zhang Han surrenders at Yinxu',
+        descZh: '章邯却而棘原相持，赵高用事，使者三返不敢归——「赵高用事于中，有功亦诛，无功亦诛。」七月，章邯与诸侯军盟于殷墟，率二十万人降。新安一坑，二十万秦卒尽没——秦之亡，自坑其众始。',
+        descEn: 'With Zhao Gao killing every messenger, Zhang Han surrendered with 200,000 at Yinxu — and the twenty thousand buried at Xin\'an were Qin\'s own last army.',
+      },
+    ],
+  },
+  {
+    key: 'kunyang',
+    titleZh: '昆阳之战',
+    titleEn: 'The battle of Kunyang',
+    span: [23, 24],
+    descZh: '更始元年六月，王邑王寻「四十二万，号曰百万」围昆阳——刘秀十三骑出城搬兵，率三千敢死直冲中坚：位面之子的一战成名。',
+    descEn: 'In 23 CE Wang Yi and Wang Xun besieged Kunyang with 420,000 men. Liu Xiu slipped out with 13 riders for reinforcements — and came back to charge the command tent with 3,000.',
+    sides: [
+      { key: 'han', nameZh: '绿林军（更始）', nameEn: 'Lülin rebels (Gengshi)', color: '#2f6b52' },
+      { key: 'xin', nameZh: '新莽军', nameEn: 'Xin dynasty army', color: '#7a4a2b' },
+    ],
+    zones: [
+      {
+        y: 23.5, side: 'xin',
+        rings: [[[111.5, 32.0], [115.5, 32.0], [115.6, 34.3], [111.6, 34.4]]],
+        noteZh: '新莽大军压向宛城-昆阳一线', noteEn: 'The Xin host bears down on Wan and Kunyang',
+      },
+      {
+        y: 23.62, side: 'han',
+        rings: [[[111.5, 32.0], [115.5, 32.0], [115.6, 34.3], [111.6, 34.4]]],
+        noteZh: '昆阳一破，新莽主力尽丧，宛城随之而降', noteEn: 'Kunyang breaks the Xin host; Wan surrenders',
+      },
+    ],
+    steps: [
+      {
+        y: 23.5,
+        moves: [{ side: 'xin', from: [113.85, 34.04], to: [113.36, 33.62],
+          titleZh: '王邑王寻，四十二万围昆阳', titleEn: '420,000 close on Kunyang',
+          force: { n: 420000, quality: 'recorded', srcZh: '《后汉书·光武帝纪》："四十二万，号曰百万"', srcEn: 'Hou Hanshu: "420,000, claiming a million."' },
+          descZh: '王邑、王寻发兵四十二万（号百万），旌旗辎重千里不绝——巨无霸驱虎豹犀象之属助威。城中绿林军守者八九千，诸将惶惧欲散。',
+          descEn: '420,000 men (a million claimed), war elephants and rhinos in train — against 9,000 defenders who wanted to scatter.' }],
+      },
+      {
+        y: 23.53,
+        moves: [{ side: 'han', from: [113.36, 33.62], to: [112.55, 32.99],
+          titleZh: '刘秀十三骑夜出搬兵', titleEn: 'Thirteen riders slip out',
+          descZh: '刘秀率十三骑夜出南门收兵——城中王凤王常坚守待援。四十万大军围城如铁桶，此行九死一生。',
+          descEn: 'Liu Xiu rode out at night with thirteen riders to raise troops, leaving the walls to hold as best they could.' }],
+      },
+      {
+        y: 23.57,
+        battles: [{ side: 'xin', at: [113.36, 33.62], nameZh: '云车攻城', nameEn: 'The assault from cloud towers', placeZh: '今河南叶县', placeEn: 'Yexian, Henan',
+          descZh: '王邑军围城数十重，云车高十余丈瞰临城中，积弩乱发，矢下如雨——城中负户而汲。「严尤说邑：昆阳小城，宜先攻宛——邑曰：百万之师，所过当灭。」',
+          descEn: 'Ten-ring siege lines, cloud towers pouring bolts — the garrison hauled water behind shields while Yan Ju urged the obvious: skip the town, take Wan first.' }],
+      },
+      {
+        y: 23.58,
+        moves: [{ side: 'han', from: [112.55, 32.99], to: [113.36, 33.62],
+          titleZh: '搬兵而返，千骑冲中坚', titleEn: 'Back with a thousand riders',
+          descZh: '刘秀发郾定陵兵数千来援——自与步骑千余为前锋，去大军四五里而陈。王邑王寻轻之，自将万余人行阵，敕诸营皆毋得动——刘秀奔阵，斩数十级。',
+          descEn: 'Liu Xiu returned with a thousand riders as the tip of the spear; Wang Yi held every other camp in place and came out with just 10,000 — arrogance as tactics.' }],
+      },
+      {
+        y: 23.59,
+        battles: [{ side: 'han', at: [113.36, 33.62], nameZh: '三千敢死，直冲中坚', nameEn: '3,000 volunteers charge the center', placeZh: '今河南叶县', placeEn: 'Yexian, Henan',
+          forces: [{ side: 'xin', n: 420000, quality: 'recorded', srcZh: '《后汉书》四十二万围城，会大雷风，屋瓦皆飞', srcEn: '420,000 besiegers, felled by storm and panic.' }],
+          descZh: '刘秀复率三千敢死者，从城西水上冲其中坚——王寻留而不备，寻自将万余人阵乱，汉兵乘锐崩之，遂杀王寻。城中亦鼓噪而出，中外合势；会大雷风，屋瓦皆飞，雨下如注，滍川盛溢——虎豹皆股战，士卒争赴溺死者以万数，水为不流。',
+          descEn: 'Three thousand volunteers hit the command tent, killed Wang Xun in his own line; the town sallied, a thunderstorm burst, and the flooding river swallowed ten thousand fleeing men.' }],
+      },
+    ],
+  },
 ];
