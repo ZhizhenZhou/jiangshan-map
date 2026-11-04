@@ -216,6 +216,41 @@
       this._warDrawRafs = [];
     }
 
+    // 战术符号（楔形头/战役菱形/名签）屏幕尺寸恒定：与骑乘头同一 kScreen 全补偿。
+    // 通用 _rescaleSvgTypography 给 war 符号的是 1/√z 档（里程碑钉惯例）——
+    // 深 zoom 下符号涨 √z≈6.5 倍（楔形 150px、菱环 200px+），且与动画期恒定的
+    // 骑乘头在交接瞬间对不上（"画完爆开"）。这里在每次相机应用后覆盖 transform。
+    _warRescaleGlyphs() {
+      const svg = this.svg;
+      if (!svg || !this.camera || !this.camera.w) return;
+      const grp = this.grpWar || svg.querySelector('#grp-war');
+      if (!grp) return;
+      let rect;
+      try {
+        rect = svg.getBoundingClientRect();
+      } catch (e) {
+        return;
+      }
+      if (!rect || !rect.width) return;
+      const k = rect.width / this.camera.w;
+      if (!(k > 0)) return;
+      const s = (1 / k).toFixed(4);
+      grp
+        .querySelectorAll('g.war-node[data-x], g.war-dir[data-x], g.war-lbl[data-x]')
+        .forEach((n) => {
+          const x = n.getAttribute('data-x');
+          const y = n.getAttribute('data-y');
+          if (x === null || y === null) return;
+          const rot = n.getAttribute('data-rot');
+          n.setAttribute(
+            'transform',
+            rot !== null
+              ? `translate(${x},${y}) rotate(${rot}) scale(${s})`
+              : `translate(${x},${y}) scale(${s})`
+          );
+        });
+    }
+
     // 当前步行军箭头从起点渐进画到终点：rAF 逐帧写 dashoffset。
     // 三个踩过的坑，都在这条注释里：
     // ① CSS 动画会被 is-camera-moving 守卫杀掉（飞行中箭头消失重画）→ rAF 驱动；
@@ -225,7 +260,8 @@
     // ③ 画完立即清除 dash——否则完成后用户再缩放，固定的 dash 值又会切碎线。
     // 楔形头"骑"在生长端点上随绘制进度移动（战史动画标准做法）：
     // getPointAtLength 取当前端点 + 切线角，相机缩放时按 kScreen 反向缩放
-    // 保持屏幕尺寸恒定；画完后移除骑乘头，静态楔形在终点接管。
+    // 保持屏幕尺寸恒定；画完后移除骑乘头，静态楔形在终点接管（同为
+    // kScreen 全补偿，交接不跳变——见 _warRescaleGlyphs）。
     _startWarDraw(casing, p, dirG, rider, tier, drawMs) {
       const reduced = reducedMotion();
       if (reduced) {
@@ -414,6 +450,9 @@
               this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
             }
             this._startWarDraw(casing, p, dir, rider, tier, drawMs);
+          } else if (isCur && claimed && dir) {
+            // 号称兵力轴不播绘制动画（虚线即时呈现），楔形头直接落位
+            dir.classList.add('is-arrived');
           }
           // dir 创建于线之下，重挂到顶层保证楔形头盖住线端
           if (dir) g.appendChild(dir);
@@ -483,6 +522,8 @@
         t.style.fill = lb.color;
       }
       this._rescaleSvgTypography();
+      // 新符号由通用 rescale 定位，随后立即覆盖为屏幕恒定档
+      this._warRescaleGlyphs();
     }
 
     // ---------------- render: campaign card ----------------
@@ -871,6 +912,7 @@
             this._warSvgSig = null;
             this._syncWarOverlay();
             this._rescaleSvgTypography();
+            this._warRescaleGlyphs();
           });
           this._warChkBound = true;
         }
@@ -1264,6 +1306,8 @@
         this._syncZoomDependentState();
         this._positionWarBalloon();
         this._dedupeMilestonePins();
+        // 通用 rescale 先写 1/√z 档，这里随后覆盖为 1/kScreen 全补偿档
+        this._warRescaleGlyphs();
       } catch (e) {
         /* non-fatal */
       }

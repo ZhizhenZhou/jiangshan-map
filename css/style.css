@@ -5217,7 +5217,7 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   }
 }
 
-/* --- directional chevrons (随缩放反向定标) --- */
+/* --- directional chevrons（组 transform 由 JS _warRescaleGlyphs 按 1/kScreen 全补偿，屏幕尺寸恒定） --- */
 #grp-war .war-dir {
   pointer-events: none;
 }
