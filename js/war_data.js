@@ -1395,4 +1395,117 @@ window.WAR_DATA = [
       },
     ],
   },
+  {
+    key: 'yiling',
+    titleZh: '夷陵之战',
+    titleEn: 'The battle of Yiling',
+    span: [221, 223],
+    descZh: '章武二年，刘备倾国伐吴以报关羽——陆逊一炬，连营七百里化为灰烬。三国三大战役，以此收官：蜀汉自此再无东出之力。',
+    descEn: 'In 222 Liu Bei marched the whole state east to avenge Guan Yu; Lu Xun answered with one fire — 700 li of linked camps, and Shu would never march east again.',
+    sides: [
+      { key: 'wu', nameZh: '吴军（陆逊）', nameEn: 'Wu army (Lu Xun)', color: '#c47f1d' },
+      { key: 'shu', nameZh: '蜀军（刘备）', nameEn: 'Shu army (Liu Bei)', color: '#2f6b52' },
+    ],
+    zones: [
+      {
+        y: 222.3, side: 'shu',
+        rings: [[[110.3, 30.2], [112.4, 30.1], [112.6, 31.4], [111.2, 31.6], [110.2, 31.0]]],
+        noteZh: '蜀军出峡，据巫峡-秭归-夷道一线', noteEn: 'Shu pours through the gorges to Yidao',
+      },
+      {
+        y: 222.7, side: 'wu',
+        rings: [[[110.3, 30.2], [112.4, 30.1], [112.6, 31.4], [111.2, 31.6], [110.2, 31.0]]],
+        noteZh: '火烧连营之后，蜀军主力尽丧，退守白帝', noteEn: 'After the fire, Shu retreats to Baidi',
+      },
+    ],
+    steps: [
+      {
+        y: 221.62,
+        moves: [{ side: 'shu', from: [106.55, 29.56], to: [111.29, 30.7],
+          path: [[106.55, 29.56], [107.9, 30.3], [109.47, 31.04], [110.5, 30.95], [111.29, 30.7]],
+          titleZh: '倾国伐吴，出峡东进', titleEn: 'The state marches east',
+          force: { n: 50000, quality: 'recorded', srcZh: '《三国志·文帝纪》注引《魏书》："刘备支党四万人"加五溪蛮一万，通说五万', srcEn: 'Weishu: "40,000 of Liu Bei\'s partisans" plus 10,000 Wuxi tribesmen.' },
+          descZh: '章武元年七月，刘备不顾群臣苦谏，以关羽之仇誓师伐吴——张飞未发而死部下之手，先锋吴班冯习破吴将李异于巫、秭归。',
+          descEn: 'Against every counsel Liu Bei marched east in July; Zhang Fei died before the march began, and the vanguard took Wu and Zigui.' }],
+      },
+      {
+        y: 222.15,
+        battles: [{ side: 'wu', at: [111.29, 30.7], nameZh: '陆逊坚守夷陵', nameEn: 'Lu Xun refuses battle', placeZh: '今湖北宜昌（夷陵）', placeEn: 'Yiling, Hubei',
+          descZh: '陆逊示弱退出山地，聚兵夷道——「备缘山行军，势无展布」，一意坚守不战。两军相持半年有余，蜀军沿山连营七百里，人疲气衰。',
+          descEn: 'Lu Xun traded ground for a locked front and simply refused battle for six months, until Shu\'s 700-li string of hillside camps was tired out.' }],
+      },
+      {
+        y: 222.6,
+        battles: [{ side: 'wu', at: [111.44, 30.55], nameZh: '火烧连营', nameEn: 'Fire through the linked camps', placeZh: '今湖北猇亭', placeEn: 'Xiaoting, Hubei',
+          forces: [{ side: 'wu', n: 50000, quality: 'recorded', srcZh: '《三国志·陆逊传》："乃敕各持一把茅，以火攻拔之……斩张南、冯习及胡王沙摩柯等首"', srcEn: 'Sanguozhi, Lu Xun bio: each man a bundle of straw, one blaze.' }],
+          descZh: '闰六月，陆逊敕士卒各持一把茅——顺风纵火，连营皆燃。斩张南冯习、胡王沙摩柯，降者数万：一夜之间，蜀军主力尽丧。',
+          descEn: 'One bundle of straw per man, one wind — the camps burned along the hills; three generals died and tens of thousands surrendered.' }],
+      },
+      {
+        y: 222.66,
+        moves: [{ side: 'shu', from: [111.29, 30.7], to: [109.47, 31.04],
+          titleZh: '刘备退保白帝', titleEn: 'Liu Bei retreats to Baidi',
+          descZh: '刘备退守白帝城——「吾乃为逊所折辱，岂非天邪！」驿人烧连铙铠断后，仅得入城。羞愤交加，一病不起。',
+          descEn: 'Liu Bei held Baidi in shame — "defeated by Lu Xun — is it not Heaven?" — and fell gravely ill.' }],
+      },
+      {
+        y: 223.3, titleZh: '永安托孤', titleEn: 'The deathbed at Yong\'an',
+        descZh: '章武三年四月，刘备殂于永安宫——托孤诸葛亮：「君才十倍曹丕……若嗣子可辅，辅之；如其不才，君可自取。」三国鼎立的最后一块版图，就此定格四十余年。',
+        descEn: 'Liu Bei died at Yong\'an, entrusting all to Zhuge Liang — and the tripartite map froze in place for forty years.',
+      },
+    ],
+  },
+  {
+    key: 'yashan',
+    titleZh: '崖山海战',
+    titleEn: 'The battle of Yamen',
+    span: [1278, 1280],
+    descZh: '祥兴二年二月，张弘范军至崖山——宋军千艘连环结寨，断汲道，会战四日：陆秀夫负帝昺蹈海，十万军民从死，宋亡。',
+    descEn: 'In the second month of 1279 Zhang Hongfan closed on Yamen; after four days of battle Lu Xiufu leapt into the sea with the child emperor — and the Song ended with 100,000 followers.',
+    sides: [
+      { key: 'yuan', nameZh: '元军（张弘范）', nameEn: 'Yuan fleet (Zhang Hongfan)', color: '#6b5a2e' },
+      { key: 'song', nameZh: '宋军（张世杰）', nameEn: 'Song fleet (Zhang Shijie)', color: '#2f5d7c' },
+    ],
+    zones: [
+      {
+        y: 1278.9, side: 'song',
+        rings: [[[113.0, 21.9], [114.4, 21.8], [114.5, 22.9], [113.1, 23.0]]],
+        noteZh: '宋末朝廷流亡至崖山，结寨固守', noteEn: 'The Song court in exile fortifies Yamen',
+      },
+      {
+        y: 1279.2, side: 'yuan',
+        rings: [[[113.0, 21.9], [114.4, 21.8], [114.5, 22.9], [113.1, 23.0]]],
+        noteZh: '崖山既破，宋室无噍类', noteEn: 'Yamen falls; the Song is no more',
+      },
+    ],
+    steps: [
+      {
+        y: 1278.85,
+        moves: [{ side: 'song', from: [113.35, 22.7], to: [113.15, 22.35],
+          titleZh: '退保崖山，千艘结寨', titleEn: 'The court camps at Yamen',
+          descZh: '帝昺立，张世杰以崖山为天险：千余艘船以大索连成水寨，造行宫——一切船只焚毁陆上宫室，示无归意。时人以为「缚篿为垣」，张世杰不听徙言之谏。',
+          descEn: 'Zhang Shijie chained a thousand ships into a floating fortress at Yamen and burned the shore camps — no retreat intended.' }],
+      },
+      {
+        y: 1279.15,
+        battles: [{ side: 'yuan', at: [113.15, 22.35], nameZh: '断汲道，会战四日', nameEn: 'Four days at the Yamen', placeZh: '今广东新会崖门', placeEn: 'Yamen, Xinhui',
+          forces: [
+            { side: 'yuan', n: 20000, quality: 'est', srcZh: '张弘范、李恒两军合计约二万、战船数百（《宋史·瀛国公纪》）', srcEn: 'Zhang Hongfan and Li Heng, ~20,000 men, hundreds of ships.' },
+            { side: 'song', n: 100000, quality: 'est', srcZh: '宋军民十余万、大船千余艘（号称二十万）', srcEn: 'Over 100,000 soldiers and civilians, a thousand ships.' },
+          ],
+          descZh: '张弘范断宋军汲道，宋军食干饮咸十余日呕泄——会战四日：元军乘潮南北夹击，宋军疲兵短兵接战，船破旗靡。',
+          descEn: 'Cutting off fresh water, the Yuan fleet attacked with the tides for four days until the Song formation dissolved.' }],
+      },
+      {
+        y: 1279.18, titleZh: '陆秀夫负帝蹈海', titleEn: 'Lu Xiufu leaps with the emperor',
+        descZh: '陆秀夫见事不可为，先驱妻子入海——谓帝昺曰：「国事至此，陛下当为国死。德祐皇帝辱已甚，陛下不可再辱！」负帝昺蹈海死，后宫诸臣从死者十万余人。七日后，十万浮尸出于海。',
+        descEn: 'Lu Xiufu put his own family into the sea first — "Your Majesty must die for the state" — and leapt with the child emperor on his back; 100,000 followed.',
+      },
+      {
+        y: 1279.25, titleZh: '宋亡', titleEn: 'The Song ends',
+        descZh: '张世杰遇飓风溺死于平章山下——宋遂亡。元统一中国：这是中国历史上第一次整个中原王朝被北方民族完整取代，崖山之后，天下改姓。',
+        descEn: 'Zhang Shijie drowned in a typhoon. The Yuan unified China — the first time the whole realm passed to a northern people.',
+      },
+    ],
+  },
 ];
