@@ -5193,8 +5193,8 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   stroke-width: var(--war-w, 2.1px);
   pointer-events: none;
 }
-#grp-war .war-march.t0, #grp-war .war-march-casing.t0 { --war-w: 3px; }
-#grp-war .war-march.t1, #grp-war .war-march-casing.t1 { --war-w: 4.6px; }
+#grp-war .war-march.t0, #grp-war .war-march-casing.t0 { --war-w: 3.6px; }
+#grp-war .war-march.t1, #grp-war .war-march-casing.t1 { --war-w: 5.2px; }
 #grp-war .war-march.t2, #grp-war .war-march-casing.t2 { --war-w: 6.6px; }
 #grp-war .war-march.t3, #grp-war .war-march-casing.t3 { --war-w: 9.2px; }
 #grp-war .war-march.is-past {
@@ -5229,10 +5229,10 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   opacity: 0.92;
   transform: scale(var(--dir-s, 1));
 }
-#grp-war .war-dir.t0 { --dir-s: 1.2; }
-#grp-war .war-dir.t1 { --dir-s: 1.55; }
-#grp-war .war-dir.t2 { --dir-s: 1.95; }
-#grp-war .war-dir.t3 { --dir-s: 2.45; }
+#grp-war .war-dir.t0 { --dir-s: 1; }
+#grp-war .war-dir.t1 { --dir-s: 1.15; }
+#grp-war .war-dir.t2 { --dir-s: 1.35; }
+#grp-war .war-dir.t3 { --dir-s: 1.6; }
 #grp-war .war-dir.is-cur .war-chevron {
   opacity: 0;
   transform: scale(calc(var(--dir-s, 1) * 0.4));
@@ -5259,10 +5259,10 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 #grp-war .war-core {
   transform: scale(var(--core-s, 1));
 }
-#grp-war .war-core.t0 { --core-s: 1; }
-#grp-war .war-core.t1 { --core-s: 1.3; }
-#grp-war .war-core.t2 { --core-s: 1.6; }
-#grp-war .war-core.t3 { --core-s: 2; }
+#grp-war .war-core.t0 { --core-s: 0.9; }
+#grp-war .war-core.t1 { --core-s: 1.1; }
+#grp-war .war-core.t2 { --core-s: 1.35; }
+#grp-war .war-core.t3 { --core-s: 1.65; }
 #grp-war .war-diamond {
   stroke: #f6f1e6;
   stroke-width: 1.1;
@@ -5784,4 +5784,15 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   font-family: var(--sans-stack);
   font-size: 10.8px;
   font-weight: 700;
+}
+
+/* --- 骑乘楔形头（绘制期间骑在生长端点上） --- */
+#grp-war .war-rider {
+  pointer-events: none;
+}
+#grp-war .war-rider-wedge {
+  fill: currentColor;
+  stroke: #f6f1e6;
+  stroke-width: 1.1;
+  paint-order: stroke;
 }

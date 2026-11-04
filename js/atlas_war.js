@@ -18,8 +18,10 @@
 
   const TAIL_YEARS = 3;           // post-war replay window (map + panel share it)
   const PLAY_INTERVAL = 2600;     // ms per step while playing (1× 档，叙事节奏)
-  const TIER_WIDTHS = [3, 4.6, 6.6, 9.2];     // screen px per strength tier
-  const TIER_SCALES = [1, 1.3, 1.6, 2];       // battle-diamond core scales
+  const TIER_WIDTHS = [3.4, 5, 7, 9.5];       // screen px per strength tier
+  const TIER_SCALES = [0.9, 1.1, 1.35, 1.65]; // battle-diamond core scales
+  const WEDGE_D = "M-5.5 -3.8L6.5 0L-5.5 3.8L-2.4 0Z"; // 楔形头（12px 级，随档位缩放）
+  const WEDGE_SCALES = [1, 1.15, 1.35, 1.6];  // 楔形头档位缩放（骑乘与静态共用）
 
   // 相机视野标定（全局唯一换算，无每战役特调）：
   // 投影画布 1000×700 用户单位覆盖东经 66°–142°（76°），即 1° 经度 = 13.16 单位。
@@ -216,10 +218,14 @@
     //    （放大地图后箭头断成数截的根因）→ 每帧按当前缩放把用户单位长度
     //    换算成屏幕像素再写 dash，缩放变化下一帧立即跟上；
     // ③ 画完立即清除 dash——否则完成后用户再缩放，固定的 dash 值又会切碎线。
-    _startWarDraw(casing, p, dirG, drawMs) {
+    // 楔形头"骑"在生长端点上随绘制进度移动（战史动画标准做法）：
+    // getPointAtLength 取当前端点 + 切线角，相机缩放时按 kScreen 反向缩放
+    // 保持屏幕尺寸恒定；画完后移除骑乘头，静态楔形在终点接管。
+    _startWarDraw(casing, p, dirG, rider, tier, drawMs) {
       const reduced = reducedMotion();
       if (reduced) {
         if (dirG) dirG.classList.add('is-arrived');
+        if (rider) rider.remove();
         return;
       }
       let Lu = 0;
@@ -230,6 +236,7 @@
       }
       if (!(Lu > 2)) {
         if (dirG) dirG.classList.add('is-arrived');
+        if (rider) rider.remove();
         return;
       }
       const t0 = performance.now();
@@ -244,10 +251,24 @@
         }
         const Ls = Lu * kScreen;
         const k = Math.min(1, (now - t0) / drawMs);
-        const off = Ls * (1 - ease(k));
+        const eased = ease(k);
+        const off = Ls * (1 - eased);
         for (const q of [casing, p]) {
           q.style.strokeDasharray = `${Ls.toFixed(1)}`;
           q.style.strokeDashoffset = `${off.toFixed(1)}`;
+        }
+        if (rider && k < 1) {
+          try {
+            const headLen = Lu * eased;
+            const pt = p.getPointAtLength(headLen);
+            const near = p.getPointAtLength(Math.max(0, headLen - 2));
+            const ang = (Math.atan2(pt.y - near.y, pt.x - near.x) * 180) / Math.PI;
+            const wedgeS = (WEDGE_SCALES[tier] || 1) / kScreen;
+            rider.setAttribute('transform',
+              `translate(${pt.x.toFixed(1)},${pt.y.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${wedgeS.toFixed(3)})`);
+          } catch (e) {
+            /* rider positioning is cosmetic */
+          }
         }
         if (k < 1) {
           const h = requestAnimationFrame(stepFn);
@@ -257,6 +278,7 @@
             q.style.strokeDasharray = 'none';
             q.style.strokeDashoffset = '0';
           }
+          if (rider) rider.remove();
           if (dirG) dirG.classList.add('is-arrived');
         }
       };
@@ -346,6 +368,18 @@
           if (!info) continue;
           const tier = mv.force ? this._warForceTier(mv.force.n) : 0;
           const claimed = mv.force && mv.force.quality === 'claimed';
+          // 浅色底衬把彩色箭头从繁杂地形里托出来（宣纸制图惯例）
+          const casing = this._svgNode(
+            'path',
+            { d: info.d, class: `war-march-casing t${tier}${isCur ? ' is-cur' : ''}` },
+            g
+          );
+          const cls = `war-march t${tier}${isCur ? ' is-cur' : ' is-past'}${claimed ? ' is-claimed' : ''}`;
+          const p = this._svgNode(
+            'path',
+            { d: info.d, class: cls, stroke: side.color },
+            g
+          );
           // directional chevron at the DESTINATION tip, angled along the final leg
           let dir = null;
           if (info.endX !== null) {
@@ -362,24 +396,19 @@
             dir.style.color = side.color;
             this._svgNode(
               'path',
-              { d: 'M-7 -5.2L8 0L-7 5.2L-3 0Z', class: 'war-chevron' },
+              { d: WEDGE_D, class: 'war-chevron' },
               dir
             );
           }
-          // 浅色底衬把彩色箭头从繁杂地形里托出来（宣纸制图惯例）
-          const casing = this._svgNode(
-            'path',
-            { d: info.d, class: `war-march-casing t${tier}${isCur ? ' is-cur' : ''}` },
-            g
-          );
-          const cls = `war-march t${tier}${isCur ? ' is-cur' : ' is-past'}${claimed ? ' is-claimed' : ''}`;
-          const p = this._svgNode(
-            'path',
-            { d: info.d, class: cls, stroke: side.color },
-            g
-          );
           if (isCur && !claimed) {
-            this._startWarDraw(casing, p, dir, drawMs);
+            // 骑乘楔形头：绘制期间骑在生长端点上，画完移除、静态楔形接管
+            let rider = null;
+            if (!reducedMotion() && info.endX !== null) {
+              rider = this._svgNode('g', { class: 'war-rider' }, g);
+              rider.style.color = side.color;
+              this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
+            }
+            this._startWarDraw(casing, p, dir, rider, tier, drawMs);
           }
           // dir 创建于线之下，重挂到顶层保证楔形头盖住线端
           if (dir) g.appendChild(dir);
@@ -412,7 +441,7 @@
             g
           );
           if (isCur) this._warCurSpot = { x: sx, y: sy };
-          this._svgNode('circle', { class: 'war-ring', r: 10, stroke: side.color }, node);
+          this._svgNode('circle', { class: 'war-ring', r: 8.5, stroke: side.color }, node);
           const core = this._svgNode(
             'g',
             { class: `war-core t${tier}` },
