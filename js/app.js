@@ -496,12 +496,27 @@
     _loadScriptOnce(src) {
       if (typeof document === 'undefined' || !document.head) return Promise.resolve();
       return new Promise((resolve) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.async = true;
-        s.onload = () => resolve();
-        s.onerror = () => resolve();
-        document.head.appendChild(s);
+        // 失败自动重试一次：首访资源突发时本地/弱网服务器可能丢请求，
+        // 此前 onerror 直接 resolve，懒加载包（快照/i18n）静默缺失且无重试。
+        // 保持 resolve-only 语义，调用方的 .then 链不受影响。
+        let retried = false;
+        const attach = () => {
+          const s = document.createElement('script');
+          s.src = src;
+          s.async = true;
+          s.onload = () => resolve();
+          s.onerror = () => {
+            s.remove();
+            if (retried) {
+              resolve();
+              return;
+            }
+            retried = true;
+            setTimeout(attach, 300);
+          };
+          document.head.appendChild(s);
+        };
+        attach();
       });
     }
 

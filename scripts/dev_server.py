@@ -10,9 +10,19 @@ import http.server
 import os
 import re
 import sys
+import socketserver
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8792
+
+
+class ThreadingHTTPServer11(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    # HTTP/1.1 + 大请求队列：浏览器首访会突发十几个同源请求，
+    # 默认 HTTP/1.0 + request_queue_size=5 会随机丢/停滞请求，
+    # 解析阻塞脚本（app.js 等）被丢 → 首屏只剩静态壳（"首次打开空白"）。
+    protocol_version = "HTTP/1.1"
+    daemon_threads = True
+    request_queue_size = 128
 
 
 class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
@@ -33,7 +43,7 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
 
 def main():
     os.chdir(ROOT)
-    server = http.server.ThreadingHTTPServer(("127.0.0.1", PORT), NoCacheHandler)
+    server = ThreadingHTTPServer11(("127.0.0.1", PORT), NoCacheHandler)
     print(f"Serving {ROOT} at http://127.0.0.1:{PORT}/ (no-cache headers on)")
     sys.stderr.flush()
     try:
