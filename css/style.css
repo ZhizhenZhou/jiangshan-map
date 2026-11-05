@@ -5529,10 +5529,10 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 .war-ctrl {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
   background: rgba(90, 74, 58, 0.1);
   border-radius: 9px;
-  padding: 4px 7px;
+  padding: 4px 8px;
 }
 .war-btn {
   min-width: 28px;
