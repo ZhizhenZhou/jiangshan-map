@@ -448,10 +448,10 @@
       }
 
       // --- march arrows: past as solid traces, current drawing progressively ---
-      const drawMs = Math.max(
-        420,
-        Math.min(1900, PLAY_INTERVAL / (this._warPlaySpeed || 1) - 550)
-      );
+      // 绘制时长与相机飞行(_animateCameraTo 650ms, cubic ease-out)同步同曲线：
+      // 箭头与地图一个节奏——起手同冲、同时落定，不再"地图停了箭头还在爬"
+      //（旧公式 PLAY_INTERVAL-550 让箭头爬 1.9s，用户实测观感为速率不一致）。
+      const drawMs = 650;
       for (let i = 0; i <= idx; i++) {
         const s = w.steps[i];
         const isCur = i === idx;
@@ -1049,10 +1049,16 @@
         const title = this._warField(battle, 'name') || this._warStepTitle(w, w.steps[idx]);
         const zh = this.locale !== 'en';
         const side = this._warSide(w, battle.side);
-        // 浮签瘦身：不放 desc（与卡片逐字重复），只留 标题 + 得手方 + 兵力
-        const sideNote = zh
-          ? `此役${esc(this._warField(side, 'name'))}得手/占优`
-          : `${esc(this._warField(side, 'name'))} held the field`;
+        // 浮签瘦身：不放 desc（与卡片逐字重复）。
+        // 战果行优先用 battle.resultZh/En（每役不同的实况），退回通用得手方行；
+        // 地点行每役必异（placeZh 数据全集都有）——避免"每步都一样"的观感。
+        const result = this._warField(battle, 'result');
+        const sideNote = result
+          ? result
+          : zh
+            ? `此役${esc(this._warField(side, 'name'))}得手/占优`
+            : `${esc(this._warField(side, 'name'))} held the field`;
+        const place = this._warField(battle, 'place');
         const forces = this._warStepForces(w, w.steps[idx])
           .map((f) => {
             const sd = this._warSide(w, f.side);
@@ -1062,6 +1068,7 @@
         el.innerHTML =
           `<div class="ep-head"><span class="ep-year">${esc(this.formatYear(w.steps[idx].y))} · ${esc(title)}</span></div>` +
           `<div class="war-balloon-side" style="color:${side.color}">${sideNote}</div>` +
+          (place ? `<div class="war-balloon-place">${esc(place)}</div>` : '') +
           (forces ? `<div class="war-balloon-forces">${forces}</div>` : '') +
           `<button type="button" class="ep-close" aria-label="${zh ? '关闭战报浮签' : 'Dismiss campaign callout'}">×</button>`;
         const closeBtn = el.querySelector('.ep-close');

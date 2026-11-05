@@ -5797,6 +5797,12 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   font-size: 10.8px;
   font-weight: 700;
 }
+.war-balloon-place {
+  margin-top: 2px;
+  font-family: var(--sans-stack);
+  font-size: 10.2px;
+  color: #8a7a63;
+}
 
 /* --- 骑乘楔形头（绘制期间骑在生长端点上） --- */
 #grp-war .war-rider {
