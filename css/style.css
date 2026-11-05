@@ -5235,13 +5235,15 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 #grp-war .war-dir.t3 { --dir-s: 1.6; }
 #grp-war .war-dir.is-cur .war-chevron {
   opacity: 0;
-  transform: scale(calc(var(--dir-s, 1) * 0.4));
+  transform: scale(var(--dir-s, 1));
 }
-/* 绘制完成由 JS 加 .is-arrived（rAF 驱动，不受 is-camera-moving 守卫影响） */
+/* 绘制完成由 JS 加 .is-arrived：骑乘头末帧与静态楔形同位/同角/同尺寸
+ * （_warPathEnd 与骑乘头同一 getPointAtLength 公式），交接是像素级替换——
+ * 不做缩放/弹跳（旧 0.4→1 过渡让箭头在终点"缩一下再弹出"，
+ * 用户读作"箭头没有跟着线的顶点走"）。 */
 #grp-war .war-dir.is-cur.is-arrived .war-chevron {
   opacity: 1;
   transform: scale(var(--dir-s, 1));
-  transition: opacity 200ms ease-out, transform 230ms cubic-bezier(0.3, 0.7, 0.4, 1.15);
 }
 
 /* --- battle diamonds (战役点 · 同址微散在 JS 侧) --- */
@@ -5532,9 +5534,6 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   border-radius: 9px;
   padding: 4px 7px;
 }
-.war-ctrl-gap {
-  display: none;
-}
 .war-btn {
   min-width: 28px;
   height: 28px;
@@ -5566,33 +5565,10 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   font-size: 12.5px;
   line-height: 1;
 }
-.war-btn.is-speed {
-  font-weight: 700;
-  font-size: 10.5px;
-  color: var(--text-secondary);
-}
-.war-btn.is-speed:hover {
-  color: var(--vermilion);
-}
-.war-btn.is-play {
-  flex: 0 0 auto;
-  width: 32px;
-  height: 28px;
-  border-radius: 8px;
-  padding: 0;
-  border-radius: 50%;
-  background: var(--vermilion);
-  color: #fffaf2;
-  font-size: 12px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.war-btn.is-play:hover {
-  background: var(--vermilion);
-  color: #fffaf2;
-  filter: brightness(1.06);
+/* 边界禁用：步 0 的回起始/上一步、末步的下一步/到结束 */
+.war-btn.is-disabled {
+  opacity: 0.3;
+  pointer-events: none;
 }
 .war-stepcount {
   flex: 1;

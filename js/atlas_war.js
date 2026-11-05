@@ -17,18 +17,21 @@
   let HistoricalAtlasController = null;
 
   const TAIL_YEARS = 3;           // post-war replay window (map + panel share it)
-  const PLAY_INTERVAL = 2600;     // ms per step while playing (1× 档，叙事节奏)
   // 战争模块的相机飞行时长：行军箭头绘制与它同步同缓动（_animateCameraTo
   // 的 duration 参数）——箭头与地图一个节奏。650 是全 app 默认，战争用慢档。
   const WAR_FLIGHT_MS = 1150;
   const TIER_WIDTHS = [3.4, 5, 7, 9.5];       // screen px per strength tier
   const TIER_SCALES = [0.9, 1.1, 1.35, 1.65]; // battle-diamond core scales
-  const WEDGE_D = "M-5.5 -3.8L6.5 0L-5.5 3.8L-2.4 0Z"; // 楔形头（12px 级，随档位缩放）
+  // 箭头头形：鼻尖在原点的三角（底边朝后）——骑乘时鼻尖钉在生长端点、
+  // 底边朝后盖住已画线的末端，线的可见末端永远正好是箭头底边（贴线尖）；
+  // 静态楔形同路径：鼻尖落在终点（战役位置）。交接前后头位置像素级一致。
+  const WEDGE_D = "M0 0L-12.5 -4.8L-12.5 4.8Z";
   const WEDGE_SCALES = [1, 1.15, 1.35, 1.6];  // 楔形头档位缩放（骑乘与静态共用）
   const WAR_ICONS = {
     rewind: '<svg class="wico" viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 2.5A5.5 5.5 0 1 0 13.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13.8 3.2v3.3h-3.3z" fill="currentColor"/></svg>',
     prev: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M11.5 3v10L4.5 8z" fill="currentColor"/><rect x="12.3" y="3" width="1.8" height="10" fill="currentColor"/></svg>',
-    next: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4.5 3v10l7-5z" fill="currentColor"/><rect x="1.9" y="3" width="1.8" height="10" fill="currentColor"/></svg>',
+    next: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4.5 3v10L11.5 8z" fill="currentColor"/></svg>',
+    end: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M3.5 3v10L10.5 8z" fill="currentColor"/><rect x="12.3" y="3" width="1.8" height="10" fill="currentColor"/></svg>',
   };
 
   // 相机视野标定（全局唯一换算，无每战役特调）：
@@ -466,9 +469,9 @@
       }
 
       // --- march arrows: past as solid traces, current drawing progressively ---
-      // 绘制时长与相机飞行同速同缓动（WAR_FLIGHT_MS + cubic ease-out），
-      // 播放变速时同比缩放；绘制本身再延迟到飞行 55% 处启动（见下）。
-      const flightMs = WAR_FLIGHT_MS / (this._warPlaySpeed || 1);
+      // 绘制时长与相机飞行同速同缓动（WAR_FLIGHT_MS + cubic ease-out）；
+      // 绘制本身再延迟到飞行 55% 处启动（见下）。
+      const flightMs = WAR_FLIGHT_MS;
       const drawMs = flightMs;
       for (let i = 0; i <= idx; i++) {
         const s = w.steps[i];
@@ -669,21 +672,13 @@
       if (!showCard) {
         if (!card.classList.contains('is-hidden')) {
           card.classList.add('is-hidden');
-          this._stopWarPlay();
         }
         this._warCardSig = null;
         return;
       }
       const folded = card.classList.contains('is-folded');
       const sig = [this.locale, w.key, idx, folded ? 1 : 0].join('|');
-      if (sig === this._warCardSig) {
-        const btn = card.querySelector('[data-act="play"]');
-        if (btn) {
-          btn.textContent = this._warPlayTimer ? '❚❚' : '▶';
-          btn.title = this._warPlayTimer ? this._warTxt('pause') : this._warTxt('play');
-        }
-        return;
-      }
+      if (sig === this._warCardSig) return;
       this._warCardSig = sig;
 
       const prevScroll = card.classList.contains('is-hidden') ? 0 : (card.querySelector('.war-steps') || {}).scrollTop || 0;
@@ -730,13 +725,11 @@
         (idx >= 0 ? this._warForceBarsHtml(w, step) : '') +
         `<div class="war-steps">${listHtml}</div>` +
         `<div class="war-ctrl">` +
-        `<button class="war-btn is-ico" data-act="rewind" title="${esc(this._warTxt('rewind'))}">${WAR_ICONS.rewind}</button>` +
-        `<button class="war-btn is-ico" data-act="prev" title="${esc(this._warTxt('prev'))}">${WAR_ICONS.prev}</button>` +
-        `<button class="war-btn is-play" data-act="play" title="${this._warPlayTimer ? esc(this._warTxt('pause')) : esc(this._warTxt('play'))}">${this._warPlayTimer ? '❚❚' : '▶'}</button>` +
-        `<button class="war-btn is-ico" data-act="next" title="${esc(this._warTxt('next'))}">${WAR_ICONS.next}</button>` +
+        `<button class="war-btn is-ico${idx <= 0 ? ' is-disabled' : ''}" data-act="rewind" title="${esc(this._warTxt('rewind'))}">${WAR_ICONS.rewind}</button>` +
+        `<button class="war-btn is-ico${idx <= 0 ? ' is-disabled' : ''}" data-act="prev" title="${esc(this._warTxt('prev'))}">${WAR_ICONS.prev}</button>` +
         `<span class="war-stepcount">${Math.max(0, idx + 1)}<i>/</i>${w.steps.length}</span>` +
-        `<span class="war-ctrl-gap"></span>` +
-        `<button class="war-btn is-ico is-speed" data-act="speed" title="${esc(this._warTxt('speed'))}">${this._warPlaySpeed || 1}×</button>` +
+        `<button class="war-btn is-ico${idx >= w.steps.length - 1 ? ' is-disabled' : ''}" data-act="next" title="${esc(this._warTxt('next'))}">${WAR_ICONS.next}</button>` +
+        `<button class="war-btn is-ico${idx >= w.steps.length - 1 ? ' is-disabled' : ''}" data-act="end" title="${esc(this._warTxt('end'))}">${WAR_ICONS.end}</button>` +
         `</div>` +
         `<div class="war-foot">${esc(this._warTxt('foot'))}</div>` +
         `</div>`;
@@ -759,31 +752,22 @@
     _warTxt(key) {
       const zh = this.locale !== 'en';
       const dict = {
-        prev: zh ? '上一步' : 'Prev',
-        next: zh ? '下一步' : 'Next',
-        play: zh ? '播放' : 'Play',
-        pause: zh ? '❚❚ 暂停' : '❚❚ Pause',
-        upcoming: zh ? '大战将启——拖动时间轴或点"播放"逐步推进战局。' : 'The campaign is about to begin — drag the timeline or press Play.',
+        prev: zh ? '上一步' : 'Prev step',
+        next: zh ? '下一步' : 'Next step',
+        end: zh ? '跳到最后一幕' : 'Skip to the final step',
+        upcoming: zh ? '大战将启——拖动时间轴逐步推进战局。' : 'The campaign is about to begin — drag the timeline.',
         fold: zh ? '折叠/展开战报' : 'Fold/unfold the report',
         foot: zh ? '路线与控制区为示意复原 · 兵力附出处（实录 / 号称 / 约数） · ◆ 战役点按得手方着色' : 'Routes & zones are schematic · strengths sourced (recorded / claimed / approx.) · ◆ diamonds colored by the winning side',
         zone: zh ? '当前控制区' : 'Front line',
         jumpHint: zh ? '点击跳到该步' : 'Click to jump to this step',
-        speed: zh ? '播放速度' : 'Playback speed',
-        rewind: zh ? '回到战役起点，从头完整重放' : 'Back to step zero and replay the whole campaign',
+        rewind: zh ? '回到起始' : 'Back to the start',
       };
       return dict[key] || key;
     }
 
-    // ---------------- player ----------------
-
-    _stopWarPlay() {
-      if (!this._warPlayTimer) return;
-      clearInterval(this._warPlayTimer);
-      this._warPlayTimer = null;
-      const card = this._warCardEl();
-      const btn = card && card.querySelector('[data-act="play"]');
-      this._syncWarPlayGlyph();
-    }
+    // ---------------- step navigation ----------------
+    // 沙盘不再有自动播放：时间轴是唯一主时钟（Space/拖轴/年份播放都照常驱动
+    // 战况），卡片传输栏只做步进——回起始/上一步/下一步/到结束，无键位冲突。
 
     _warSeekTo(y) {
       const yi = Math.round(y) || (this.year < 0 ? 1 : -1);
@@ -801,15 +785,14 @@
       }
     }
 
-    _gotoWarStep(w, i, opts = {}) {
+    _gotoWarStep(w, i) {
       if (!w || i < 0 || i >= (w.steps || []).length) return;
       const s = w.steps[i];
       this._warSeekTo(s.y);
-      // 播放中只做"保持战场在视野内"的轻量相机；手动跳步才全幅聚焦
-      if (!reducedMotion()) this._warFocusStep(w, s, Boolean(opts.gentle));
+      if (!reducedMotion()) this._warFocusStep(w, s);
     }
 
-    _warFocusStep(w, s, gentle = false) {
+    _warFocusStep(w, s) {
       const pts = [];
       (s.moves || []).forEach((mv) => this._warPointList(mv).forEach((p) => pts.push(p)));
       (s.battles || []).forEach((b) => b.at && pts.push(b.at));
@@ -827,23 +810,6 @@
       const tip = scr[scr.length - 1];
       let cx = (minX + maxX) / 2 * 0.75 + tip[0] * 0.25;
       let cy = (minY + maxY) / 2 * 0.75 + tip[1] * 0.25;
-      if (gentle) {
-        // 轻量相机：战场已在视野内则完全不动作，不打断行军绘制动画
-        const cam = this._cameraTarget || this.camera;
-        const inView =
-          cx > cam.x + cam.w * 0.18 &&
-          cx < cam.x + cam.w * 0.82 &&
-          cy > cam.y + cam.h * 0.2 &&
-          cy < cam.y + cam.h * 0.8;
-        if (inView) return;
-        this._animateCameraTo({
-          x: Math.max(-180, Math.min(1000 - cam.w + 140, cx - cam.w / 2)),
-          y: Math.max(-150, Math.min(700 - cam.h + 120, cy - cam.h / 2)),
-          w: cam.w,
-          h: cam.h,
-        }, WAR_FLIGHT_MS / (this._warPlaySpeed || 1));
-        return;
-      }
       // 手动聚焦：度标定的 AABB 适配（pad 12%、最小 1.8°、最大 30°）。
       // 旧版裸数字 430 单位 ≈ 32°，是"战场纵深小"事故的源头。
       const padW = (maxX - minX) * FIT_PAD;
@@ -858,7 +824,7 @@
         y: cy - bh / 2,
         w: bw,
         h: bh,
-      }, WAR_FLIGHT_MS / (this._warPlaySpeed || 1));
+      }, WAR_FLIGHT_MS);
     }
 
     // 战场全境适配：全场步骤所有坐标点的 AABB，pad 12%、最小 2.3°、最大 53°。
@@ -892,67 +858,6 @@
       };
     }
 
-    _toggleWarPlay() {
-      const w = this._activeWar();
-      if (!w) return;
-      if (this._warPlayTimer) {
-        this._stopWarPlay();
-        return;
-      }
-      // 已在末步时按播放 → 从头播放（修复 yutu 末步空转）
-      let start = this._warStepIndex(w) + 1;
-      if (start >= w.steps.length) start = 0;
-      this._gotoWarStep(w, start, { gentle: true });
-      this._startWarInterval(w);
-    }
-
-    // 定时推进器：rewind 与 play 共用。rewind 先 goto step 0 再启动定时器，
-    // 第一步完整展示一个间隔后才推进（此前 rewind 直接从 idx+1 起跳，
-    // 首步被瞬时跳过——用户报告的"重播 bug"）。
-    _startWarInterval(w) {
-      if (this._warPlayTimer) clearInterval(this._warPlayTimer);
-      const speed = this._warPlaySpeed || 1;
-      this._warPlayTimer = setInterval(() => {
-        const w2 = this._activeWar();
-        if (!w2 || w2.key !== w.key || this.playing || this.isScrubbing) {
-          this._stopWarPlay();
-          return;
-        }
-        const i = this._warStepIndex(w2) + 1;
-        if (i >= w2.steps.length) {
-          this._stopWarPlay();
-          return;
-        }
-        this._gotoWarStep(w2, i, { gentle: true });
-      }, PLAY_INTERVAL / speed);
-      // 启动即同步播放钮图标（否则要等下一次重建才变 ❚❚）
-      this._syncWarPlayGlyph();
-    }
-
-    _syncWarPlayGlyph() {
-      const btn = this._warCardEl && this._warCardEl();
-      const b = btn && btn.querySelector(String.raw`[data-act="play"]`);
-      if (b) {
-        b.textContent = this._warPlayTimer ? '❚❚' : '▶';
-        b.title = this._warPlayTimer ? this._warTxt('pause') : this._warTxt('play');
-      }
-    }
-
-    _cycleWarSpeed() {
-      const speeds = [1, 2, 4];
-      this._warPlaySpeed = speeds[(speeds.indexOf(this._warPlaySpeed || 1) + 1) % speeds.length];
-      // 播放中变速：以新间隔重启定时器，当前位置不变
-      if (this._warPlayTimer) {
-        clearInterval(this._warPlayTimer);
-        this._warPlayTimer = null;
-        const w = this._activeWar();
-        if (w) this._toggleWarPlay();
-      }
-      this._warCardSig = null;
-      this._renderWarCard(this._activeWar(), this._warStepIndex(this._activeWar() || { steps: [] }));
-      return this._warPlaySpeed;
-    }
-
     // ---------------- sync entry ----------------
 
     _bindWarCardEvents(card) {
@@ -970,30 +875,19 @@
         }
         const w = this._activeWar();
         if (!w) return;
-        if (a === 'speed') {
-          this._cycleWarSpeed();
-          return;
-        }
-        if (a === 'play') {
-          // toggle 自管定时器：先 stop 再 toggle 会把"暂停"变成"重启"
-          this._toggleWarPlay();
-          return;
-        }
+        const idx = this._warStepIndex(w);
+        const last = (w.steps || []).length - 1;
+        // 边界禁用（is-disabled 按钮不响应）
+        if ((a === 'rewind' || a === 'prev') && idx <= 0) return;
+        if ((a === 'next' || a === 'end') && idx >= last) return;
         if (a === 'rewind') {
-          // 回到战役起点：先展示第 0 步一个完整间隔，再逐帧推进
-          //（此前借道 _toggleWarPlay 会立刻跳到第 1 步，首步从未展示）
-          this._stopWarPlay();
-          this._gotoWarStep(w, 0, { gentle: true });
-          this._warCardSig = null;
-          this._renderWarCard(w, 0);
-          this._startWarInterval(w);
-          return;
-        }
-        this._stopWarPlay();
-        if (a === 'prev' || a === 'next') {
-          this._gotoWarStep(w, this._warStepIndex(w) + (a === 'next' ? 1 : -1));
-        } else if (a === 'play') {
-          this._toggleWarPlay();
+          this._gotoWarStep(w, 0);
+        } else if (a === 'prev') {
+          this._gotoWarStep(w, idx - 1);
+        } else if (a === 'next') {
+          this._gotoWarStep(w, idx + 1);
+        } else if (a === 'end') {
+          this._gotoWarStep(w, last);
         } else if (a === 'step') {
           this._gotoWarStep(w, parseInt(act.dataset.idx, 10));
         }
@@ -1017,10 +911,6 @@
           });
           this._warChkBound = true;
         }
-      }
-      // 全局播放/拖轴时打断沙盘播放（战局严格由时间轴驱动）
-      if (this._warPlayTimer && (this.playing || (this.isScrubbing && !this._warInternalSeek))) {
-        this._stopWarPlay();
       }
       const w = this._activeWar();
       const idx = w ? this._warStepIndex(w) : -1;
@@ -1048,7 +938,7 @@
               this.camera = { ...fit, zoom: 1000 / fit.w };
               this._applyCamera(false);
             } else {
-              this._animateCameraTo(fit, WAR_FLIGHT_MS / (this._warPlaySpeed || 1));
+              this._animateCameraTo(fit, WAR_FLIGHT_MS);
             }
           }
         }
@@ -1141,23 +1031,6 @@
           });
         }
         if (this.locale === 'zh-tw') this._applyZhHantDom(el);
-      }
-      // 悬停浮签 = 暂停自动播放（读详细描述时不被推走），移出恢复
-      if (!this._warBalloonHoverBound) {
-        this._warBalloonHoverBound = true;
-        el.addEventListener('pointerenter', () => {
-          if (!this._warPlayTimer) return;
-          clearInterval(this._warPlayTimer);
-          this._warPlayTimer = null;
-          this._warPlayPausedByHover = true;
-          this._syncWarPlayGlyph();
-        });
-        el.addEventListener('pointerleave', () => {
-          if (!this._warPlayPausedByHover || this._warPlayTimer) return;
-          this._warPlayPausedByHover = false;
-          const w2 = this._activeWar();
-          if (w2 && this._warLayerOn()) this._startWarInterval(w2);
-        });
       }
       this._warBalloonState = {
         sx: anchor.x,
@@ -1315,7 +1188,6 @@
       const w = this._warData().find((x) => x.key === nodeEl.dataset.war);
       if (!w) return;
       const i = parseInt(nodeEl.dataset.step, 10);
-      this._stopWarPlay();
       this._gotoWarStep(w, i);
     }
   }
@@ -1336,7 +1208,6 @@
     // campaign window re-seek to the exact step after the integer-year base sync.
     const baseJump = Ctrl.prototype.jumpToYear;
     Ctrl.prototype.jumpToYear = function (...args) {
-      if (!this._warInternalSeek && this._warPlayTimer) this._stopWarPlay();
       const r = baseJump.apply(this, args);
       try {
         // 沙盘内部跳步不等相位变化：吞掉边界幽灵残影，避免与行军动画打架
