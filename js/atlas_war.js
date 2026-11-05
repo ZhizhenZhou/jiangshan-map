@@ -154,22 +154,32 @@
       if (Math.hypot(g1[0] - g0[0], g1[1] - g0[1]) < 0.1) return null;
       // 短直进轴（无途经点、弦 < 40 用户单位 ≈ 3°）：journey 构建器的最小弯幅
       // (9 单位) 对短弦是巨型钩子——末端切线甩到行进方向侧后方（官渡白马轴
-      // 11 单位弦实测甩 64°）。战术轴走直线，长距离战略行军才吃弯。
+      // 11 单位弦实测甩 64°），纯直线又呆板。战史沙盘的画法是【比例弯幅】
+      // 柔弧：原版 yutu-qiannian 全部用 3+ 途经点天然成弧，这里给双点轴
+      // 同斜率(0.165)、低下限(1.5) 的弯幅——短轴也是优雅弧线。
       if (pts.length === 2 && this.projector) {
         const a0 = this.projector.toScreen(g0[0], g0[1]);
         const b0 = this.projector.toScreen(g1[0], g1[1]);
         const chord0 = Math.hypot(b0[0] - a0[0], b0[1] - a0[1]);
         if (chord0 < 40) {
-          const ang = (Math.atan2(b0[1] - a0[1], b0[0] - a0[0]) * 180) / Math.PI;
+          const bend = Math.max(1.5, Math.min(34, chord0 * 0.165));
+          const cx = (a0[0] + b0[0]) * 0.5 - ((b0[1] - a0[1]) / chord0) * bend;
+          const cy = (a0[1] + b0[1]) * 0.5 + ((b0[0] - a0[0]) / chord0) * bend;
+          // 末端切线（t=1）：2(P2−C)；中点取 t=0.53（与 journey 构建器一致）
+          const t = 0.53, mt = 1 - t;
+          const mx = mt * mt * a0[0] + 2 * mt * t * cx + t * t * b0[0];
+          const my = mt * mt * a0[1] + 2 * mt * t * cy + t * t * b0[1];
+          const mtx = 2 * mt * (cx - a0[0]) + 2 * t * (b0[0] - cx);
+          const mty = 2 * mt * (cy - a0[1]) + 2 * t * (b0[1] - cy);
           return {
-            d: `M${a0[0].toFixed(1)} ${a0[1].toFixed(1)}L${b0[0].toFixed(1)} ${b0[1].toFixed(1)}`,
-            mx: (a0[0] + b0[0]) / 2,
-            my: (a0[1] + b0[1]) / 2,
-            angleDeg: ang,
+            d: `M${a0[0].toFixed(1)} ${a0[1].toFixed(1)}Q${cx.toFixed(1)} ${cy.toFixed(1)} ${b0[0].toFixed(1)} ${b0[1].toFixed(1)}`,
+            mx,
+            my,
+            angleDeg: (Math.atan2(mty, mtx) * 180) / Math.PI,
             chord: chord0,
             endX: b0[0],
             endY: b0[1],
-            endAngleDeg: ang,
+            endAngleDeg: (Math.atan2(b0[1] - cy, b0[0] - cx) * 180) / Math.PI,
           };
         }
       }

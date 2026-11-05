@@ -862,9 +862,9 @@ window.WAR_DATA = [
       },
       {
         y: 200.25,
-        moves: [{ side: 'cao', from: [113.95, 34.9], to: [114.55, 35.53],
+        moves: [{ side: 'cao', path: [[113.95, 34.9], [114.42, 35.28], [114.55, 35.53]],
           titleZh: '曹操声东击西，驰援白马',
-          titleEn: 'Cao Cao feints, then races to Baima',
+          titleEn: 'Cao Cao feints at Yanjin, then races to Baima',
           descZh: '曹操佯渡延津诱袁军西顾，实则轻兵兼道西进——颜良仓促逆战，白马之围一战而解。',
           descEn: 'Cao feinted at Yanjin, then force-marched west; Yan Liang was caught unprepared.' }],
         battles: [{ side: 'cao', at: [114.55, 35.53], nameZh: '白马之战，关羽斩颜良', nameEn: 'Baima; Guan Yu slays Yan Liang', placeZh: '今河南滑县', placeEn: 'Huaxian, Henan',
