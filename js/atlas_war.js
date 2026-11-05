@@ -271,6 +271,8 @@
     _cancelWarDraws() {
       (this._warDrawRafs || []).forEach((h) => cancelAnimationFrame(h));
       this._warDrawRafs = [];
+      (this._warDrawTimers || []).forEach((h) => clearTimeout(h));
+      this._warDrawTimers = [];
     }
 
     // 战术符号（楔形头/战役菱形/名签）屏幕尺寸恒定：与骑乘头同一 kScreen 全补偿。
@@ -348,7 +350,9 @@
           /* keep last scale */
         }
         const Ls = Lu * kScreen;
-        const k = Math.min(1, (now - t0) / drawMs);
+        // k 双侧夹紧：k<0 时 eased 为负、dashoffset 越过 dasharray，
+        // 可见段跳到线中段（绘制首帧实测瞬移一帧）
+        const k = Math.max(0, Math.min(1, (now - t0) / drawMs));
         const eased = ease(k);
         const off = Ls * (1 - eased);
         for (const q of [casing, p]) {
@@ -453,9 +457,10 @@
       }
 
       // --- march arrows: past as solid traces, current drawing progressively ---
-      // 绘制时长与相机飞行同速同缓动（WAR_FLIGHT_MS + cubic ease-out）：
-      // 箭头与地图一个节奏起手、同时落定，行军可读不催赶。
-      const drawMs = WAR_FLIGHT_MS;
+      // 绘制时长与相机飞行同速同缓动（WAR_FLIGHT_MS + cubic ease-out），
+      // 播放变速时同比缩放；绘制本身再延迟到飞行 55% 处启动（见下）。
+      const flightMs = WAR_FLIGHT_MS / (this._warPlaySpeed || 1);
+      const drawMs = flightMs;
       for (let i = 0; i <= idx; i++) {
         const s = w.steps[i];
         const isCur = i === idx;
@@ -503,14 +508,32 @@
             );
           }
           if (isCur && !claimed) {
-            // 骑乘楔形头：绘制期间骑在生长端点上，画完移除、静态楔形接管
-            let rider = null;
-            if (!reducedMotion() && info.endX !== null) {
-              rider = this._svgNode('g', { class: 'war-rider' }, g);
-              rider.style.color = side.color;
-              this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
+            // 骑乘楔形头：绘制期间骑在生长端点上，画完移除、静态楔形接管。
+            // 绘制延迟到飞行约 55% 处才启动——若与飞行同时开始，全国视角下
+            // 整条线只有 ~20px 而骑乘头恒定 19px，"箭头跟着线尖走"读不出来；
+            // 先让取景基本就位（55% 时 ease-out 已达 93%），箭头在已定好的
+            // 战场上扫完，才是战史动画的时序。播放变速时整套时序同比缩放。
+            const startDraw = () => {
+              let rider = null;
+              if (!reducedMotion() && info.endX !== null) {
+                rider = this._svgNode('g', { class: 'war-rider' }, g);
+                rider.style.color = side.color;
+                this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
+              }
+              this._startWarDraw(casing, p, dir, rider, tier, drawMs);
+            };
+            const delay = reducedMotion() ? 0 : Math.round(flightMs * 0.55);
+            if (delay > 0) {
+              const h = setTimeout(() => {
+                this._warDrawTimers = (this._warDrawTimers || []).filter((t) => t !== h);
+                if (!casing.isConnected) return; // 重渲染后旧节点作废
+                startDraw();
+              }, delay);
+              this._warDrawTimers = this._warDrawTimers || [];
+              this._warDrawTimers.push(h);
+            } else {
+              startDraw();
             }
-            this._startWarDraw(casing, p, dir, rider, tier, drawMs);
           } else if (isCur && claimed && dir) {
             // 号称兵力轴不播绘制动画（虚线即时呈现），楔形头直接落位
             dir.classList.add('is-arrived');
@@ -803,7 +826,7 @@
           y: Math.max(-150, Math.min(700 - cam.h + 120, cy - cam.h / 2)),
           w: cam.w,
           h: cam.h,
-        }, WAR_FLIGHT_MS);
+        }, WAR_FLIGHT_MS / (this._warPlaySpeed || 1));
         return;
       }
       // 手动聚焦：度标定的 AABB 适配（pad 12%、最小 1.8°、最大 30°）。
@@ -820,7 +843,7 @@
         y: cy - bh / 2,
         w: bw,
         h: bh,
-      }, WAR_FLIGHT_MS);
+      }, WAR_FLIGHT_MS / (this._warPlaySpeed || 1));
     }
 
     // 战场全境适配：全场步骤所有坐标点的 AABB，pad 12%、最小 2.3°、最大 53°。
@@ -1010,7 +1033,7 @@
               this.camera = { ...fit, zoom: 1000 / fit.w };
               this._applyCamera(false);
             } else {
-              this._animateCameraTo(fit, WAR_FLIGHT_MS);
+              this._animateCameraTo(fit, WAR_FLIGHT_MS / (this._warPlaySpeed || 1));
             }
           }
         }
