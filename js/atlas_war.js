@@ -322,8 +322,14 @@
     // 保持屏幕尺寸恒定；画完后移除骑乘头，静态楔形在终点接管（同为
     // kScreen 全补偿，交接不跳变——见 _warRescaleGlyphs）。
     _startWarDraw(casing, p, dirG, rider, tier, drawMs) {
+      const showFull = () => {
+        for (const q of [casing, p]) {
+          if (q) q.style.visibility = 'visible';
+        }
+      };
       const reduced = reducedMotion();
       if (reduced) {
+        showFull();
         if (dirG) dirG.classList.add('is-arrived');
         if (rider) rider.remove();
         return;
@@ -335,6 +341,7 @@
         Lu = 0;
       }
       if (!(Lu > 2)) {
+        showFull();
         if (dirG) dirG.classList.add('is-arrived');
         if (rider) rider.remove();
         return;
@@ -356,6 +363,8 @@
         const eased = ease(k);
         const off = Ls * (1 - eased);
         for (const q of [casing, p]) {
+          // 首帧带 dash 显形（创建时为隐藏，避免延迟期整线裸奔）
+          q.style.visibility = 'visible';
           q.style.strokeDasharray = `${Ls.toFixed(1)}`;
           q.style.strokeDashoffset = `${off.toFixed(1)}`;
         }
@@ -484,6 +493,12 @@
             { d: info.d, class: cls, stroke: side.color },
             g
           );
+          if (isCur && !claimed) {
+            // 当前行先隐藏：绘制延迟期间未写 dash 的全线会裸奔
+            //（用户读作"先出现一根线又消失"）。_startWarDraw 首帧带 dash 显形。
+            casing.style.visibility = 'hidden';
+            p.style.visibility = 'hidden';
+          }
           // directional chevron at the DESTINATION tip, angled along the drawn
           // curve's end tangent (not the raw last leg — see _warPathEnd)
           let dir = null;
