@@ -152,6 +152,27 @@
       const g0 = pts[0];
       const g1 = pts[pts.length - 1];
       if (Math.hypot(g1[0] - g0[0], g1[1] - g0[1]) < 0.1) return null;
+      // 短直进轴（无途经点、弦 < 40 用户单位 ≈ 3°）：journey 构建器的最小弯幅
+      // (9 单位) 对短弦是巨型钩子——末端切线甩到行进方向侧后方（官渡白马轴
+      // 11 单位弦实测甩 64°）。战术轴走直线，长距离战略行军才吃弯。
+      if (pts.length === 2 && this.projector) {
+        const a0 = this.projector.toScreen(g0[0], g0[1]);
+        const b0 = this.projector.toScreen(g1[0], g1[1]);
+        const chord0 = Math.hypot(b0[0] - a0[0], b0[1] - a0[1]);
+        if (chord0 < 40) {
+          const ang = (Math.atan2(b0[1] - a0[1], b0[0] - a0[0]) * 180) / Math.PI;
+          return {
+            d: `M${a0[0].toFixed(1)} ${a0[1].toFixed(1)}L${b0[0].toFixed(1)} ${b0[1].toFixed(1)}`,
+            mx: (a0[0] + b0[0]) / 2,
+            my: (a0[1] + b0[1]) / 2,
+            angleDeg: ang,
+            chord: chord0,
+            endX: b0[0],
+            endY: b0[1],
+            endAngleDeg: ang,
+          };
+        }
+      }
       const info = this._buildJourneySegmentInfo(
         g0,
         g1,
@@ -209,6 +230,29 @@
         }
       }
       return coord;
+    }
+
+    // 静态楔形头的位置与角度取【画出来的曲线】末端（getPointAtLength L 与 L-2），
+    // 与骑乘头末帧同一算法——raw 航点的末段弦角在弯道上会甩离曲线方向
+    // （官渡南压箭头曾实测楔形指向与线不一致），交接瞬间也会甩角。
+    _warPathEnd(p, fallback) {
+      try {
+        const L = p.getTotalLength();
+        const pt = p.getPointAtLength(L);
+        const near = p.getPointAtLength(Math.max(0, L - 2));
+        if (Math.hypot(pt.x - near.x, pt.y - near.y) > 0.05) {
+          return {
+            endX: pt.x,
+            endY: pt.y,
+            endAngleDeg: (Math.atan2(pt.y - near.y, pt.x - near.x) * 180) / Math.PI,
+          };
+        }
+      } catch (e) {
+        /* fall through to raw-waypoint fallback */
+      }
+      return fallback && fallback.endX !== null
+        ? { endX: fallback.endX, endY: fallback.endY, endAngleDeg: fallback.endAngleDeg }
+        : null;
     }
 
     _cancelWarDraws() {
@@ -421,16 +465,18 @@
             { d: info.d, class: cls, stroke: side.color },
             g
           );
-          // directional chevron at the DESTINATION tip, angled along the final leg
+          // directional chevron at the DESTINATION tip, angled along the drawn
+          // curve's end tangent (not the raw last leg — see _warPathEnd)
           let dir = null;
-          if (info.endX !== null) {
+          const end = info.endX !== null ? this._warPathEnd(p, info) : null;
+          if (end) {
             dir = this._svgNode(
               'g',
               {
                 class: `war-dir t${tier}${isCur ? ' is-cur' : ''}`,
-                'data-x': info.endX.toFixed(1),
-                'data-y': info.endY.toFixed(1),
-                'data-rot': info.endAngleDeg.toFixed(1),
+                'data-x': end.endX.toFixed(1),
+                'data-y': end.endY.toFixed(1),
+                'data-rot': end.endAngleDeg.toFixed(1),
               },
               g
             );
