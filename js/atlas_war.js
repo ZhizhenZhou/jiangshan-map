@@ -18,6 +18,9 @@
 
   const TAIL_YEARS = 3;           // post-war replay window (map + panel share it)
   const PLAY_INTERVAL = 2600;     // ms per step while playing (1× 档，叙事节奏)
+  // 战争模块的相机飞行时长：行军箭头绘制与它同步同缓动（_animateCameraTo
+  // 的 duration 参数）——箭头与地图一个节奏。650 是全 app 默认，战争用慢档。
+  const WAR_FLIGHT_MS = 1150;
   const TIER_WIDTHS = [3.4, 5, 7, 9.5];       // screen px per strength tier
   const TIER_SCALES = [0.9, 1.1, 1.35, 1.65]; // battle-diamond core scales
   const WEDGE_D = "M-5.5 -3.8L6.5 0L-5.5 3.8L-2.4 0Z"; // 楔形头（12px 级，随档位缩放）
@@ -401,6 +404,8 @@
       this._cancelWarDraws();
       grp.innerHTML = '';
       this._warUsedSpots = {};
+      this._warCurMoveTip = null;   // 当前行军箭头落点（浮签锚）
+      this._warBattleAnchor = null; // ≤当前步的最后一役（叙事步浮签锚）
 
       if (!w) return;
       const g = this._svgNode('g', { class: 'war-root' }, grp);
@@ -448,10 +453,9 @@
       }
 
       // --- march arrows: past as solid traces, current drawing progressively ---
-      // 绘制时长与相机飞行(_animateCameraTo 650ms, cubic ease-out)同步同曲线：
-      // 箭头与地图一个节奏——起手同冲、同时落定，不再"地图停了箭头还在爬"
-      //（旧公式 PLAY_INTERVAL-550 让箭头爬 1.9s，用户实测观感为速率不一致）。
-      const drawMs = 650;
+      // 绘制时长与相机飞行同速同缓动（WAR_FLIGHT_MS + cubic ease-out）：
+      // 箭头与地图一个节奏起手、同时落定，行军可读不催赶。
+      const drawMs = WAR_FLIGHT_MS;
       for (let i = 0; i <= idx; i++) {
         const s = w.steps[i];
         const isCur = i === idx;
@@ -480,6 +484,7 @@
           let dir = null;
           const end = info.endX !== null ? this._warPathEnd(p, info) : null;
           if (end) {
+            if (isCur) this._warCurMoveTip = { x: end.endX, y: end.endY };
             dir = this._svgNode(
               'g',
               {
@@ -541,6 +546,8 @@
             g
           );
           if (isCur) this._warCurSpot = { x: sx, y: sy };
+          // 最近战场锚（≤当前步的最后一役）：叙事步浮签沿用它
+          this._warBattleAnchor = { x: sx, y: sy };
           this._svgNode('circle', { class: 'war-ring', r: 8.5, stroke: side.color }, node);
           const core = this._svgNode(
             'g',
@@ -796,7 +803,7 @@
           y: Math.max(-150, Math.min(700 - cam.h + 120, cy - cam.h / 2)),
           w: cam.w,
           h: cam.h,
-        });
+        }, WAR_FLIGHT_MS);
         return;
       }
       // 手动聚焦：度标定的 AABB 适配（pad 12%、最小 1.8°、最大 30°）。
@@ -813,7 +820,7 @@
         y: cy - bh / 2,
         w: bw,
         h: bh,
-      });
+      }, WAR_FLIGHT_MS);
     }
 
     // 战场全境适配：全场步骤所有坐标点的 AABB，pad 12%、最小 2.3°、最大 53°。
@@ -995,6 +1002,7 @@
       // 战局失活清登记，下次进入重新飞。拖轴途中不抢相机。
       if (w && this._warTheaterKey !== w.key) {
         this._warTheaterKey = w.key;
+        this._warLastAnchor = null; // 换战役：叙事步锚点不跨场沿用
         if (!this.isScrubbing && !this.challenge && !this.activePerson && !this.activeTrace) {
           const fit = this._warTheaterFit(w);
           if (fit) {
@@ -1002,12 +1010,13 @@
               this.camera = { ...fit, zoom: 1000 / fit.w };
               this._applyCamera(false);
             } else {
-              this._animateCameraTo(fit);
+              this._animateCameraTo(fit, WAR_FLIGHT_MS);
             }
           }
         }
       } else if (!w) {
         this._warTheaterKey = null;
+        this._warLastAnchor = null;
       }
     }
 
@@ -1028,12 +1037,20 @@
     _syncWarBalloon(w, idx) {
       const el = this._warBalloonEl();
       if (!el) return;
-      const battle = w && idx >= 0 ? ((w.steps[idx] || {}).battles || [])[0] : null;
+      const step = w && idx >= 0 ? w.steps[idx] : null;
+      const battle = step ? (step.battles || [])[0] : null;
       const milestoneOpen =
         this.milestoneBalloon && !this.milestoneBalloon.classList.contains('is-hidden');
+      // 锚点：战步用战役点；行军步用箭头落点；叙事步沿用最近战场
+      if (battle && this._warCurSpot) this._warLastAnchor = this._warCurSpot;
+      const anchor = battle
+        ? this._warCurSpot
+        : (this._warCurMoveTip || this._warBattleAnchor || this._warLastAnchor);
+      if (anchor) this._warLastAnchor = anchor;
       const usable =
-        battle &&
-        this._warCurSpot &&
+        step &&
+        (battle || this._warStepTitle(w, step)) &&
+        anchor &&
         this._warLayerOn() &&
         !this.challenge &&
         !this.activePerson &&
@@ -1046,29 +1063,35 @@
       const sig = [this.locale, w.key, idx].join('|');
       if (sig !== this._warBalloonSig) {
         this._warBalloonSig = sig;
-        const title = this._warField(battle, 'name') || this._warStepTitle(w, w.steps[idx]);
+        const title = battle
+          ? (this._warField(battle, 'name') || this._warStepTitle(w, step))
+          : this._warStepTitle(w, step);
         const zh = this.locale !== 'en';
-        const side = this._warSide(w, battle.side);
-        // 浮签瘦身：不放 desc（与卡片逐字重复）。
-        // 战果行优先用 battle.resultZh/En（每役不同的实况），退回通用得手方行；
-        // 地点行每役必异（placeZh 数据全集都有）——避免"每步都一样"的观感。
-        const result = this._warField(battle, 'result');
-        const sideNote = result
-          ? result
-          : zh
-            ? `此役${esc(this._warField(side, 'name'))}得手/占优`
-            : `${esc(this._warField(side, 'name'))} held the field`;
-        const place = this._warField(battle, 'place');
-        const forces = this._warStepForces(w, w.steps[idx])
+        const side = battle ? this._warSide(w, battle.side) : null;
+        // 战果行优先 battle.resultZh/En（每役实况），退回通用得手方行；
+        // 叙事步没有胜负，标题+描述自立。地点行每役必异。
+        const result = battle ? this._warField(battle, 'result') : '';
+        const sideNote = battle
+          ? (result ||
+             (zh
+               ? `此役${esc(this._warField(side, 'name'))}得手/占优`
+               : `${esc(this._warField(side, 'name'))} held the field`))
+          : '';
+        const place = battle ? this._warField(battle, 'place') : '';
+        // 详细描述：战步取战例 desc，行军步取 move desc，叙事步取 step desc
+        const dsrc = battle || (step.moves || [])[0] || step;
+        const desc = this._warField(dsrc, 'desc');
+        const forces = this._warStepForces(w, step)
           .map((f) => {
             const sd = this._warSide(w, f.side);
             return `<span class="war-bf-item"><i style="background:${sd.color}"></i>${esc(this._warField(sd, 'name'))} ${esc(this._warFormatN(f.n, f.quality))}</span>`;
           })
           .join('');
         el.innerHTML =
-          `<div class="ep-head"><span class="ep-year">${esc(this.formatYear(w.steps[idx].y))} · ${esc(title)}</span></div>` +
-          `<div class="war-balloon-side" style="color:${side.color}">${sideNote}</div>` +
+          `<div class="ep-head"><span class="ep-year">${esc(this.formatYear(step.y))} · ${esc(title)}</span></div>` +
+          (sideNote ? `<div class="war-balloon-side" style="color:${side.color}">${sideNote}</div>` : '') +
           (place ? `<div class="war-balloon-place">${esc(place)}</div>` : '') +
+          (desc ? `<div class="war-balloon-desc">${esc(desc)}</div>` : '') +
           (forces ? `<div class="war-balloon-forces">${forces}</div>` : '') +
           `<button type="button" class="ep-close" aria-label="${zh ? '关闭战报浮签' : 'Dismiss campaign callout'}">×</button>`;
         const closeBtn = el.querySelector('.ep-close');
@@ -1081,9 +1104,26 @@
         }
         if (this.locale === 'zh-tw') this._applyZhHantDom(el);
       }
+      // 悬停浮签 = 暂停自动播放（读详细描述时不被推走），移出恢复
+      if (!this._warBalloonHoverBound) {
+        this._warBalloonHoverBound = true;
+        el.addEventListener('pointerenter', () => {
+          if (!this._warPlayTimer) return;
+          clearInterval(this._warPlayTimer);
+          this._warPlayTimer = null;
+          this._warPlayPausedByHover = true;
+          this._syncWarPlayGlyph();
+        });
+        el.addEventListener('pointerleave', () => {
+          if (!this._warPlayPausedByHover || this._warPlayTimer) return;
+          this._warPlayPausedByHover = false;
+          const w2 = this._activeWar();
+          if (w2 && this._warLayerOn()) this._startWarInterval(w2);
+        });
+      }
       this._warBalloonState = {
-        sx: this._warCurSpot.x,
-        sy: this._warCurSpot.y,
+        sx: anchor.x,
+        sy: anchor.y,
       };
       el.classList.remove('is-hidden', 'is-offscreen');
       this._positionWarBalloon();

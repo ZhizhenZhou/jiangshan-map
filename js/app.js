@@ -10210,7 +10210,7 @@
       }
     }
 
-    _animateCameraTo(targetCam) {
+    _animateCameraTo(targetCam, duration = 650) {
       this._cameraTarget = targetCam;
       if (
         !this._cameraViewportRect &&
@@ -10221,7 +10221,6 @@
       }
       const from = { ...this.camera };
       const t0 = performance.now();
-      const duration = 650;
       if (this.flyRaf) cancelAnimationFrame(this.flyRaf);
       const step = (now) => {
         const k = Math.min(1, (now - t0) / duration);
