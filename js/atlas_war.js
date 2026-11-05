@@ -674,20 +674,64 @@
         if (!card.classList.contains('is-hidden')) {
           card.classList.add('is-hidden');
         }
-        this._warCardSig = null;
+        this._warCardBuildSig = null;
+        this._warCardStepSig = null;
         return;
       }
       const folded = card.classList.contains('is-folded');
-      const sig = [this.locale, w.key, idx, folded ? 1 : 0].join('|');
-      if (sig === this._warCardSig) return;
-      this._warCardSig = sig;
+      const last = (w.steps || []).length - 1;
+      // 两级签名：换战役/换语言/折叠态才整卡重建；换步只做局部刷新
+      //（旧版签名含 idx，每步 innerHTML 全卡重建——用户实测"每步都刷新/闪烁"）
+      const buildSig = [this.locale, w.key, folded ? 1 : 0].join('|');
+      if (buildSig !== this._warCardBuildSig) {
+        this._warCardBuildSig = buildSig;
+        this._warCardStepSig = null;
+        const prevScroll = card.classList.contains('is-hidden') ? 0 : (card.querySelector('.war-steps') || {}).scrollTop || 0;
+        const spanTxt = `${this.formatYear(w.span[0], true)} — ${this.formatYear(w.span[1], true)}`;
+        const sidesHtml = (w.sides || [])
+          .map((sd) => `<span class="war-side"><i style="background:${sd.color}"></i>${esc(this._warField(sd, 'name'))}</span>`)
+          .join('');
+        const listHtml = (w.steps || [])
+          .map((s, i) => {
+            const b0 = (s.battles || [])[0];
+            const side = this._warSide(w, b0 ? b0.side : ((s.moves || [])[0] || {}).side);
+            return (
+              `<div class="war-step" data-act="step" data-idx="${i}">` +
+              `<span class="wy" style="color:${side.color}">${this.formatYear(s.y, true)}</span>` +
+              `<span class="wt">${esc(this._warStepTitle(w, s))}</span></div>`
+            );
+          })
+          .join('');
+        card.innerHTML =
+          `<div class="war-head" data-act="fold-toggle">` +
+          `<span class="war-title">${esc(this._warField(w, 'title'))}</span>` +
+          `<span class="war-years">${spanTxt}</span>` +
+          `<button class="war-fold" data-act="fold" aria-expanded="${folded ? 'false' : 'true'}" title="${esc(this._warTxt('fold'))}">▾</button>` +
+          `</div>` +
+          `<div class="war-body${folded ? ' is-folded' : ''}">` +
+          `<div class="war-sides">${sidesHtml}</div>` +
+          `<div class="war-narr"></div>` +
+          `<div class="war-fbars-slot"></div>` +
+          `<div class="war-steps">${listHtml}</div>` +
+          `<div class="war-ctrl">` +
+          `<button class="war-btn is-ico" data-act="rewind" title="${esc(this._warTxt('rewind'))}">${WAR_ICONS.rewind}</button>` +
+          `<button class="war-btn is-ico" data-act="prev" title="${esc(this._warTxt('prev'))}">${WAR_ICONS.prev}</button>` +
+          `<span class="war-stepcount"></span>` +
+          `<button class="war-btn is-ico" data-act="next" title="${esc(this._warTxt('next'))}">${WAR_ICONS.next}</button>` +
+          `<button class="war-btn is-ico" data-act="end" title="${esc(this._warTxt('end'))}">${WAR_ICONS.end}</button>` +
+          `</div>` +
+          `<div class="war-foot">${esc(this._warTxt('foot'))}</div>` +
+          `</div>`;
+        card.classList.remove('is-hidden');
+        if (prevScroll) {
+          const listEl = card.querySelector('.war-steps');
+          if (listEl) listEl.scrollTop = prevScroll;
+        }
+      }
+      if (idx === this._warCardStepSig) return;
+      this._warCardStepSig = idx;
 
-      const prevScroll = card.classList.contains('is-hidden') ? 0 : (card.querySelector('.war-steps') || {}).scrollTop || 0;
-      const zh = this.locale !== 'en';
-      const spanTxt = `${this.formatYear(w.span[0], true)} — ${this.formatYear(w.span[1], true)}`;
-      const sidesHtml = (w.sides || [])
-        .map((sd) => `<span class="war-side"><i style="background:${sd.color}"></i>${esc(this._warField(sd, 'name'))}</span>`)
-        .join('');
+      // ---- 局部刷新：叙述 / 兵力条 / 步数 / 按钮禁用态 / 列表高亮 ----
       const step = idx >= 0 ? w.steps[idx] : null;
       const zi = this._warZoneIndex(w);
       const zone = zi >= 0 ? (w.zones || [])[zi] : null;
@@ -703,42 +747,18 @@
             this._warField(step.battles && step.battles[0] ? step.battles[0] : (step.moves || [])[0] || {}, 'desc') ||
               this._warField(step.moves && step.moves[0] ? step.moves[0] : {}, 'desc')
           )}${zoneNoteHtml}`;
-      const listHtml = (w.steps || [])
-        .map((s, i) => {
-          const b0 = (s.battles || [])[0];
-          const side = this._warSide(w, b0 ? b0.side : ((s.moves || [])[0] || {}).side);
-          return (
-            `<div class="war-step${i === idx ? ' is-cur' : ''}" data-act="step" data-idx="${i}">` +
-            `<span class="wy" style="color:${side.color}">${this.formatYear(s.y, true)}</span>` +
-            `<span class="wt">${esc(this._warStepTitle(w, s))}</span></div>`
-          );
-        })
-        .join('');
-      card.innerHTML =
-        `<div class="war-head" data-act="fold-toggle">` +
-        `<span class="war-title">${esc(this._warField(w, 'title'))}</span>` +
-        `<span class="war-years">${spanTxt}</span>` +
-        `<button class="war-fold" data-act="fold" aria-expanded="${folded ? 'false' : 'true'}" title="${esc(this._warTxt('fold'))}">▾</button>` +
-        `</div>` +
-        `<div class="war-body${folded ? ' is-folded' : ''}">` +
-        `<div class="war-sides">${sidesHtml}</div>` +
-        `<div class="war-narr">${narrHtml}</div>` +
-        (idx >= 0 ? this._warForceBarsHtml(w, step) : '') +
-        `<div class="war-steps">${listHtml}</div>` +
-        `<div class="war-ctrl">` +
-        `<button class="war-btn is-ico${idx <= 0 ? ' is-disabled' : ''}" data-act="rewind" title="${esc(this._warTxt('rewind'))}">${WAR_ICONS.rewind}</button>` +
-        `<button class="war-btn is-ico${idx <= 0 ? ' is-disabled' : ''}" data-act="prev" title="${esc(this._warTxt('prev'))}">${WAR_ICONS.prev}</button>` +
-        `<span class="war-stepcount">${Math.max(0, idx + 1)}<i>/</i>${w.steps.length}</span>` +
-        `<button class="war-btn is-ico${idx >= w.steps.length - 1 ? ' is-disabled' : ''}" data-act="next" title="${esc(this._warTxt('next'))}">${WAR_ICONS.next}</button>` +
-        `<button class="war-btn is-ico${idx >= w.steps.length - 1 ? ' is-disabled' : ''}" data-act="end" title="${esc(this._warTxt('end'))}">${WAR_ICONS.end}</button>` +
-        `</div>` +
-        `<div class="war-foot">${esc(this._warTxt('foot'))}</div>` +
-        `</div>`;
-      card.classList.remove('is-hidden');
-      if (prevScroll) {
-        const listEl = card.querySelector('.war-steps');
-        if (listEl) listEl.scrollTop = prevScroll;
-      }
+      card.querySelector('.war-narr').innerHTML = narrHtml;
+      card.querySelector('.war-fbars-slot').innerHTML = idx >= 0 ? this._warForceBarsHtml(w, step) : '';
+      card.querySelector('.war-stepcount').innerHTML = `${Math.max(0, idx + 1)}<i>/</i>${w.steps.length}`;
+      const setDis = (act, dis) => {
+        const b = card.querySelector(`[data-act="${act}"]`);
+        if (b) b.classList.toggle('is-disabled', dis);
+      };
+      setDis('rewind', idx <= 0);
+      setDis('prev', idx <= 0);
+      setDis('next', idx >= last);
+      setDis('end', idx >= last);
+      card.querySelectorAll('.war-step').forEach((r, i) => r.classList.toggle('is-cur', i === idx));
       const curRow = card.querySelector('.war-step.is-cur');
       if (curRow) {
         const listEl = card.querySelector('.war-steps');
@@ -1136,7 +1156,8 @@
 
     _onWarLocaleChange() {
       this._warSvgSig = null;
-      this._warCardSig = null;
+      this._warCardBuildSig = null;
+      this._warCardStepSig = null;
       this._warBalloonSig = null;
       const chk = this._id('chk-war');
       const lbl = this._id('lbl-war');

@@ -5529,7 +5529,8 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 .war-ctrl {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 7px;
   background: rgba(90, 74, 58, 0.1);
   border-radius: 9px;
   padding: 4px 8px;
@@ -5570,10 +5571,13 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   opacity: 0.3;
   pointer-events: none;
 }
+/* 步数嵌片：固定宽度（tabular 数位不跳动），整簇居中而非弹簧拉伸 */
 .war-stepcount {
-  flex: 1;
+  min-width: 48px;
   text-align: center;
-  margin: 0 4px;
+  padding: 3px 8px;
+  background: rgba(90, 74, 58, 0.13);
+  border-radius: 6px;
   font-family: var(--sans-stack);
   font-size: 10.5px;
   color: var(--text-secondary);
