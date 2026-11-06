@@ -227,28 +227,6 @@
       };
     }
 
-    // 同场战争内多役同址时做微小偏移（登记偏移后落点，避免二次重叠）。
-    // 0.3° 档 ≈ 战场全境 zoom 下 20px 间距（0.15° 曾实测挤到 14.8px）。
-    _warOffset(w, coord) {
-      const offs = [
-        [0, 0],
-        [0.3, 0.22],
-        [-0.3, 0.22],
-        [0.26, -0.28],
-        [-0.26, -0.28],
-      ];
-      if (!this._warUsedSpots) this._warUsedSpots = {};
-      const list = this._warUsedSpots[w.key] || (this._warUsedSpots[w.key] = []);
-      for (const [dx, dy] of offs) {
-        const cand = [coord[0] + dx, coord[1] + dy];
-        if (!list.some((s) => Math.hypot(s[0] - cand[0], s[1] - cand[1]) < 0.34)) {
-          list.push(cand);
-          return cand;
-        }
-      }
-      return coord;
-    }
-
     // 静态楔形头的位置与角度取【画出来的曲线】末端（getPointAtLength L 与 L-2），
     // 与骑乘头末帧同一算法——raw 航点的末段弦角在弯道上会甩离曲线方向
     // （官渡南压箭头曾实测楔形指向与线不一致），交接瞬间也会甩角。
@@ -283,6 +261,10 @@
     // 通用 _rescaleSvgTypography 给 war 符号的是 1/√z 档（里程碑钉惯例）——
     // 深 zoom 下符号涨 √z≈6.5 倍（楔形 150px、菱环 200px+），且与动画期恒定的
     // 骑乘头在交接瞬间对不上（"画完爆开"）。这里在每次相机应用后覆盖 transform。
+    //
+    // 战役菱形避让也在这一步做：菱形按【真址】渲染，屏距 <26px 的组成簇，
+    // 簇内错开到 22px 屏距——错开量随缩放折算成用户单位，深 zoom 时菱形
+    // 趋近真址（延津曾实测被 0.3° 固定偏移甩离箭头尖端 130px）。
     _warRescaleGlyphs() {
       const svg = this.svg;
       if (!svg || !this.camera || !this.camera.w) return;
@@ -298,19 +280,82 @@
       const k = rect.width / this.camera.w;
       if (!(k > 0)) return;
       const s = (1 / k).toFixed(4);
+
+      // --- 战役菱形：真址 + 屏幕恒定聚簇错开 ---
+      const nodes = [...grp.querySelectorAll('g.war-node')];
+      const placed = []; // 已占位的屏幕位置（用户单位存储，比较时乘 k）
+      const MINPX = 26;
+      const dirs = [[0.81, 0.6], [-0.81, 0.6], [0.74, -0.82], [-0.74, -0.82]];
+      let curOff = [0, 0];
+      for (const n of nodes) {
+        const tx = parseFloat(n.dataset.x);
+        const ty = parseFloat(n.dataset.y);
+        if (!Number.isFinite(tx) || !Number.isFinite(ty)) continue;
+        let ox = 0;
+        let oy = 0;
+        const collide = (ax, ay) =>
+          placed.some((q) => Math.hypot((q[0] - ax) * k, (q[1] - ay) * k) < MINPX);
+        if (collide(tx, ty)) {
+          for (let d = 1; d <= 4 && !ox && !oy; d++) {
+            const stepU = (MINPX * d) / k;
+            for (const [dx, dy] of dirs) {
+              const ax = tx + dx * stepU;
+              const ay = ty + dy * stepU;
+              if (!collide(ax, ay)) {
+                ox = ax - tx;
+                oy = ay - ty;
+                break;
+              }
+            }
+          }
+        }
+        placed.push([tx + ox, ty + oy]);
+        n.setAttribute('transform', `translate(${(tx + ox).toFixed(1)},${(ty + oy).toFixed(1)}) scale(${s})`);
+        if (n.classList.contains('is-cur')) curOff = [ox, oy];
+      }
+      // 名签随当前步菱形一同避让（锚点与菱形保持对齐）
+      const curN0 = grp.querySelector('g.war-node.is-cur');
       grp
-        .querySelectorAll('g.war-node[data-x], g.war-dir[data-x], g.war-lbl[data-x]')
+        .querySelectorAll('g.war-lbl[data-x]')
+        .forEach((n) => {
+          let ox = 0;
+          let oy = 0;
+          if ((curOff[0] || curOff[1]) && curN0 &&
+              n.dataset.x === curN0.dataset.x && n.dataset.y === curN0.dataset.y) {
+            ox = curOff[0];
+            oy = curOff[1];
+          }
+          const lx = parseFloat(n.dataset.x) + ox;
+          const ly = parseFloat(n.dataset.y) + oy;
+          n.setAttribute('transform', `translate(${lx.toFixed(1)},${ly.toFixed(1)}) scale(${s})`);
+        });
+      // 锚点同步：浮签/去重用的是菱形的【当前落位】
+      const curN = grp.querySelector('g.war-node.is-cur');
+      if (curN) {
+        const t = /translate\(([\d.-]+),([\d.-]+)\)/.exec(curN.getAttribute('transform') || '');
+        if (t) {
+          const np = { x: +t[1], y: +t[2] };
+          this._warCurSpot = np;
+          if (this._warBalloonState && this._warBalloonAnchorKind === 'battle') {
+            this._warBalloonState = { sx: np.x, sy: np.y };
+          }
+        }
+      }
+      const allN = nodes[nodes.length - 1];
+      if (allN) {
+        const t = /translate\(([\d.-]+),([\d.-]+)\)/.exec(allN.getAttribute('transform') || '');
+        if (t) this._warBattleAnchor = { x: +t[1], y: +t[2] };
+      }
+
+      // --- 楔形头：位置钉真址（不参与避让），屏幕尺寸恒定 ---
+      grp
+        .querySelectorAll('g.war-dir[data-x]')
         .forEach((n) => {
           const x = n.getAttribute('data-x');
           const y = n.getAttribute('data-y');
           if (x === null || y === null) return;
-          const rot = n.getAttribute('data-rot');
-          n.setAttribute(
-            'transform',
-            rot !== null
-              ? `translate(${x},${y}) rotate(${rot}) scale(${s})`
-              : `translate(${x},${y}) scale(${s})`
-          );
+          const rot = n.getAttribute('data-rot') || '0';
+          n.setAttribute('transform', `translate(${x},${y}) rotate(${rot}) scale(${s})`);
         });
     }
 
@@ -420,9 +465,9 @@
       }
       this._cancelWarDraws();
       grp.innerHTML = '';
-      this._warUsedSpots = {};
-      this._warCurMoveTip = null;   // 当前行军箭头落点（浮签锚）
-      this._warBattleAnchor = null; // ≤当前步的最后一役（叙事步浮签锚）
+      this._warCurMoveTip = null;       // 当前行军箭头落点（浮签锚，取主轴）
+      this._warCurMoveTipTier = null;   // 主轴的兵力档
+      this._warBattleAnchor = null;     // ≤当前步的最后一役（叙事步浮签锚）
 
       if (!w) return;
       const g = this._svgNode('g', { class: 'war-root' }, grp);
@@ -508,7 +553,12 @@
           let dir = null;
           const end = info.endX !== null ? this._warPathEnd(p, info) : null;
           if (end) {
-            if (isCur) this._warCurMoveTip = { x: end.endX, y: end.endY };
+            // 多箭头步（如四路分进）浮签锚定兵力最强的主轴（同强取先）
+            const best = this._warCurMoveTipTier == null || tier >= this._warCurMoveTipTier;
+            if (isCur && best) {
+              this._warCurMoveTip = { x: end.endX, y: end.endY };
+              this._warCurMoveTipTier = tier;
+            }
             dir = this._svgNode(
               'g',
               {
@@ -570,8 +620,9 @@
         (s.battles || []).forEach((b, bi) => {
           if (!b.at) return;
           const side = this._warSide(w, b.side);
-          const spot = this._warOffset(w, b.at);
-          const [sx, sy] = this.projector.toScreen(spot[0], spot[1]);
+          // 真址渲染：同址避让在 _warRescaleGlyphs 里按屏幕距离逐帧处理
+          //（旧版 0.3° 固定偏移在深 zoom 下把菱形甩离箭头尖端 130px）
+          const [sx, sy] = this.projector.toScreen(b.at[0], b.at[1]);
           const tier = this._warForceTier(
             Math.max(0, ...(b.forces || []).filter((f) => f.quality !== 'claimed').map((f) => f.n))
           );
@@ -1057,6 +1108,9 @@
         sx: anchor.x,
         sy: anchor.y,
       };
+      // 锚种类：菱形避让逐帧微调时，浮签只跟随同源锚（battle/叙事锚随菱形动，
+      // 主轴箭头尖锚不随菱形动）
+      this._warBalloonAnchorKind = battle ? 'battle' : (this._warCurMoveTip ? 'movetip' : 'battleanchor');
       el.classList.remove('is-hidden', 'is-offscreen');
       this._positionWarBalloon();
     }
@@ -1338,10 +1392,11 @@
       const r = baseApplyCam.apply(this, args);
       try {
         this._syncZoomDependentState();
+        // 通用 rescale 先写 1/√z 档，这里随后覆盖为 1/kScreen 全补偿档；
+        // 菱形避让会挪动锚点，须先于浮签定位执行
+        this._warRescaleGlyphs();
         this._positionWarBalloon();
         this._dedupeMilestonePins();
-        // 通用 rescale 先写 1/√z 档，这里随后覆盖为 1/kScreen 全补偿档
-        this._warRescaleGlyphs();
       } catch (e) {
         /* non-fatal */
       }
