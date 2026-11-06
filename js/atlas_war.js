@@ -25,8 +25,11 @@
   // 箭头头形：鼻尖在原点的三角（底边朝后）——骑乘时鼻尖钉在生长端点、
   // 底边朝后盖住已画线的末端，线的可见末端永远正好是箭头底边（贴线尖）；
   // 静态楔形同路径：鼻尖落在终点（战役位置）。交接前后头位置像素级一致。
-  const WEDGE_D = "M0 0L-12.5 -4.8L-12.5 4.8Z";
-  const WEDGE_SCALES = [1, 1.15, 1.35, 1.6];  // 楔形头档位缩放（骑乘与静态共用）
+  const WEDGE_D = "M0 0L-12.5 -5.4L-12.5 5.4Z";
+  // 头与线等比：档位系数 = 线宽/12.5×2.75——头长与底边宽恒为线宽的
+  // 2.75/2.5 倍（旧 1/1.15/1.35/1.6 与线宽脱钩：细线上头过大、粗线上头
+  // 缩成刺，用户实测"太丑"）。
+  const WEDGE_SCALES = TIER_WIDTHS.map((w) => +(w * 2.75 / 12.5).toFixed(3));
   const WAR_ICONS = {
     // 传输栏五键镜像对称：|◀ ◀  ▶ ▶|（回起始/上一步 ←→ 下一步/到结束）
     rewind: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><rect x="1.9" y="3" width="1.8" height="10" fill="currentColor"/><path d="M14.1 3v10L7.1 8z" fill="currentColor"/></svg>',
@@ -570,11 +573,9 @@
               g
             );
             dir.style.color = side.color;
-            this._svgNode(
-              'path',
-              { d: WEDGE_D, class: 'war-chevron' },
-              dir
-            );
+            // 头也吃底衬：浅色大一号的同形三角垫底，与线的底衬语言一致
+            this._svgNode('path', { d: WEDGE_D, class: 'war-chevron-under' }, dir);
+            this._svgNode('path', { d: WEDGE_D, class: 'war-chevron' }, dir);
           }
           if (isCur && !claimed) {
             // 骑乘楔形头：绘制期间骑在生长端点上，画完移除、静态楔形接管。
@@ -587,6 +588,7 @@
               if (!reducedMotion() && info.endX !== null) {
                 rider = this._svgNode('g', { class: 'war-rider' }, g);
                 rider.style.color = side.color;
+                this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge-under' }, rider);
                 this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
               }
               this._startWarDraw(casing, p, dir, rider, tier, drawMs);
@@ -1189,23 +1191,58 @@
       const minTop = isMobile ? 48 : 12;
       const maxTop = Math.max(minTop, rect.height - bH - (isMobile ? 56 : 16));
       const pinGap = isMobile ? 10 : 12;
-      let left;
-      let top = Math.max(minTop, Math.min(maxTop, py - bH * 0.42));
-      let caretDir = 'left';
-      if (px + pinGap <= rightLimit) {
-        left = px + pinGap;
-        caretDir = 'left';
-      } else if (px - bW - pinGap >= minLeft) {
-        left = px - bW - pinGap;
-        caretDir = 'right';
-      } else {
-        left = Math.max(minLeft, Math.min(rightLimit, px - bW / 2));
-        caretDir = py < rect.height / 2 ? 'top' : 'bottom';
+      // 候选侧按「与箭头行进方向同向」优先：线在箭头身后，前方是空的——
+      // 浮签放到行进方向那一侧就不会压住线（旧逻辑固定先右后左，常压线）。
+      const dirEl = this.grpWar
+        ? this.grpWar.querySelector('g.war-dir.is-cur')
+        : null;
+      const rotRad = ((parseFloat(dirEl && dirEl.dataset.rot) || 0) * Math.PI) / 180;
+      const advX = Math.cos(rotRad);
+      const advY = Math.sin(rotRad);
+      // 候选：side=浮签相对锚的方位；caret=data-caret 值（箭头指向锚的那条边）
+      const cands = [
+        { side: 'right', caret: 'left', dx: 1, dy: 0 },
+        { side: 'left', caret: 'right', dx: -1, dy: 0 },
+        { side: 'bottom', caret: 'top', dx: 0, dy: 1 },
+        { side: 'top', caret: 'bottom', dx: 0, dy: -1 },
+      ].map((c) => ({ ...c, score: c.dx * advX + c.dy * advY }))
+        .sort((a, b) => b.score - a.score);
+      let placed = null;
+      for (const c of cands) {
+        if (c.side === 'right') {
+          const left = px + pinGap;
+          if (left + bW <= rightLimit) { placed = { left, top: Math.max(minTop, Math.min(maxTop, py - bH * 0.42)), caretDir: c.caret }; break; }
+        } else if (c.side === 'left') {
+          const left = px - pinGap - bW;
+          if (left >= minLeft) { placed = { left, top: Math.max(minTop, Math.min(maxTop, py - bH * 0.42)), caretDir: c.caret }; break; }
+        } else if (c.side === 'bottom') {
+          const top = py + pinGap;
+          if (top + bH <= maxTop) { placed = { left: Math.max(minLeft, Math.min(rightLimit, px - bW / 2)), top, caretDir: c.caret }; break; }
+        } else {
+          const top = py - pinGap - bH;
+          if (top >= minTop) { placed = { left: Math.max(minLeft, Math.min(rightLimit, px - bW / 2)), top, caretDir: c.caret }; break; }
+        }
       }
-      el.style.left = `${left.toFixed(1)}px`;
-      el.style.top = `${top.toFixed(1)}px`;
-      el.style.setProperty('--caret-y', `${Math.max(14, Math.min(bH - 14, py - top)).toFixed(1)}px`);
-      el.dataset.caret = caretDir;
+      if (!placed) {
+        // 四侧都放不下：退回旧逻辑（右→左→居中）
+        let left;
+        let top = Math.max(minTop, Math.min(maxTop, py - bH * 0.42));
+        let caretDir = 'left';
+        if (px + pinGap <= rightLimit) {
+          left = px + pinGap;
+        } else if (px - bW - pinGap >= minLeft) {
+          left = px - bW - pinGap;
+          caretDir = 'right';
+        } else {
+          left = Math.max(minLeft, Math.min(rightLimit, px - bW / 2));
+          caretDir = py < rect.height / 2 ? 'top' : 'bottom';
+        }
+        placed = { left, top, caretDir };
+      }
+      el.style.left = `${placed.left.toFixed(1)}px`;
+      el.style.top = `${placed.top.toFixed(1)}px`;
+      el.style.setProperty('--caret-y', `${Math.max(14, Math.min(bH - 14, py - placed.top)).toFixed(1)}px`);
+      el.dataset.caret = placed.caretDir;
     }
 
     _onWarLocaleChange() {

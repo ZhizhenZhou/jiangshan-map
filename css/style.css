@@ -5205,6 +5205,11 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   stroke-opacity: 0.95;
   stroke-width: calc(var(--war-w, 3px) + 1.2px);
 }
+/* 当前步行端平头帽：圆头帽会从箭头鼻尖下探出半线宽的小圆头 */
+#grp-war .war-march.is-cur,
+#grp-war .war-march-casing.is-cur {
+  stroke-linecap: butt;
+}
 /* 当前行军箭头由 JS 设 inline dasharray/dashoffset + warMarchDraw 渐进绘制 */
 #grp-war .war-march.is-claimed {
   stroke-dasharray: 2.5 3.5;
@@ -5221,18 +5226,18 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 #grp-war .war-dir {
   pointer-events: none;
 }
+#grp-war .war-chevron-under {
+  fill: #f6f1e6;
+  transform: scale(calc(var(--dir-s, 1) * 1.14));
+}
 #grp-war .war-chevron {
   fill: currentColor;
-  stroke: #f6f1e6;
-  stroke-width: 1.1;
-  paint-order: stroke;
-  opacity: 0.92;
   transform: scale(var(--dir-s, 1));
 }
-#grp-war .war-dir.t0 { --dir-s: 1; }
-#grp-war .war-dir.t1 { --dir-s: 1.15; }
-#grp-war .war-dir.t2 { --dir-s: 1.35; }
-#grp-war .war-dir.t3 { --dir-s: 1.6; }
+#grp-war .war-dir.t0 { --dir-s: 0.64; }
+#grp-war .war-dir.t1 { --dir-s: 0.94; }
+#grp-war .war-dir.t2 { --dir-s: 1.31; }
+#grp-war .war-dir.t3 { --dir-s: 1.79; }
 #grp-war .war-dir.is-cur .war-chevron {
   opacity: 0;
   transform: scale(var(--dir-s, 1));
@@ -5795,9 +5800,10 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 #grp-war .war-rider {
   pointer-events: none;
 }
+#grp-war .war-rider-wedge-under {
+  fill: #f6f1e6;
+  transform: scale(1.14);
+}
 #grp-war .war-rider-wedge {
   fill: currentColor;
-  stroke: #f6f1e6;
-  stroke-width: 1.1;
-  paint-order: stroke;
 }
