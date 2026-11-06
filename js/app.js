@@ -9257,9 +9257,11 @@
       };
 
       // Scale static markers (milestones, journey waypoints, directional chevrons, challenge pins, genealogy overlays)
+      // 战争沙盘符号（#grp-war）不在其列：_warRescaleGlyphs 以 1/kScreen 全补偿 + 菱形避让接管，
+      // 双写会让通用 1/√z 档偶尔在缩放帧覆盖 war transform（实测竞态）。
       this.svg
         .querySelectorAll(
-          '.milestone-pin, #grp-journey g[data-x], #grp-challenge g[data-x], #grp-genealogy g[data-x], #grp-war g[data-x]'
+          '.milestone-pin, #grp-journey g[data-x], #grp-challenge g[data-x], #grp-genealogy g[data-x]'
         )
         .forEach((node) => {
           if (this.activePerson && node.classList && node.classList.contains('journey-node')) {
