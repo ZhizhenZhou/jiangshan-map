@@ -1191,6 +1191,17 @@
       const minTop = isMobile ? 48 : 12;
       const maxTop = Math.max(minTop, rect.height - bH - (isMobile ? 56 : 16));
       const pinGap = isMobile ? 10 : 12;
+      // 战报卡片（z 更高）占左下一大块：浮签压在卡片底下=展示不全。
+      // 桌面布局下浮签的可放左界 = 卡片右缘 + 间距。
+      let leftFloor = minLeft;
+      if (!isMobile) {
+        const cardEl = this._warCardEl();
+        if (cardEl && !cardEl.classList.contains('is-hidden')) {
+          const cr = cardEl.getBoundingClientRect();
+          const sr = this.svg.getBoundingClientRect();
+          leftFloor = Math.max(minLeft, cr.right - sr.left + 10);
+        }
+      }
       // 候选侧按「与箭头行进方向同向」优先：线在箭头身后，前方是空的——
       // 浮签放到行进方向那一侧就不会压住线（旧逻辑固定先右后左，常压线）。
       const dirEl = this.grpWar
@@ -1214,13 +1225,13 @@
           if (left + bW <= rightLimit) { placed = { left, top: Math.max(minTop, Math.min(maxTop, py - bH * 0.42)), caretDir: c.caret }; break; }
         } else if (c.side === 'left') {
           const left = px - pinGap - bW;
-          if (left >= minLeft) { placed = { left, top: Math.max(minTop, Math.min(maxTop, py - bH * 0.42)), caretDir: c.caret }; break; }
+          if (left >= leftFloor) { placed = { left, top: Math.max(minTop, Math.min(maxTop, py - bH * 0.42)), caretDir: c.caret }; break; }
         } else if (c.side === 'bottom') {
           const top = py + pinGap;
-          if (top + bH <= maxTop) { placed = { left: Math.max(minLeft, Math.min(rightLimit, px - bW / 2)), top, caretDir: c.caret }; break; }
+          if (top + bH <= maxTop) { placed = { left: Math.max(leftFloor, Math.min(rightLimit, px - bW / 2)), top, caretDir: c.caret }; break; }
         } else {
           const top = py - pinGap - bH;
-          if (top >= minTop) { placed = { left: Math.max(minLeft, Math.min(rightLimit, px - bW / 2)), top, caretDir: c.caret }; break; }
+          if (top >= minTop) { placed = { left: Math.max(leftFloor, Math.min(rightLimit, px - bW / 2)), top, caretDir: c.caret }; break; }
         }
       }
       if (!placed) {
@@ -1230,11 +1241,11 @@
         let caretDir = 'left';
         if (px + pinGap <= rightLimit) {
           left = px + pinGap;
-        } else if (px - bW - pinGap >= minLeft) {
+        } else if (px - bW - pinGap >= leftFloor) {
           left = px - bW - pinGap;
           caretDir = 'right';
         } else {
-          left = Math.max(minLeft, Math.min(rightLimit, px - bW / 2));
+          left = Math.max(leftFloor, Math.min(rightLimit, px - bW / 2));
           caretDir = py < rect.height / 2 ? 'top' : 'bottom';
         }
         placed = { left, top, caretDir };
