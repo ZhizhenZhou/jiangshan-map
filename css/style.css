@@ -5331,12 +5331,15 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 }
 @media (min-width: 901px) {
   #map-key {
-    max-height: 560px;
     overflow: hidden;
-    transition: max-height 0.34s cubic-bezier(0.22, 0.9, 0.32, 1), opacity 0.22s ease;
+    transition: opacity 0.22s ease;
   }
   #map-key.is-condensed {
-    max-height: 42px;
+    max-height: none;
+  }
+  /* 收拢 = 只留相位条：display 隐藏其余行，杜绝 max-height 硬裁的残影 */
+  #map-key.is-condensed > :not(.key-phase-bar) {
+    display: none;
   }
   #war-card {
     transition: bottom 0.34s cubic-bezier(0.22, 0.9, 0.32, 1), opacity 0.22s ease;
