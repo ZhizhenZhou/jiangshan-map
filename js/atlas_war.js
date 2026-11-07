@@ -258,6 +258,7 @@
       this._warDrawRafs = [];
       (this._warDrawTimers || []).forEach((h) => clearTimeout(h));
       this._warDrawTimers = [];
+      this._warDrawPending = false;
     }
 
     // 战术符号（楔形头/战役菱形/名签）屏幕尺寸恒定：与骑乘头同一 kScreen 全补偿。
@@ -379,11 +380,17 @@
           if (q) q.style.visibility = 'visible';
         }
       };
+      const finish = () => {
+        // 箭头走完：静态楔形接管 + 揭幕等待中的浮签
+        this._warDrawPending = false;
+        if (dirG) dirG.classList.add('is-arrived');
+        if (rider) rider.remove();
+        this._revealWarBalloon();
+      };
       const reduced = reducedMotion();
       if (reduced) {
         showFull();
-        if (dirG) dirG.classList.add('is-arrived');
-        if (rider) rider.remove();
+        finish();
         return;
       }
       let Lu = 0;
@@ -394,8 +401,7 @@
       }
       if (!(Lu > 2)) {
         showFull();
-        if (dirG) dirG.classList.add('is-arrived');
-        if (rider) rider.remove();
+        finish();
         return;
       }
       const t0 = performance.now();
@@ -441,8 +447,7 @@
             q.style.strokeDasharray = 'none';
             q.style.strokeDashoffset = '0';
           }
-          if (rider) rider.remove();
-          if (dirG) dirG.classList.add('is-arrived');
+          finish();
         }
       };
       const h = requestAnimationFrame(stepFn);
@@ -593,6 +598,7 @@
               }
               this._startWarDraw(casing, p, dir, rider, tier, drawMs);
             };
+            this._warDrawPending = true; // 浮签等箭头走完再揭幕
             const delay = reducedMotion() ? 0 : Math.round(flightMs * 0.55);
             if (delay > 0) {
               const h = setTimeout(() => {
@@ -1113,6 +1119,24 @@
       // 锚种类：菱形避让逐帧微调时，浮签只跟随同源锚（battle/叙事锚随菱形动，
       // 主轴箭头尖锚不随菱形动）
       this._warBalloonAnchorKind = battle ? 'battle' : (this._warCurMoveTip ? 'movetip' : 'battleanchor');
+      // 浮签等箭头：本步有行军箭头在画（或延迟待画）时先藏着，
+      // 画完由 _startWarDraw 的 finish() 揭幕——「箭头过去了，动画结束了再出现」
+      const dirEl = (this.grpWar || (this.svg && this.svg.querySelector('#grp-war')));
+      const curDir = dirEl && dirEl.querySelector('g.war-dir.is-cur');
+      const arrived = !curDir || curDir.classList.contains('is-arrived');
+      this._warBalloonPendingSig = `${w.key}:${idx}`;
+      if (this._warDrawPending && !arrived) {
+        el.classList.add('is-hidden');
+        return;
+      }
+      el.classList.remove('is-hidden', 'is-offscreen');
+      this._positionWarBalloon();
+    }
+
+    _revealWarBalloon() {
+      const el = this._warBalloonEl();
+      if (!el || !this._warBalloonState) return;
+      if (this._warBalloonDismissedIdx === this._warBalloonPendingSig) return;
       el.classList.remove('is-hidden', 'is-offscreen');
       this._positionWarBalloon();
     }
