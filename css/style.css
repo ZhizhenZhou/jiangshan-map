@@ -5234,10 +5234,13 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   fill: currentColor;
   transform: scale(var(--dir-s, 1));
 }
-#grp-war .war-dir.t0 { --dir-s: 0.64; }
-#grp-war .war-dir.t1 { --dir-s: 0.94; }
-#grp-war .war-dir.t2 { --dir-s: 1.31; }
-#grp-war .war-dir.t3 { --dir-s: 1.79; }
+/* --dir-s 逐档等于 atlas_war.js 的 WEDGE_SCALES（底衬脚印×2.2÷12.5）——
+ * 两表不同步时到位交接瞬间箭头会缩一截（旧表 0.64/0.94/1.31/1.79 比
+ * 骑乘头小 14%，实测交接跳变）。改比例只改 WEDGE_SCALES 并同步此处。 */
+#grp-war .war-dir.t0 { --dir-s: 1.232; }
+#grp-war .war-dir.t1 { --dir-s: 1.514; }
+#grp-war .war-dir.t2 { --dir-s: 1.76; }
+#grp-war .war-dir.t3 { --dir-s: 2.218; }
 #grp-war .war-dir.is-cur .war-chevron {
   opacity: 0;
   transform: scale(var(--dir-s, 1));
@@ -5344,9 +5347,13 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   #war-card {
     transition: bottom 0.34s cubic-bezier(0.22, 0.9, 0.32, 1), opacity 0.22s ease;
   }
-  /* 战争卡片淡入淡出代替硬显示切换（全局 .is-hidden 是 display:none，无法过渡） */
+  /* 战争卡片淡入淡出代替硬显示切换（全局 .is-hidden 是 display:none，无法过渡）。
+   * 必须写 animation:none：warCardIn 的 forwards 填充会永久钉住 opacity:1，
+   * 级联上压过这里的普通 opacity:0 声明（动画 > 普通声明）——实测退场后
+   * 卡片赖着不走。animation:none 同时让每次重新显示都重放入场滑动。 */
   #war-card.is-hidden {
     display: block !important;
+    animation: none;
     opacity: 0;
     transform: translateY(10px);
     pointer-events: none;

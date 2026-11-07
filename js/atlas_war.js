@@ -29,7 +29,11 @@
   // 头与线等比：档位系数 = 线宽/12.5×2.75——头长与底边宽恒为线宽的
   // 2.75/2.5 倍（旧 1/1.15/1.35/1.6 与线宽脱钩：细线上头过大、粗线上头
   // 缩成刺，用户实测"太丑"）。
-  const WEDGE_SCALES = TIER_WIDTHS.map((w) => +(w * 2.75 / 12.5).toFixed(3));
+  // 楔形头按【底衬脚印】（线宽+3.4px 底衬）的 2.2 倍定标。按裸线宽定标时小
+  // 兵力档的头（t0 仅 10×8.7px）整个埋进 7px 宽的底衬带里，绘制中视觉上
+  // "没有箭头"（官渡白马轴帧级实测）；2.2 倍让底边盖住 dash 平头帽、两翼
+  // 探出底衬。此表必须与 style.css 的 --dir-s 逐档一致，交接才像素级无缝。
+  const WEDGE_SCALES = TIER_WIDTHS.map((w) => +(((w + 3.4) * 2.2) / 12.5).toFixed(3));
   const WAR_ICONS = {
     // 传输栏五键镜像对称：|◀ ◀  ▶ ▶|（回起始/上一步 ←→ 下一步/到结束）
     rewind: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><rect x="1.9" y="3" width="1.8" height="10" fill="currentColor"/><path d="M14.1 3v10L7.1 8z" fill="currentColor"/></svg>',
@@ -1013,25 +1017,48 @@
       this._syncWarBalloon(w, idx);
       this._dedupeMilestonePins();
       this._syncZoomDependentState();
-      // 战局激活（从无到有）→ 相机自动飞入战场全境；
-      // 战局失活清登记，下次进入重新飞。拖轴途中不抢相机。
+      // 战局激活（从无到有）→ 相机自动飞入战场全境，并登记进战前取景；
+      // 战局失活→若用户没在战役期间手动挪过相机（仍在战区取景附近），
+      // 对称飞回进战前取景——拖轴进出战役是一个完整的"推近/拉回"镜头，
+      // 只进不回会让人拖回 195 后地图还停在官渡特写（逻辑不顺畅实测）。
+      // 拖轴途中不抢相机。
       if (w && this._warTheaterKey !== w.key) {
         this._warTheaterKey = w.key;
         this._warLastAnchor = null; // 换战役：叙事步锚点不跨场沿用
-        if (!this.isScrubbing && !this.challenge && !this.activePerson && !this.activeTrace) {
-          const fit = this._warTheaterFit(w);
-          if (fit) {
-            if (reducedMotion()) {
-              this.camera = { ...fit, zoom: 1000 / fit.w };
-              this._applyCamera(false);
-            } else {
-              this._animateCameraTo(fit, WAR_FLIGHT_MS);
-            }
+        const fit = this._warTheaterFit(w);
+        this._warTheaterFitUsed = fit || null;
+        this._warCamBefore = { ...this.camera };
+        if (fit && !this.isScrubbing && !this.challenge && !this.activePerson && !this.activeTrace) {
+          if (reducedMotion()) {
+            this.camera = { ...fit, zoom: 1000 / fit.w };
+            this._applyCamera(false);
+          } else {
+            this._animateCameraTo(fit, WAR_FLIGHT_MS);
           }
         }
       } else if (!w) {
+        const hadTheater = this._warTheaterKey != null;
+        const fitUsed = this._warTheaterFitUsed;
+        const camBefore = this._warCamBefore;
         this._warTheaterKey = null;
         this._warLastAnchor = null;
+        this._warTheaterFitUsed = null;
+        this._warCamBefore = null;
+        if (hadTheater && fitUsed && camBefore &&
+            !this.isScrubbing && !this.challenge && !this.activePerson && !this.activeTrace) {
+          // 用户仍在战区取景附近（没手动漫游走）才回位
+          const c = this.camera;
+          const dx = Math.hypot((c.x - fitUsed.x) / fitUsed.w, (c.y - fitUsed.y) / fitUsed.w);
+          const ratio = c.w / fitUsed.w;
+          if (dx < 0.55 && ratio > 0.4 && ratio < 3) {
+            if (reducedMotion()) {
+              this.camera = { ...camBefore, zoom: 1000 / camBefore.w };
+              this._applyCamera(false);
+            } else {
+              this._animateCameraTo({ ...camBefore }, 650);
+            }
+          }
+        }
       }
     }
 
@@ -1252,7 +1279,9 @@
       let placed = null;
       for (const c of cands) {
         if (c.side === 'right') {
-          const left = px + pinGap;
+          // 右候选同样吃 leftFloor：锚点水平落在卡片带内时 px+gap 会把
+          // 浮签放进卡片底下（赤壁乘桑定盟步实测压住标题一行）
+          const left = Math.max(leftFloor, px + pinGap);
           if (left + bW <= rightLimit) { placed = { left, top: Math.max(minTop, Math.min(maxTop, py - bH * 0.42)), caretDir: c.caret }; break; }
         } else if (c.side === 'left') {
           const left = px - pinGap - bW;
@@ -1270,8 +1299,8 @@
         let left;
         let top = Math.max(minTop, Math.min(maxTop, py - bH * 0.42));
         let caretDir = 'left';
-        if (px + pinGap <= rightLimit) {
-          left = px + pinGap;
+        if (Math.max(leftFloor, px + pinGap) + bW <= rightLimit) {
+          left = Math.max(leftFloor, px + pinGap);
         } else if (px - bW - pinGap >= leftFloor) {
           left = px - bW - pinGap;
           caretDir = 'right';
