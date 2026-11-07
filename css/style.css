@@ -1,4 +1,7 @@
 :root {
+  /* 宣纸浅色制图配色，无暗色主题：only light 让 Chrome 自动强暗色止步
+   * （Auto Dark 会把浅色底衬/相位条圆点压成近隐形，用户端实测） */
+  color-scheme: light only;
   --bg-parchment: #f3eee4;
   --bg-parchment-alt: #ebe4d6;
   --water-fill: #d6e0de;

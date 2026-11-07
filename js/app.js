@@ -4307,6 +4307,7 @@
               ? ev.landmark.en || ev.landmark.zh
               : this._zh(ev.landmark.zh);
           li.innerHTML = `<span class="ev-yr">${yrLabel}</span><span>${text}</span>`;
+          li.dataset.evYear = String(ev.year); // 战争沙盘：点战役编年行=进入该沙盘
           li.addEventListener('click', () => {
             this.stopAutoplay();
             if (window.innerWidth <= 900 && this.mobileChronicleOpen) this.toggleMobileChronicle(false);
@@ -4817,6 +4818,7 @@
       this._lastHighlightedMilestoneKey = null;
       for (const m of dynasty.milestones || []) {
         const li = document.createElement('li');
+        li.dataset.evYear = String(m.year); // 战争沙盘：点战役里程碑行=进入该沙盘
         const targetY = this._clampYearToDynasty(dynasty, m.year);
         const prevY = Math.max(dynasty.fromYear, targetY - 1);
         const targetSnapKey = this._resolveSnapKey(dynasty, targetY);
@@ -8084,7 +8086,7 @@
                   this.locale === 'en'
                     ? this.formatYear(ev.year)
                     : `${ev.year <= 0 ? '前' + -ev.year : ev.year}年`;
-                return `<div class="t-ev-row" data-ev-idx="${evIdx}"><span class="t-ev-yr">▸ ${yrLabel}</span><span class="t-ev-txt">${ev.text}</span></div>`;
+                return `<div class="t-ev-row" data-ev-idx="${evIdx}" data-ev-year="${ev.year}"><span class="t-ev-yr">▸ ${yrLabel}</span><span class="t-ev-txt">${ev.text}</span></div>`;
               })
               .join('');
             eventsHtml = `<div class="t-events">${evItems}</div>`;

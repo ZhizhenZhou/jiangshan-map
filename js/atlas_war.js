@@ -78,6 +78,14 @@
       return null;
     }
 
+    // 沙盘会话：年份落在战役窗口≠进入沙盘。只有明确手势（点战役事件行 /
+    // 勾选沙盘图层 / 小数年份深链）才置 _warEngagedKey 接管界面；
+    // 普通播放/拖轴扫过战役年份时 _warEngagedWar() 返回 null，界面照常。
+    _warEngagedWar() {
+      const w = this._activeWar();
+      return w && this._warEngagedKey === w.key ? w : null;
+    }
+
     _warStepIndex(w, year = this.year) {
       let idx = -1;
       (w.steps || []).forEach((s, i) => {
@@ -854,6 +862,12 @@
     // 战况），卡片传输栏只做步进——回起始/上一步/下一步/到结束，无键位冲突。
 
     _warSeekTo(y) {
+      // 未进入沙盘的小数年份（手输年份框等）不再劫持界面——只做普通同步
+      const wRaw = this._activeWar(y);
+      if (!wRaw || this._warEngagedKey !== wRaw.key) {
+        this._syncWarOverlay();
+        return;
+      }
       const yi = Math.round(y) || (this.year < 0 ? 1 : -1);
       this._warInternalSeek = true;
       try {
@@ -986,6 +1000,10 @@
         const chk = this._id('chk-war');
         if (chk) {
           chk.addEventListener('change', () => {
+            // 勾选=进入沙盘的手势之一：当年有战役则立即接管并飞入；
+            // 取消勾选=退出沙盘
+            const w0 = chk.checked ? this._activeWar() : null;
+            this._warEngagedKey = w0 ? w0.key : null;
             const grp = this._warGroup();
             if (grp) grp.classList.toggle('is-hidden', !chk.checked);
             this._warSvgSig = null;
@@ -995,8 +1013,33 @@
           });
           this._warChkBound = true;
         }
+        // 点时间轴战役事件行=进入该战役沙盘（明确手势；capture 阶段先于
+        // 行自身的 jumpToYear 登记，随后的 _syncWarOverlay 即接管）
+        if (!this._warEvRowBound) {
+          document.addEventListener(
+            'click',
+            (e) => {
+              try {
+                const t = e.target;
+                const row = t && t.closest ? t.closest('[data-ev-year]') : null;
+                if (!row) return;
+                const y = Number(row.dataset.evYear);
+                if (!Number.isFinite(y)) return;
+                const war = this._warData().find((x) => y >= x.span[0] && y <= x.span[1]);
+                if (war) this._warEngagedKey = war.key;
+              } catch (err) {
+                /* non-fatal */
+              }
+            },
+            true
+          );
+          this._warEvRowBound = true;
+        }
       }
-      const w = this._activeWar();
+      const wRaw = this._activeWar();
+      // 沙盘接管门控：未进入（见 _warEngagedWar）时按"无战役"渲染——
+      // 普通播放/拖轴扫过战役年份不出卡片、不收相位面板、不出箭头、不动相机
+      const w = wRaw && this._warEngagedKey === wRaw.key ? wRaw : null;
       const idx = w ? this._warStepIndex(w) : -1;
       const zi = w ? this._warZoneIndex(w) : -1;
       // 战争卡片激活：阶段面板收拢成相位条、卡片上移让位（平滑过渡，
@@ -1009,7 +1052,7 @@
       const grp = this._warGroup();
       if (grp) {
         const chk = this._id('chk-war');
-        if (chk && !chk.checked) grp.classList.add('is-hidden');
+        if (!w || (chk && !chk.checked)) grp.classList.add('is-hidden');
         else grp.classList.remove('is-hidden');
       }
       this._renderWarSvg(w, idx, zi);
@@ -1044,6 +1087,11 @@
         this._warLastAnchor = null;
         this._warTheaterFitUsed = null;
         this._warCamBefore = null;
+        // 沙盘会话随窗口结束：年份离开战役窗口或换到别的战役窗口，
+        // 都算退出沙盘——再次进入需要新的明确手势（点事件行/勾选/深链）
+        if (this._warEngagedKey && (!wRaw || wRaw.key !== this._warEngagedKey)) {
+          this._warEngagedKey = null;
+        }
         if (hadTheater && fitUsed && camBefore &&
             !this.isScrubbing && !this.challenge && !this.activePerson && !this.activeTrace) {
           // 用户仍在战区取景附近（没手动漫游走）才回位
@@ -1183,7 +1231,7 @@
       if (!svg || !this.camera) return;
       const w = this.camera.w;
       svg.classList.toggle('war-deep', w < 120);
-      const warActive = Boolean(this._activeWar && this._activeWar());
+      const warActive = Boolean(this._warEngagedWar && this._warEngagedWar());
       const terrain = document.getElementById('terrain-relief-img');
       if (!terrain) return;
       let targetOpacity = 1;
@@ -1197,9 +1245,9 @@
     // 里程碑钉与战役菱形同事件去重：钉落在任一战役点 10 用户单位（≈0.76°）内
     // 即加 .war-shadowed 降透明度（同一事件两套"红菱+白环"是双标记混淆的根源）。
     _dedupeMilestonePins() {
-      const grp = this.grpMilestones || (this.svg && this.svg.querySelector('#grp-milestones'));
-      if (!grp) return;
-      const active = Boolean(this._activeWar && this._activeWar());
+    const grp = this.grpMilestones || (this.svg && this.svg.querySelector('#grp-milestones'));
+    if (!grp) return;
+    const active = Boolean(this._warEngagedWar && this._warEngagedWar());
       const nodes = active
         ? Array.from((this.grpWar || this.svg.querySelector('#grp-war') || { querySelectorAll: () => [] }).querySelectorAll('.war-node[data-x]'))
         : [];
@@ -1451,6 +1499,11 @@
           Number.isFinite(frac) &&
           this._warData().some((x) => frac >= x.span[0] - 1 && frac <= x.span[1] + TAIL_YEARS)
         ) {
+          // 小数年份深链=明确进入该战役沙盘的手势（分享的战役链接）
+          const linkWar = this._warData().find(
+            (x) => frac >= x.span[0] - 1 && frac <= x.span[1] + TAIL_YEARS
+          );
+          if (linkWar) this._warEngagedKey = linkWar.key;
           this._warSeekTo(frac);
         }
       } catch (e) {
@@ -1459,10 +1512,10 @@
       return r;
     };
 
-    // 战争年份：自动里程碑气泡让位给战争态势浮签（手动点钉不受影响）
+    // 战争年份：沙盘接管中才让自动里程碑气泡让位（普通播放照常显示）
     const baseAutoSync = Ctrl.prototype._syncAutoMilestoneBalloon;
     Ctrl.prototype._syncAutoMilestoneBalloon = function (...args) {
-      if (this._activeWar && this._activeWar()) {
+      if (this._warEngagedWar && this._warEngagedWar()) {
         if (this.activeMilestone && this.activeMilestone.isAuto) this.closeMilestoneBalloon();
         return;
       }
@@ -1486,7 +1539,7 @@
     Ctrl.prototype.closeMilestoneBalloon = function (...args) {
       const r = baseCloseMb.apply(this, args);
       try {
-        const w = this._activeWar ? this._activeWar() : null;
+        const w = this._warEngagedWar ? this._warEngagedWar() : null;
         if (w) this._syncWarBalloon(w, this._warStepIndex(w));
       } catch (e) {
         /* non-fatal */
