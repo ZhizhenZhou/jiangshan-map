@@ -5318,6 +5318,13 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 #viewport-frame.is-camera-moving #war-card {
   animation: none;
 }
+/* 战争沙盘激活：朝代阶段/图例面板让位（与 journey/challenge 同模式），
+   不然战争卡片和 #map-key 在左下角互相叠压 */
+#viewport-frame.has-active-war #map-key,
+#viewport-frame.has-active-war #scale-bar-box {
+  opacity: 0;
+  pointer-events: none;
+}
 
 @keyframes warCardIn {
   from {

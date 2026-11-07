@@ -995,6 +995,11 @@
       const w = this._activeWar();
       const idx = w ? this._warStepIndex(w) : -1;
       const zi = w ? this._warZoneIndex(w) : -1;
+      // 战争卡片激活时朝代阶段面板让位（与 journey/challenge 的 has-active-* 同模式）
+      const vf = this._id('viewport-frame');
+      if (vf) {
+        vf.classList.toggle('has-active-war', Boolean(w) && !this.activePerson && !this.activeTrace && !this.challenge);
+      }
       const grp = this._warGroup();
       if (grp) {
         const chk = this._id('chk-war');
