@@ -5318,10 +5318,39 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 #viewport-frame.is-camera-moving #war-card {
   animation: none;
 }
-/* 战争沙盘激活：朝代阶段/图例面板让位（与 journey/challenge 同模式），
-   不然战争卡片和 #map-key 在左下角互相叠压 */
-#viewport-frame.has-active-war #map-key,
-#viewport-frame.has-active-war #scale-bar-box {
+/* 战争沙盘激活：阶段面板收拢成相位条（战争嵌在历史进程里，而非替换它——
+   进出都有过渡），战争卡片上移让位；移动端空间紧张，保持整面板隐藏 */
+#viewport-frame.has-active-war #war-card {
+  bottom: 64px;
+}
+@media (max-width: 900px) {
+  #viewport-frame.has-active-war #map-key {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+@media (min-width: 901px) {
+  #map-key {
+    max-height: 560px;
+    overflow: hidden;
+    transition: max-height 0.34s cubic-bezier(0.22, 0.9, 0.32, 1), opacity 0.22s ease;
+  }
+  #map-key.is-condensed {
+    max-height: 42px;
+  }
+  #war-card {
+    transition: bottom 0.34s cubic-bezier(0.22, 0.9, 0.32, 1), opacity 0.22s ease;
+  }
+  /* 战争卡片淡入淡出代替硬显示切换（全局 .is-hidden 是 display:none，无法过渡） */
+  #war-card.is-hidden {
+    display: block !important;
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+  }
+}
+#war-balloon.is-hidden {
+  display: block !important;
   opacity: 0;
   pointer-events: none;
 }
