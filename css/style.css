@@ -5936,3 +5936,25 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 #grp-war .war-rider-wedge {
   fill: currentColor;
 }
+
+/* --- 构建更新提示（标签页长开时 JS 停在旧版本的兜底） --- */
+#build-update-pill {
+  position: fixed;
+  left: 50%;
+  bottom: 56px;
+  transform: translateX(-50%);
+  z-index: 60;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--vermilion, #a63a28);
+  background: rgba(250, 246, 237, 0.95);
+  color: var(--vermilion, #a63a28);
+  font: 600 12.5px/1 var(--sans-stack, 'PingFang SC', sans-serif);
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 18px rgba(60, 40, 20, 0.18);
+  cursor: pointer;
+}
+#build-update-pill:hover {
+  background: var(--vermilion, #a63a28);
+  color: #f6f1e6;
+}
