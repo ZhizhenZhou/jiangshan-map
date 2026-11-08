@@ -282,6 +282,21 @@
       this._warDrawsLeft = 0;
     }
 
+    // 真实屏幕缩放（screen px / 用户单位）。viewBox 默认 xMidYMid meet 是
+    // 宽高两向【取小】的均匀缩放；相机恒为 CANVAS_AR（10:7），而 SVG 元素
+    // 随窗口/布局变形——只看宽度会在宽扁窗口下高估缩放（实测 1440×900
+    // 高估 4.6%、1512×760 高估 37.6%）：行军虚线比骑乘头超前一个固定百分比，
+    // 线头从楔形鼻尖底下钻出来，静态楔形也整体偏大、行军提前画完。
+    // 与里程碑气泡/缩放条的 screenScale 同式（app.js 用 Math.min 两向）。
+    // camOverride：门控按目标取景（warFly fit）投影线长时传入。
+    _warKScreen(camOverride) {
+      const rect = this.svg && this.svg.getBoundingClientRect ? this.svg.getBoundingClientRect() : null;
+      const cam = camOverride || this.camera;
+      if (!rect || !cam || !cam.w || !cam.h) return 1;
+      const k = Math.min(rect.width / cam.w, rect.height / cam.h);
+      return k > 0 ? k : 1;
+    }
+
     // 战术符号（楔形头/战役菱形/名签）屏幕尺寸恒定：与骑乘头同一 kScreen 全补偿。
     // 通用 _rescaleSvgTypography 给 war 符号的是 1/√z 档（里程碑钉惯例）——
     // 深 zoom 下符号涨 √z≈6.5 倍（楔形 150px、菱环 200px+），且与动画期恒定的
@@ -295,14 +310,7 @@
       if (!svg || !this.camera || !this.camera.w) return;
       const grp = this.grpWar || svg.querySelector('#grp-war');
       if (!grp) return;
-      let rect;
-      try {
-        rect = svg.getBoundingClientRect();
-      } catch (e) {
-        return;
-      }
-      if (!rect || !rect.width) return;
-      const k = rect.width / this.camera.w;
+      const k = this._warKScreen();
       if (!(k > 0)) return;
       const s = (1 / k).toFixed(4);
 
@@ -432,8 +440,7 @@
       const stepFn = (now) => {
         let kScreen = 1;
         try {
-          const rect = this.svg.getBoundingClientRect();
-          kScreen = rect.width > 0 ? rect.width / this.camera.w : 1;
+          kScreen = this._warKScreen();
         } catch (e) {
           /* keep last scale */
         }
@@ -625,15 +632,7 @@
             } catch (e) {
               Lu0 = 0;
             }
-            let kProj = 1;
-            try {
-              const rect = this.svg.getBoundingClientRect();
-              if (rect.width > 0 && this.camera && this.camera.w > 0) {
-                kProj = rect.width / (warFly ? warFly.w : this.camera.w);
-              }
-            } catch (e) {
-              /* 门控失败按可播处理 */
-            }
+            const kProj = this._warKScreen(warFly || null);
             if (!(Lu0 > 2) || Lu0 * kProj < WAR_DRAW_MIN_PX) {
               // 远景/退化路径：整箭瞬时落位（无骑乘头、无计时器）；
               // 浮签随其后 _syncWarBalloon 正常揭幕（pending 未置位）
@@ -656,11 +655,7 @@
                     const p0 = p.getPointAtLength(0);
                     const p1 = p.getPointAtLength(Math.min(2, Lu0));
                     const a0 = (Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180) / Math.PI;
-                    let kr = 1;
-                    const rect = this.svg.getBoundingClientRect();
-                    if (rect.width > 0 && this.camera && this.camera.w > 0) {
-                      kr = rect.width / this.camera.w;
-                    }
+                    const kr = this._warKScreen();
                     const s0 = (WEDGE_SCALES[tier] || 1) / kr;
                     rider.setAttribute('transform',
                       `translate(${p0.x.toFixed(1)},${p0.y.toFixed(1)}) rotate(${a0.toFixed(1)}) scale(${s0.toFixed(3)})`);
