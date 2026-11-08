@@ -20,6 +20,12 @@
   // 战争模块的相机飞行时长：行军箭头绘制与它同步同缓动（_animateCameraTo
   // 的 duration 参数）——箭头与地图一个节奏。650 是全 app 默认，战争用慢档。
   const WAR_FLIGHT_MS = 1150;
+  // 行军绘制时长：与飞行同步时取 WAR_FLIGHT_MS；沙盘内逐步推进（相机不飞）
+  // 用短档——100ms 起跑、900ms 走完，箭头带着线一气呵成，不再干等 632ms。
+  const WAR_DRAW_MS = 900;
+  // 行军只在目标缩放下读得出来时才播：屏幕投影线长低于此值（全国视角整条
+  // 线 ~20px，骑乘头恒定 ~19px）就整箭瞬时落位，不播"糊团"。
+  const WAR_DRAW_MIN_PX = 90;
   const TIER_WIDTHS = [3.4, 5, 7, 9.5];       // screen px per strength tier
   const TIER_SCALES = [0.9, 1.1, 1.35, 1.65]; // battle-diamond core scales
   // 箭头头形：鼻尖在原点的三角（底边朝后）——骑乘时鼻尖钉在生长端点、
@@ -273,6 +279,7 @@
       (this._warDrawTimers || []).forEach((h) => clearTimeout(h));
       this._warDrawTimers = [];
       this._warDrawPending = false;
+      this._warDrawsLeft = 0;
     }
 
     // 战术符号（楔形头/战役菱形/名签）屏幕尺寸恒定：与骑乘头同一 kScreen 全补偿。
@@ -395,11 +402,13 @@
         }
       };
       const finish = () => {
-        // 箭头走完：静态楔形接管 + 揭幕等待中的浮签
-        this._warDrawPending = false;
+        // 箭头走完：静态楔形接管；多轴步等全部箭头落位后才揭幕浮签
+        //（旧实现第一个 finisher 清 pending，兄弟轴还在画浮签就跳出来）
+        this._warDrawsLeft = Math.max(0, (this._warDrawsLeft || 0) - 1);
+        this._warDrawPending = this._warDrawsLeft > 0;
         if (dirG) dirG.classList.add('is-arrived');
         if (rider) rider.remove();
-        this._revealWarBalloon();
+        if (!this._warDrawPending) this._revealWarBalloon();
       };
       const reduced = reducedMotion();
       if (reduced) {
@@ -468,7 +477,10 @@
       this._warDrawRafs.push(h);
     }
 
-    _renderWarSvg(w, idx, zi) {
+    // warFly：激活进场即将飞相机时传战区取景（_warTheaterFit 结果），否则 null。
+    // 由 _syncWarOverlay 在渲染前用与激活块同一谓词预判传入——飞行发生在渲染
+    // 之后，渲染端只能靠预判决定绘制的延迟/时长/门控缩放基准。
+    _renderWarSvg(w, idx, zi, warFly) {
       const grp = this._warGroup();
       if (!grp) return;
       const sig = [
@@ -537,10 +549,9 @@
       }
 
       // --- march arrows: past as solid traces, current drawing progressively ---
-      // 绘制时长与相机飞行同速同缓动（WAR_FLIGHT_MS + cubic ease-out）；
-      // 绘制本身再延迟到飞行 55% 处启动（见下）。
+      // 激活进场（warFly 非空）：绘制与相机飞行同速同缓动（WAR_FLIGHT_MS +
+      // cubic ease-out）；沙盘内逐步推进相机不飞：100ms 起跑、WAR_DRAW_MS 走完。
       const flightMs = WAR_FLIGHT_MS;
-      const drawMs = flightMs;
       for (let i = 0; i <= idx; i++) {
         const s = w.steps[i];
         const isCur = i === idx;
@@ -592,38 +603,86 @@
               g
             );
             dir.style.color = side.color;
+            // 楔形比例单一事实来源：inline --dir-s 直接取 WEDGE_SCALES[tier]，
+            // CSS 逐档规则降为兜底——静态楔形与骑乘头交接同尺寸由构造保证
+            //（两表曾各自维护，到位交接瞬间箭头缩 2~4%）
+            dir.style.setProperty('--dir-s', String(WEDGE_SCALES[tier] || 1));
             // 头也吃底衬：浅色大一号的同形三角垫底，与线的底衬语言一致
             this._svgNode('path', { d: WEDGE_D, class: 'war-chevron-under' }, dir);
             this._svgNode('path', { d: WEDGE_D, class: 'war-chevron' }, dir);
           }
           if (isCur && !claimed) {
             // 骑乘楔形头：绘制期间骑在生长端点上，画完移除、静态楔形接管。
-            // 绘制延迟到飞行约 55% 处才启动——若与飞行同时开始，全国视角下
-            // 整条线只有 ~20px 而骑乘头恒定 19px，"箭头跟着线尖走"读不出来；
-            // 先让取景基本就位（55% 时 ease-out 已达 93%），箭头在已定好的
-            // 战场上扫完，才是战史动画的时序。播放变速时整套时序同比缩放。
-            const startDraw = () => {
-              let rider = null;
-              if (!reducedMotion() && info.endX !== null) {
-                rider = this._svgNode('g', { class: 'war-rider' }, g);
-                rider.style.color = side.color;
-                this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge-under' }, rider);
-                this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
+            // 行军只在目标缩放下读得出来时才播——按目标缩放投影线长，低于
+            // WAR_DRAW_MIN_PX（全国视角整条线 ~20px，骑乘头恒定 ~19px）就整箭
+            // 瞬时落位，不播糊团。沙盘内逐步推进相机不飞：100ms 即起跑、
+            // WAR_DRAW_MS 走完；激活进场（warFly，_syncWarOverlay 调用处传入）
+            // 让线在飞行 30% 处（ease-out 已达 ~66%）开始生长、落位在定帧后
+            // 不久——箭头与线从头到尾是一个整体。播放变速时整套时序同比缩放。
+            let Lu0 = 0;
+            try {
+              Lu0 = typeof p.getTotalLength === 'function' ? p.getTotalLength() : 0;
+            } catch (e) {
+              Lu0 = 0;
+            }
+            let kProj = 1;
+            try {
+              const rect = this.svg.getBoundingClientRect();
+              if (rect.width > 0 && this.camera && this.camera.w > 0) {
+                kProj = rect.width / (warFly ? warFly.w : this.camera.w);
               }
-              this._startWarDraw(casing, p, dir, rider, tier, drawMs);
-            };
-            this._warDrawPending = true; // 浮签等箭头走完再揭幕
-            const delay = reducedMotion() ? 0 : Math.round(flightMs * 0.55);
-            if (delay > 0) {
-              const h = setTimeout(() => {
-                this._warDrawTimers = (this._warDrawTimers || []).filter((t) => t !== h);
-                if (!casing.isConnected) return; // 重渲染后旧节点作废
-                startDraw();
-              }, delay);
-              this._warDrawTimers = this._warDrawTimers || [];
-              this._warDrawTimers.push(h);
+            } catch (e) {
+              /* 门控失败按可播处理 */
+            }
+            if (!(Lu0 > 2) || Lu0 * kProj < WAR_DRAW_MIN_PX) {
+              // 远景/退化路径：整箭瞬时落位（无骑乘头、无计时器）；
+              // 浮签随其后 _syncWarBalloon 正常揭幕（pending 未置位）
+              casing.style.visibility = 'visible';
+              p.style.visibility = 'visible';
+              if (dir) dir.classList.add('is-arrived');
             } else {
-              startDraw();
+              const delay = reducedMotion() ? 0 : warFly ? Math.round(flightMs * 0.3) : 100;
+              const ms = warFly ? flightMs : WAR_DRAW_MS;
+              const startDraw = () => {
+                let rider = null;
+                if (!reducedMotion() && info.endX !== null) {
+                  rider = this._svgNode('g', { class: 'war-rider' }, g);
+                  rider.style.color = side.color;
+                  this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge-under' }, rider);
+                  this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
+                  // 创建即钉在路径起点（首帧 rAF 会重写精确姿态）：无 transform
+                  // 的骑乘头会闪到 SVG 原点
+                  try {
+                    const p0 = p.getPointAtLength(0);
+                    const p1 = p.getPointAtLength(Math.min(2, Lu0));
+                    const a0 = (Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180) / Math.PI;
+                    let kr = 1;
+                    const rect = this.svg.getBoundingClientRect();
+                    if (rect.width > 0 && this.camera && this.camera.w > 0) {
+                      kr = rect.width / this.camera.w;
+                    }
+                    const s0 = (WEDGE_SCALES[tier] || 1) / kr;
+                    rider.setAttribute('transform',
+                      `translate(${p0.x.toFixed(1)},${p0.y.toFixed(1)}) rotate(${a0.toFixed(1)}) scale(${s0.toFixed(3)})`);
+                  } catch (e) {
+                    /* 起点姿态是装饰性的 */
+                  }
+                }
+                this._startWarDraw(casing, p, dir, rider, tier, ms);
+              };
+              this._warDrawsLeft = (this._warDrawsLeft || 0) + 1;
+              this._warDrawPending = true; // 浮签等全部箭头落位再揭幕
+              if (delay > 0) {
+                const h = setTimeout(() => {
+                  this._warDrawTimers = (this._warDrawTimers || []).filter((t) => t !== h);
+                  if (!casing.isConnected) return; // 重渲染后旧节点作废
+                  startDraw();
+                }, delay);
+                this._warDrawTimers = this._warDrawTimers || [];
+                this._warDrawTimers.push(h);
+              } else {
+                startDraw();
+              }
             }
           } else if (isCur && claimed && dir) {
             // 号称兵力轴不播绘制动画（虚线即时呈现），楔形头直接落位
@@ -723,9 +782,13 @@
       const enter = () => {
         const w = this._activeWar();
         if (!w) return;
-        // 入口胶囊只在未接管时出现；点击即接管（先停播放，别让主时钟抢镜头）
-        if (this.stopAutoplay) this.stopAutoplay();
+        // 入口胶囊只在未接管时出现；点击即接管。先置接管再停播放——停播的
+        // 内部同步会跑自动里程碑气泡逻辑，非接管状态下它会弹开里程碑气泡，
+        // 战争浮签从此永久让位（baldbg2 实测栈：stopAutoplay → app.js
+        // _syncAutoMilestoneBalloon → openMilestoneBalloon）。接管先行，让位
+        // 包装器（_syncAutoMilestoneBalloon 的 engaged 分支）自动收掉旧气泡。
         this._warEngagedKey = w.key;
+        if (this.stopAutoplay) this.stopAutoplay();
         this._syncWarOverlay();
       };
       gate.addEventListener('click', enter);
@@ -1121,7 +1184,14 @@
           this._warGateSig = null;
         }
       }
-      this._renderWarSvg(w, idx, zi);
+      // 激活进场飞行预判：与下方激活块同一谓词（勿两处维护）——飞行发生在
+      // 渲染之后，渲染端只能靠预判决定行军绘制的延迟/时长/门控缩放基准
+      const warFly =
+        w && this._warTheaterKey !== w.key && !reducedMotion() &&
+        !this.isScrubbing && !this.challenge && !this.activePerson && !this.activeTrace
+          ? this._warTheaterFit(w)
+          : null;
+      this._renderWarSvg(w, idx, zi, warFly);
       this._renderWarCard(w, idx);
       this._syncWarBalloon(w, idx);
       this._dedupeMilestonePins();

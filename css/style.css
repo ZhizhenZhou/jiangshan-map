@@ -5237,25 +5237,22 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   fill: currentColor;
   transform: scale(var(--dir-s, 1));
 }
-/* --dir-s 逐档等于 atlas_war.js 的 WEDGE_SCALES（底衬脚印×2.2÷12.5）——
- * 两表不同步时到位交接瞬间箭头会缩一截（旧表 0.64/0.94/1.31/1.79 比
- * 骑乘头小 14%，实测交接跳变）。改比例只改 WEDGE_SCALES 并同步此处。 */
+/* --dir-s 由 JS 创建 dir 组时 inline 写入 WEDGE_SCALES[tier]（单一事实来源），
+ * 下方逐档规则仅为无 inline 时的兜底。两表曾各自维护（JS
+ * [1.197,1.478,1.83,2.27] vs CSS 1.232/1.514/1.76/2.218），到位交接瞬间
+ * 箭头会缩 2~4%，故收敛为 JS 一处。 */
 #grp-war .war-dir.t0 { --dir-s: 1.232; }
 #grp-war .war-dir.t1 { --dir-s: 1.514; }
 #grp-war .war-dir.t2 { --dir-s: 1.76; }
 #grp-war .war-dir.t3 { --dir-s: 2.218; }
-#grp-war .war-dir.is-cur .war-chevron {
-  opacity: 0;
-  transform: scale(var(--dir-s, 1));
-}
-/* 绘制完成由 JS 加 .is-arrived：骑乘头末帧与静态楔形同位/同角/同尺寸
- * （_warPathEnd 与骑乘头同一 getPointAtLength 公式），交接是像素级替换——
- * 不做缩放/弹跳（旧 0.4→1 过渡让箭头在终点"缩一下再弹出"，
- * 用户读作"箭头没有跟着线的顶点走"）。 */
-#grp-war .war-dir.is-cur.is-arrived .war-chevron {
-  opacity: 1;
-  transform: scale(var(--dir-s, 1));
-}
+/* 画线期间终点不落"幽灵箭头"：is-cur 整组隐藏（含浅色底衬——旧实现只藏
+ * 彩色楔形，奶油色底衬比成品还大 14%，在终点坐满整个延迟+绘制期，用户
+ * 读作"箭头和线分开"）。绘制期间唯一的箭头就是骑在线尖上的骑乘头；到位
+ * 帧 JS 加 .is-arrived 与移除骑乘头同一 tick，像素级替换（_warPathEnd 与
+ * 骑乘头同一 getPointAtLength 公式，同位/同角/同尺寸；不做缩放/弹跳——
+ * 旧 0.4→1 过渡让箭头在终点"缩一下再弹出"）。 */
+#grp-war .war-dir.is-cur { visibility: hidden; }
+#grp-war .war-dir.is-cur.is-arrived { visibility: visible; }
 
 /* --- battle diamonds (战役点 · 同址微散在 JS 侧) --- */
 #grp-war .war-node {
