@@ -250,14 +250,16 @@
       };
     }
 
-    // 静态楔形头的位置与角度取【画出来的曲线】末端（getPointAtLength L 与 L-2），
-    // 与骑乘头末帧同一算法——raw 航点的末段弦角在弯道上会甩离曲线方向
+    // 静态楔形头的位置与角度取【画出来的曲线】末端（getPointAtLength L 与
+    // L - 屏幕2.5px 弦长），与骑乘头末帧同一算法、同口径弦长（深 zoom 下
+    // 固定 2 用户单位的弦跨 ~130px 曲线，平均切向偏离端部真实方向，直楔形
+    // 压不住弯线尾）——raw 航点的末段弦角在弯道上会甩离曲线方向
     // （官渡南压箭头曾实测楔形指向与线不一致），交接瞬间也会甩角。
     _warPathEnd(p, fallback) {
       try {
         const L = p.getTotalLength();
         const pt = p.getPointAtLength(L);
-        const near = p.getPointAtLength(Math.max(0, L - 2));
+        const near = p.getPointAtLength(Math.max(0, L - Math.max(0.08, 2.5 / this._warKScreen())));
         if (Math.hypot(pt.x - near.x, pt.y - near.y) > 0.05) {
           return {
             endX: pt.x,
@@ -392,17 +394,19 @@
         });
     }
 
-    // 当前步行军箭头从起点渐进画到终点：rAF 逐帧写 dashoffset。
-    // 三个踩过的坑，都在这条注释里：
+    // 当前步行军箭头从起点渐进画到终点：rAF 逐帧重建部分路径 d（露头末端 =
+    // 骑乘头鼻尖所在弧长，线与楔形头同几何），画完恢复原始曲线。
+    // 踩过的坑，都在这条注释里：
     // ① CSS 动画会被 is-camera-moving 守卫杀掉（飞行中箭头消失重画）→ rAF 驱动；
-    // ② non-scaling-stroke 下 dasharray 按【屏幕像素】解释且 pathLength 不生效
-    //    （放大地图后箭头断成数截的根因）→ 每帧按当前缩放把用户单位长度
-    //    换算成屏幕像素再写 dash，缩放变化下一帧立即跟上；
-    // ③ 画完立即清除 dash——否则完成后用户再缩放，固定的 dash 值又会切碎线。
+    // ② 旧 dash 露头方案退役：non-scaling-stroke 下 dash 数值的消耗语义随
+    //    DPR/页面缩放漂移（1440×900 就差 4.6%、宽扁窗口差 37%，虚线尖与
+    //    骑乘头错位几十 px，用户实测"线头钻出来"），dash 只适合定长虚线
+    //    （is-claimed），生长露头必须用几何重建；
     // 楔形头"骑"在生长端点上随绘制进度移动（战史动画标准做法）：
-    // getPointAtLength 取当前端点 + 切线角，相机缩放时按 kScreen 反向缩放
-    // 保持屏幕尺寸恒定；画完后移除骑乘头，静态楔形在终点接管（同为
-    // kScreen 全补偿，交接不跳变——见 _warRescaleGlyphs）。
+    // getPointAtLength 取当前端点 + 切线角（弦长按屏幕 2.5px 折算，与
+    // _warPathEnd 同口径），相机缩放时按 kScreen 反向缩放保持屏幕尺寸恒定；
+    // 画完后移除骑乘头，静态楔形在终点接管（同为 kScreen 全补偿，交接
+    // 不跳变——见 _warRescaleGlyphs）。
     _startWarDraw(casing, p, dirG, rider, tier, drawMs) {
       const showFull = () => {
         for (const q of [casing, p]) {
@@ -437,6 +441,24 @@
       }
       const t0 = performance.now();
       const ease = (k) => 1 - Math.pow(1 - k, 3);
+      // 露头机制：每帧【重建部分路径 d】（终点精确落在骑乘头鼻尖所在弧长），
+      // 画完恢复原始曲线。不用 dash——non-scaling-stroke 下 dash 数值的消耗
+      // 语义随 DPR/页面缩放漂移（预测式永远自洽、实画却可差几十 px，宽扁
+      // 窗口/Retina 下用户实测"线头从楔形底下钻出来"）；重建后线与楔形头是
+      // 同一几何对象，钻头结构上不可能。采样按屏幕 2.5px 折算、单帧 ≤400 点。
+      let origD = null;
+      try {
+        origD = p.getAttribute('d');
+      } catch (e) { /* 静态兜底 */ }
+      // 测量副本：可见路径的 d 每帧会被覆盖成部分折线，getPointAtLength 会被
+      // 钳在当前末端、线永远长不动（实测首帧即冻结）——所有弧长采样一律走
+      // 这条隐藏的原始曲线副本，可见线只负责被重建。
+      let measure = null;
+      if (origD && casing.parentNode) {
+        measure = this._svgNode('path', { d: origD }, casing.parentNode);
+        measure.style.visibility = 'hidden';
+      }
+      const samplePt = (arc) => (measure || p).getPointAtLength(arc);
       const stepFn = (now) => {
         let kScreen = 1;
         try {
@@ -444,27 +466,48 @@
         } catch (e) {
           /* keep last scale */
         }
-        const Ls = Lu * kScreen;
-        // k 双侧夹紧：k<0 时 eased 为负、dashoffset 越过 dasharray，
-        // 可见段跳到线中段（绘制首帧实测瞬移一帧）
+        // k 双侧夹紧：k<0 时 eased 为负、露头长度为负直接崩溃
         const k = Math.max(0, Math.min(1, (now - t0) / drawMs));
         const eased = ease(k);
-        const off = Ls * (1 - eased);
-        for (const q of [casing, p]) {
-          // 首帧带 dash 显形（创建时为隐藏，避免延迟期整线裸奔）
-          q.style.visibility = 'visible';
-          q.style.strokeDasharray = `${Ls.toFixed(1)}`;
-          q.style.strokeDashoffset = `${off.toFixed(1)}`;
+        const headLen = Lu * eased;
+        if (origD && measure) {
+          try {
+            const step = Math.max(Lu / 400, 2.5 / kScreen);
+            const n = Math.max(1, Math.ceil(headLen / step));
+            let d = null;
+            if (n <= 1) {
+              const pt = samplePt(headLen);
+              const pt0 = samplePt(0);
+              d = `M${pt0.x.toFixed(2)} ${pt0.y.toFixed(2)}L${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`;
+            } else {
+              d = '';
+              for (let i = 0; i <= n; i++) {
+                const pt = samplePt((headLen * i) / n);
+                d += (i ? 'L' : 'M') + pt.x.toFixed(2) + ' ' + pt.y.toFixed(2);
+              }
+            }
+            for (const q of [casing, p]) {
+              // 首帧带露头 d 显形（创建时为隐藏，避免延迟期整线裸奔）
+              q.style.visibility = 'visible';
+              q.setAttribute('d', d);
+            }
+          } catch (e) {
+            /* 重建失败退回整线 */
+            showFull();
+          }
+        } else {
+          showFull();
         }
         if (rider && k < 1) {
           try {
-            const headLen = Lu * eased;
-            const pt = p.getPointAtLength(headLen);
-            const near = p.getPointAtLength(Math.max(0, headLen - 2));
+            const pt = samplePt(headLen);
+            // 切向弦长按屏幕 ~2.5px 折算（与 _warPathEnd 同口径）：深 zoom 下
+            // 固定 2 用户单位的弦会跨 ~130px 曲线，平均切向偏离端部真实方向
+            const near = samplePt(Math.max(0, headLen - Math.max(0.08, 2.5 / kScreen)));
             const ang = (Math.atan2(pt.y - near.y, pt.x - near.x) * 180) / Math.PI;
             const wedgeS = (WEDGE_SCALES[tier] || 1) / kScreen;
             rider.setAttribute('transform',
-              `translate(${pt.x.toFixed(1)},${pt.y.toFixed(1)}) rotate(${ang.toFixed(1)}) scale(${wedgeS.toFixed(3)})`);
+              `translate(${pt.x.toFixed(2)},${pt.y.toFixed(2)}) rotate(${ang.toFixed(1)}) scale(${wedgeS.toFixed(3)})`);
           } catch (e) {
             /* rider positioning is cosmetic */
           }
@@ -473,10 +516,13 @@
           const h = requestAnimationFrame(stepFn);
           this._warDrawRafs.push(h);
         } else {
-          for (const q of [casing, p]) {
-            q.style.strokeDasharray = 'none';
-            q.style.strokeDashoffset = '0';
+          // 画完恢复原始曲线（重建的多段线只是绘制期替身），测量副本退场
+          if (origD) {
+            for (const q of [casing, p]) {
+              q.setAttribute('d', origD);
+            }
           }
+          if (measure && measure.parentNode) measure.remove();
           finish();
         }
       };
@@ -653,10 +699,11 @@
                   // 的骑乘头会闪到 SVG 原点
                   try {
                     const p0 = p.getPointAtLength(0);
-                    const p1 = p.getPointAtLength(Math.min(2, Lu0));
-                    const a0 = (Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180) / Math.PI;
                     const kr = this._warKScreen();
-                    const s0 = (WEDGE_SCALES[tier] || 1) / kr;
+                    const back = Math.min(Math.max(0.08, 2.5 / (kr || 1)), Lu0);
+                    const p1 = p.getPointAtLength(back);
+                    const a0 = (Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180) / Math.PI;
+                    const s0 = (WEDGE_SCALES[tier] || 1) / (kr || 1);
                     rider.setAttribute('transform',
                       `translate(${p0.x.toFixed(1)},${p0.y.toFixed(1)}) rotate(${a0.toFixed(1)}) scale(${s0.toFixed(3)})`);
                   } catch (e) {
