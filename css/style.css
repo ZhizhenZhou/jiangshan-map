@@ -5394,16 +5394,11 @@ html[lang="en"] .genealogy-list li.person-ev-row {
     transform: translateY(-1px);
   }
 }
-/* 战争沙盘激活：阶段面板收拢成相位条（战争嵌在历史进程里，而非替换它——
-   进出都有过渡），战争卡片上移让位；移动端空间紧张，保持整面板隐藏 */
-#viewport-frame.has-active-war #war-card {
-  bottom: 64px;
-}
-@media (max-width: 900px) {
-  #viewport-frame.has-active-war #map-key {
-    opacity: 0;
-    pointer-events: none;
-  }
+/* 战争沙盘接管：底缘相位条整体让位（用户反馈：进入后不要这条东汉收拢条，
+   地图让给沙盘本身）——面板淡出，卡片回到常态位置；退出时反向恢复 */
+#viewport-frame.has-active-war #map-key {
+  opacity: 0;
+  pointer-events: none;
 }
 @media (min-width: 901px) {
   #map-key {
