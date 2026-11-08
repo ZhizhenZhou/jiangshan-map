@@ -5324,6 +5324,76 @@ html[lang="en"] .genealogy-list li.person-ev-row {
 #viewport-frame.is-camera-moving #war-card {
   animation: none;
 }
+/* --- 战争沙盘入口胶囊：年份落在战役窗口且未接管时，底缘居中的显眼入口
+   （旧入口藏在编年行/图层弹层里，用户找不到）。语言沿用提示胶囊习语
+   （start-guide：999px 圆角 + 宣纸底 + hairline），hover 转 vermilion
+   同 .canvas-reset-btn。接管后隐藏；左缘避开 map-key（右缘 ≤352px），
+   右缘避开 canvas-br-dock，1440 下居中跨 ~560-880。 */
+#war-gate {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: min(78vw, 460px);
+  padding: 7px 14px 7px 12px;
+  border-radius: 999px;
+  background: rgba(250, 246, 237, 0.92);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+#war-gate .wico {
+  color: var(--vermilion);
+  flex: none;
+}
+#war-gate b {
+  font-family: var(--serif-stack);
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#war-gate i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-muted);
+  flex: none;
+}
+#war-gate em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vermilion);
+  flex: none;
+}
+#war-gate:hover {
+  border-color: rgba(181, 69, 47, 0.45);
+  transform: translateX(-50%) translateY(-1px);
+  box-shadow: 0 6px 18px rgba(43, 38, 34, 0.16);
+}
+#war-gate:focus-visible {
+  outline: 2px solid rgba(181, 69, 47, 0.5);
+  outline-offset: 2px;
+}
+/* 窄桌面：map-key 右缘 ≤352px，居中胶囊会压到它——改贴其右侧排布 */
+@media (min-width: 901px) and (max-width: 1150px) {
+  #war-gate {
+    left: 368px;
+    transform: none;
+    max-width: calc(100% - 610px);
+  }
+  #war-gate:hover {
+    transform: translateY(-1px);
+  }
+}
 /* 战争沙盘激活：阶段面板收拢成相位条（战争嵌在历史进程里，而非替换它——
    进出都有过渡），战争卡片上移让位；移动端空间紧张，保持整面板隐藏 */
 #viewport-frame.has-active-war #war-card {
@@ -5414,6 +5484,32 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   font-size: 12px;
   cursor: pointer;
   transition: transform 0.18s;
+}
+/* 退出战争沙盘 ✕：靠右，折叠 ▾ 挨在其右侧（ep-close 圆钮语言） */
+#war-card .war-exit {
+  margin-left: auto;
+  align-self: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(166, 58, 40, 0.08);
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+#war-card .war-exit:hover {
+  background: var(--vermilion);
+  color: #fffaf2;
+}
+#war-card .war-exit + .war-fold {
+  margin-left: 4px;
 }
 #war-card.is-folded .war-fold {
   transform: rotate(-90deg);

@@ -40,6 +40,8 @@
     prev: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M11.5 3v10L4.5 8z" fill="currentColor"/></svg>',
     next: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4.5 3v10L11.5 8z" fill="currentColor"/></svg>',
     end: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M3.5 3v10L10.5 8z" fill="currentColor"/><rect x="12.3" y="3" width="1.8" height="10" fill="currentColor"/></svg>',
+    // 入口胶囊：交叉双剑（线条风，currentColor）
+    gate: '<svg class="wico" viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2.6 2.6L12 12M13.4 2.6L4 12"/><path d="M2.4 13.6l2.1-2.1M13.6 13.6l-2.1-2.1"/><path d="M3.2 10.2l2.6 2.6M12.8 10.2l-2.6 2.6"/></g></svg>',
   };
 
   // 相机视野标定（全局唯一换算，无每战役特调）：
@@ -708,6 +710,33 @@
       return this._id('war-card');
     }
 
+    // ---------------- render: sandbox entry gate (情境入口胶囊) ----------------
+
+    _warGateEl() {
+      return this._id('war-gate');
+    }
+
+    _bindWarGate() {
+      const gate = this._warGateEl();
+      if (!gate || gate._warGateBound) return;
+      gate._warGateBound = true;
+      const enter = () => {
+        const w = this._activeWar();
+        if (!w) return;
+        // 入口胶囊只在未接管时出现；点击即接管（先停播放，别让主时钟抢镜头）
+        if (this.stopAutoplay) this.stopAutoplay();
+        this._warEngagedKey = w.key;
+        this._syncWarOverlay();
+      };
+      gate.addEventListener('click', enter);
+      gate.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          enter();
+        }
+      });
+    }
+
     _warForceBarsHtml(w, s) {
       const forces = this._warStepForces(w, s);
       if (!forces.length) return '';
@@ -777,6 +806,7 @@
           `<div class="war-head" data-act="fold-toggle">` +
           `<span class="war-title">${esc(this._warField(w, 'title'))}</span>` +
           `<span class="war-years">${spanTxt}</span>` +
+          `<button class="war-exit" data-act="exit" title="${esc(this._warTxt('exit'))}" aria-label="${esc(this._warTxt('exit'))}">×</button>` +
           `<button class="war-fold" data-act="fold" aria-expanded="${folded ? 'false' : 'true'}" title="${esc(this._warTxt('fold'))}">▾</button>` +
           `</div>` +
           `<div class="war-body${folded ? ' is-folded' : ''}">` +
@@ -853,6 +883,8 @@
         zone: zh ? '当前控制区' : 'Front line',
         jumpHint: zh ? '点击跳到该步' : 'Click to jump to this step',
         rewind: zh ? '回到起始' : 'Back to the start',
+        gate: zh ? '进入战争沙盘' : 'Enter the war sandbox',
+        exit: zh ? '退出战争沙盘' : 'Exit the war sandbox',
       };
       return dict[key] || key;
     }
@@ -965,6 +997,13 @@
         const act = e.target.closest('[data-act]');
         if (!act) return;
         const a = act.dataset.act;
+        if (a === 'exit') {
+          // 退出战争沙盘：清会话 → _syncWarOverlay 的退出分支收卡、展开
+          // 相位条、相机对称飞回进战前取景；年份仍在窗口内则入口胶囊重现
+          this._warEngagedKey = null;
+          this._syncWarOverlay();
+          return;
+        }
         if (a === 'fold' || a === 'fold-toggle') {
           card.classList.toggle('is-folded');
           const w2 = this._activeWar();
@@ -1054,6 +1093,33 @@
         const chk = this._id('chk-war');
         if (!w || (chk && !chk.checked)) grp.classList.add('is-hidden');
         else grp.classList.remove('is-hidden');
+      }
+      // 情境入口胶囊：年份落在战役窗口且未接管时，地图底缘给出显眼入口
+      // （上一版入口藏在编年行/图层弹层里，用户找不到——这是主入口）
+      this._bindWarGate();
+      const gate = this._warGateEl();
+      if (gate) {
+        const showGate =
+          Boolean(wRaw) && !w &&
+          !this.activePerson && !this.activeTrace && !this.challenge &&
+          this._warLayerOn();
+        gate.classList.toggle('is-hidden', !showGate);
+        const gateSig = showGate
+          ? [this.locale, wRaw.key, wRaw.span[0], wRaw.span[1]].join('|')
+          : null;
+        if (showGate && gateSig !== this._warGateSig) {
+          this._warGateSig = gateSig;
+          const spanTxt = `${this.formatYear(wRaw.span[0], true)} — ${this.formatYear(wRaw.span[1], true)}`;
+          gate.innerHTML =
+            WAR_ICONS.gate +
+            `<b>${esc(this._warField(wRaw, 'title'))}</b>` +
+            `<i>${esc(spanTxt)}</i>` +
+            `<em>${esc(this._warTxt('gate'))} ›</em>`;
+          gate.title = esc(this._warTxt('gate'));
+          if (this.locale === 'zh-tw') this._applyZhHantDom(gate);
+        } else if (!showGate) {
+          this._warGateSig = null;
+        }
       }
       this._renderWarSvg(w, idx, zi);
       this._renderWarCard(w, idx);
