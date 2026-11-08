@@ -609,6 +609,25 @@
       // 激活进场（warFly 非空）：绘制与相机飞行同速同缓动（WAR_FLIGHT_MS +
       // cubic ease-out）；沙盘内逐步推进相机不飞：100ms 起跑、WAR_DRAW_MS 走完。
       const flightMs = WAR_FLIGHT_MS;
+      // 链式交接：下一支箭从本支终点出发（from ≈ 上一支 to）时，本支终点
+      // 不落楔形头——走廊读作连续路线，箭头只出现在当前前沿；否则链点上
+      // 会躺着一个指向前一支旧方向的楔形，下一支反向出发时被读成"箭头
+      // 反了"（官渡 step3→step4 曹军折返实测）。行军动画的骑乘头不受影响。
+      const chainedEnds = new Set();
+      {
+        const flat = [];
+        for (let i = 0; i <= idx; i++) {
+          for (const mv of w.steps[i].moves || []) flat.push(mv);
+        }
+        for (let k = 0; k + 1 < flat.length; k++) {
+          const pa = this._warPointList(flat[k]);
+          const pb = this._warPointList(flat[k + 1]);
+          if (pa.length < 2 || pb.length < 2) continue;
+          const ea = pa[pa.length - 1];
+          const sb = pb[0];
+          if ((ea[0] - sb[0]) ** 2 + (ea[1] - sb[1]) ** 2 < 0.0004) chainedEnds.add(flat[k]);
+        }
+      }
       for (let i = 0; i <= idx; i++) {
         const s = w.steps[i];
         const isCur = i === idx;
@@ -649,29 +668,33 @@
               this._warCurMoveTip = { x: end.endX, y: end.endY };
               this._warCurMoveTipTier = tier;
             }
-            dir = this._svgNode(
-              'g',
-              {
-                class: `war-dir t${tier}${isCur ? ' is-cur' : ''}`,
-                'data-x': end.endX.toFixed(1),
-                'data-y': end.endY.toFixed(1),
-                'data-rot': end.endAngleDeg.toFixed(1),
-              },
-              g
-            );
-            dir.style.color = side.color;
-            // 头也吃底衬：浅色大一号的同形三角垫底，与线的底衬语言一致。
-            // 比例用【transform 属性】写死在子路径上（SVG 属性变换原点恒为
-            // 本地 (0,0)=底边，与相机无关）；不走 CSS scale——其 origin/box
-            // 语义随 reference box 漂移，深 zoom 下楔形会被画离锚点。
-            this._svgNode('path', {
-              d: WEDGE_D, class: 'war-chevron-under',
-              transform: `scale(${((WEDGE_SCALES[tier] || 1) * 1.14).toFixed(4)})`,
-            }, dir);
-            this._svgNode('path', {
-              d: WEDGE_D, class: 'war-chevron',
-              transform: `scale(${(WEDGE_SCALES[tier] || 1).toFixed(4)})`,
-            }, dir);
+            // 链式交接（下一支箭从本支终点出发）→ 本支不落楔形头，
+            // 走廊在链点连续；行军动画的骑乘头照常（画完随下一支起步让位）
+            if (!chainedEnds.has(mv)) {
+              dir = this._svgNode(
+                'g',
+                {
+                  class: `war-dir t${tier}${isCur ? ' is-cur' : ''}`,
+                  'data-x': end.endX.toFixed(1),
+                  'data-y': end.endY.toFixed(1),
+                  'data-rot': end.endAngleDeg.toFixed(1),
+                },
+                g
+              );
+              dir.style.color = side.color;
+              // 头也吃底衬：浅色大一号的同形三角垫底，与线的底衬语言一致。
+              // 比例用【transform 属性】写死在子路径上（SVG 属性变换原点恒为
+              // 本地 (0,0)=底边，与相机无关）；不走 CSS scale——其 origin/box
+              // 语义随 reference box 漂移，深 zoom 下楔形会被画离锚点。
+              this._svgNode('path', {
+                d: WEDGE_D, class: 'war-chevron-under',
+                transform: `scale(${((WEDGE_SCALES[tier] || 1) * 1.14).toFixed(4)})`,
+              }, dir);
+              this._svgNode('path', {
+                d: WEDGE_D, class: 'war-chevron',
+                transform: `scale(${(WEDGE_SCALES[tier] || 1).toFixed(4)})`,
+              }, dir);
+            }
           }
           if (isCur && !claimed) {
             // 骑乘楔形头：绘制期间骑在生长端点上，画完移除、静态楔形接管。
