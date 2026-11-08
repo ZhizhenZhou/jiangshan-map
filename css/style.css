@@ -5225,26 +5225,19 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   }
 }
 
-/* --- directional chevrons（组 transform 由 JS _warRescaleGlyphs 按 1/kScreen 全补偿，屏幕尺寸恒定） --- */
+/* --- directional chevrons（组 transform 由 JS _warRescaleGlyphs 按 1/kScreen 全补偿，屏幕尺寸恒定） ---
+ * 子路径的档位缩放由 JS 写【transform 属性】（原点恒为本地 (0,0)=底边），
+ * 不用 CSS scale——其 origin/box 语义随 reference box 漂移，深 zoom 下楔形
+ * 会被画离锚点。WEDGE_D 底边在原点、锥尖朝 +x 前方：底边与线端齐平。 */
 #grp-war .war-dir {
   pointer-events: none;
 }
 #grp-war .war-chevron-under {
   fill: #f6f1e6;
-  transform: scale(calc(var(--dir-s, 1) * 1.14));
 }
 #grp-war .war-chevron {
   fill: currentColor;
-  transform: scale(var(--dir-s, 1));
 }
-/* --dir-s 由 JS 创建 dir 组时 inline 写入 WEDGE_SCALES[tier]（单一事实来源），
- * 下方逐档规则仅为无 inline 时的兜底。两表曾各自维护（JS
- * [1.197,1.478,1.83,2.27] vs CSS 1.232/1.514/1.76/2.218），到位交接瞬间
- * 箭头会缩 2~4%，故收敛为 JS 一处。 */
-#grp-war .war-dir.t0 { --dir-s: 1.232; }
-#grp-war .war-dir.t1 { --dir-s: 1.514; }
-#grp-war .war-dir.t2 { --dir-s: 1.76; }
-#grp-war .war-dir.t3 { --dir-s: 2.218; }
 /* 画线期间终点不落"幽灵箭头"：is-cur 整组隐藏（含浅色底衬——旧实现只藏
  * 彩色楔形，奶油色底衬比成品还大 14%，在终点坐满整个延迟+绘制期，用户
  * 读作"箭头和线分开"）。绘制期间唯一的箭头就是骑在线尖上的骑乘头；到位
@@ -5933,13 +5926,12 @@ html[lang="en"] .genealogy-list li.person-ev-row {
   color: #3d3629;
 }
 
-/* --- 骑乘楔形头（绘制期间骑在生长端点上） --- */
+/* --- 骑乘楔形头（绘制期间骑在生长端点上，底边与线端齐平） --- */
 #grp-war .war-rider {
   pointer-events: none;
 }
 #grp-war .war-rider-wedge-under {
   fill: #f6f1e6;
-  transform: scale(1.14);
 }
 #grp-war .war-rider-wedge {
   fill: currentColor;

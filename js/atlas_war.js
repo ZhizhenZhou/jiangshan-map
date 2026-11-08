@@ -28,17 +28,21 @@
   const WAR_DRAW_MIN_PX = 90;
   const TIER_WIDTHS = [3.4, 5, 7, 9.5];       // screen px per strength tier
   const TIER_SCALES = [0.9, 1.1, 1.35, 1.65]; // battle-diamond core scales
-  // 箭头头形：鼻尖在原点的三角（底边朝后）——骑乘时鼻尖钉在生长端点、
-  // 底边朝后盖住已画线的末端，线的可见末端永远正好是箭头底边（贴线尖）；
-  // 静态楔形同路径：鼻尖落在终点（战役位置）。交接前后头位置像素级一致。
-  const WEDGE_D = "M0 0L-12.5 -5.4L-12.5 5.4Z";
+  // 箭头头形：底边在原点、鼻尖伸向 +x 前方（行进方向）——底边与线端齐平
+  // （用户要求"箭头的底边刚好接触到线的边缘"），锥部完全在线前方，线的
+  // 平头帽整个被底边盖住。旧"鼻尖在原点、底边朝后盖线"构造里，楔形越靠
+  // 近鼻尖越窄而线是等宽的——锥部末端的线尾永远比楔形宽出来，深 zoom 下
+  // 读作"线头从箭头底下钻出来"（构造性缺陷，探针测锚点全为 0 也照出）。
+  // 到位态锥尖伸进终点战役菱形下方（菱形画在箭头之上）。
+  const WEDGE_D = "M0 0L12.5 -5.4L12.5 5.4Z";
   // 头与线等比：档位系数 = 线宽/12.5×2.75——头长与底边宽恒为线宽的
   // 2.75/2.5 倍（旧 1/1.15/1.35/1.6 与线宽脱钩：细线上头过大、粗线上头
   // 缩成刺，用户实测"太丑"）。
   // 楔形头按【底衬脚印】（线宽+3.4px 底衬）的 2.2 倍定标。按裸线宽定标时小
   // 兵力档的头（t0 仅 10×8.7px）整个埋进 7px 宽的底衬带里，绘制中视觉上
-  // "没有箭头"（官渡白马轴帧级实测）；2.2 倍让底边盖住 dash 平头帽、两翼
-  // 探出底衬。此表必须与 style.css 的 --dir-s 逐档一致，交接才像素级无缝。
+  // "没有箭头"（官渡白马轴帧级实测）；2.2 倍让底边盖住线端平头帽、两翼
+  // 探出底衬。此表由 JS 创建 dir/骑乘头子路径时写进 transform 属性
+  // （style.css 不再持有 --dir-s 拷贝），交接像素级无缝由构造保证。
   const WEDGE_SCALES = TIER_WIDTHS.map((w) => +(((w + 3.4) * 2.2) / 12.5).toFixed(3));
   const WAR_ICONS = {
     // 传输栏五键镜像对称：|◀ ◀  ▶ ▶|（回起始/上一步 ←→ 下一步/到结束）
@@ -656,13 +660,18 @@
               g
             );
             dir.style.color = side.color;
-            // 楔形比例单一事实来源：inline --dir-s 直接取 WEDGE_SCALES[tier]，
-            // CSS 逐档规则降为兜底——静态楔形与骑乘头交接同尺寸由构造保证
-            //（两表曾各自维护，到位交接瞬间箭头缩 2~4%）
-            dir.style.setProperty('--dir-s', String(WEDGE_SCALES[tier] || 1));
-            // 头也吃底衬：浅色大一号的同形三角垫底，与线的底衬语言一致
-            this._svgNode('path', { d: WEDGE_D, class: 'war-chevron-under' }, dir);
-            this._svgNode('path', { d: WEDGE_D, class: 'war-chevron' }, dir);
+            // 头也吃底衬：浅色大一号的同形三角垫底，与线的底衬语言一致。
+            // 比例用【transform 属性】写死在子路径上（SVG 属性变换原点恒为
+            // 本地 (0,0)=底边，与相机无关）；不走 CSS scale——其 origin/box
+            // 语义随 reference box 漂移，深 zoom 下楔形会被画离锚点。
+            this._svgNode('path', {
+              d: WEDGE_D, class: 'war-chevron-under',
+              transform: `scale(${((WEDGE_SCALES[tier] || 1) * 1.14).toFixed(4)})`,
+            }, dir);
+            this._svgNode('path', {
+              d: WEDGE_D, class: 'war-chevron',
+              transform: `scale(${(WEDGE_SCALES[tier] || 1).toFixed(4)})`,
+            }, dir);
           }
           if (isCur && !claimed) {
             // 骑乘楔形头：绘制期间骑在生长端点上，画完移除、静态楔形接管。
@@ -691,10 +700,10 @@
               const startDraw = () => {
                 let rider = null;
                 if (!reducedMotion() && info.endX !== null) {
-                  rider = this._svgNode('g', { class: 'war-rider' }, g);
-                  rider.style.color = side.color;
-                  this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge-under' }, rider);
-                  this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
+                rider = this._svgNode('g', { class: 'war-rider' }, g);
+                rider.style.color = side.color;
+                this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge-under', transform: 'scale(1.14)' }, rider);
+                this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
                   // 创建即钉在路径起点（首帧 rAF 会重写精确姿态）：无 transform
                   // 的骑乘头会闪到 SVG 原点
                   try {
