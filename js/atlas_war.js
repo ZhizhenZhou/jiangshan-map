@@ -125,9 +125,10 @@
 
     _engageWar(w) {
       if (!w) return false;
-      if (w.key === 'guandu' && typeof this.openPersonChronicle === 'function') {
-        const idx = Math.max(0, this._warStepIndex(w));
-        return this.openPersonChronicle('guandu', idx);
+      // Campaigns with a formal story profile use main's storyline experience;
+      // the standalone war-card shell only remains for unregistered fallbacks.
+      if (this._warHasStory(w.key) && typeof this.openPersonChronicle === 'function') {
+        return this.openPersonChronicle(w.key, Math.max(0, this._warStepIndex(w)));
       }
       if (!this._prepareWarEngagement(w)) return false;
       this._syncWarOverlay();
@@ -158,8 +159,8 @@
         this._syncWarOverlay();
         return false;
       }
-      if (linkWar.key === 'guandu' && typeof this.openPersonChronicle === 'function') {
-        return this.openPersonChronicle('guandu', Math.max(0, this._warStepIndex(linkWar, frac)));
+      if (this._warHasStory(linkWar.key) && typeof this.openPersonChronicle === 'function') {
+        return this.openPersonChronicle(linkWar.key, Math.max(0, this._warStepIndex(linkWar, frac)));
       }
       this._warEngagedKey = linkWar.key;
       this._warSeekTo(frac);
@@ -198,6 +199,7 @@
     _hydrateWarStoryProfiles() {
       const profiles = HistoricalAtlasController && HistoricalAtlasController.PERSON_PROFILES;
       if (!Array.isArray(profiles)) return false;
+      this._warStoryLastCoord = null;
       let changed = false;
       for (const profile of profiles) {
         if (!profile || !profile.warKey || (Array.isArray(profile.stops) && profile.stops.length)) continue;
@@ -216,7 +218,11 @@
           const battle = (step.battles || [])[0] || null;
           const move = (step.moves || [])[0] || null;
           const pts = move ? this._warPointList(move) : [];
-          const coord = step.storyCoord || (battle && battle.at) || (pts.length ? pts[pts.length - 1] : null);
+          // Pure-narrative steps (no move/battle, e.g. 草木皆兵) inherit the
+          // previous scene's position so no scene is ever dropped from the card.
+          const stepCoord = step.storyCoord || (battle && battle.at) || (pts.length ? pts[pts.length - 1] : null);
+          const coord = stepCoord || this._warStoryLastCoord || null;
+          if (stepCoord) this._warStoryLastCoord = stepCoord;
           const fromCoord = pts.length > 1 ? pts[0] : null;
           const titleZh = step.titleZh || (battle && (battle.nameZh || battle.titleZh)) || (move && move.titleZh) || '';
           const titleEn = step.titleEn || (battle && (battle.nameEn || battle.titleEn)) || (move && move.titleEn) || titleZh;
@@ -231,7 +237,7 @@
             actZh: step.actZh || '',
             actEn: step.actEn || '',
             camp,
-            ancientZh: step.storySiteZh || (battle && battle.placeZh) || titleZh,
+            ancientZh: step.storySiteZh || (battle && String(battle.placeZh || '').replace(/^（?今/, '').replace(/（今[^）)]*）/,'')) || titleZh,
             ancientEn: step.storySiteEn || (battle && battle.placeEn) || titleEn,
             modernZh: step.storyModernZh || '',
             modernEn: step.storyModernEn || '',
@@ -245,7 +251,7 @@
             warStepIdx: idx,
             warKey: war.key,
           };
-        }).filter((stop) => Array.isArray(stop.coord));
+        });
         changed = true;
       }
       if (changed) {
@@ -253,6 +259,11 @@
         this._soloPersonEventsCache = null;
       }
       return changed;
+    }
+
+    _warHasStory(key) {
+      const profiles = HistoricalAtlasController && HistoricalAtlasController.PERSON_PROFILES;
+      return Array.isArray(profiles) && profiles.some((p) => p && p.warKey === key);
     }
 
     _activeWarStory() {
@@ -1326,10 +1337,19 @@
         if (chk) {
           chk.addEventListener('change', () => {
             // 勾选=进入沙盘的手势之一：当年有战役则立即接管并飞入；
-            // 取消勾选=退出沙盘
+            // 取消勾选=退出沙盘（战役故事模式则连同故事卡一起收起）
             const w0 = chk.checked ? this._activeWar() : null;
-            if (w0) this._engageWar(w0);
-            else this._warEngagedKey = null;
+            if (w0) {
+              this._engageWar(w0);
+            } else {
+              this._warEngagedKey = null;
+              if (
+                this.activePerson && this.activePerson.profile && this.activePerson.profile.warKey &&
+                typeof this.closeGenealogyCard === 'function'
+              ) {
+                this.closeGenealogyCard();
+              }
+            }
             const grp = this._warGroup();
             if (grp) grp.classList.toggle('is-hidden', !chk.checked);
             this._warSvgSig = null;
@@ -1356,7 +1376,12 @@
                 const y = Number(row.dataset.evYear);
                 if (!Number.isFinite(y)) return;
                 const war = this._warData().find((x) => y >= x.span[0] && y <= x.span[1]);
-                if (war && war.key !== 'guandu') this._prepareWarEngagement(war);
+                if (!war) return;
+                if (this._warHasStory(war.key) && typeof this.openPersonChronicle === 'function') {
+                  this.openPersonChronicle(war.key, Math.max(0, this._warStepIndex(war, y)));
+                } else {
+                  this._prepareWarEngagement(war);
+                }
               } catch (err) {
                 /* non-fatal */
               }
@@ -1392,7 +1417,7 @@
       const gate = this._warGateEl();
       if (gate) {
         const showGate =
-          Boolean(wRaw) && wRaw.key !== 'guandu' && !w &&
+          Boolean(wRaw) && !w &&
           !this.activePerson && !this.activeTrace && !this.challenge &&
           this._warLayerOn();
         gate.classList.toggle('is-hidden', !showGate);

@@ -111,11 +111,29 @@ async function runSearchRuntimeSuite(ctx) {
         '女真',
         '红巾军',
       ]) {
-        assert.strictEqual(
-          ctrl._resolvePersonProfile(nonPersonQ),
-          null,
-          `_resolvePersonProfile("${nonPersonQ}") must not fabricate a fake person profile`
-        );
+        // 靖康 / 鸦片战争 are now formal war-backed storylines — resolving them
+        // is correct; they must still never fabricate an ordinary person hit.
+        const campaignStory =
+          nonPersonQ === '靖康'
+            ? 'jingkang'
+            : nonPersonQ === '鸦片战争'
+              ? 'yapian'
+              : null;
+        const resolvedStory = campaignStory
+          ? ctrl._resolvePersonProfile(nonPersonQ)
+          : null;
+        if (campaignStory) {
+          assert(
+            resolvedStory && resolvedStory.isStory && resolvedStory.warKey === campaignStory,
+            `_resolvePersonProfile("${nonPersonQ}") must resolve to the ${campaignStory} storyline`
+          );
+        } else {
+          assert.strictEqual(
+            ctrl._resolvePersonProfile(nonPersonQ),
+            null,
+            `_resolvePersonProfile("${nonPersonQ}") must not fabricate a fake person profile`
+          );
+        }
         const qHits = ctrl._queryQuickSearch(nonPersonQ);
         assert(
           qHits.length > 0 && !qHits.some((h) => h.kind === 'person'),

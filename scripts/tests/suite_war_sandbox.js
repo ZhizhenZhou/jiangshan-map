@@ -188,7 +188,27 @@ async function runWarSandboxSuite(ctx) {
   assert(warModule.includes('_hydrateWarStoryProfiles()'), 'War module must hydrate formal story profiles from WAR_DATA');
   assert(warModule.includes('_activeWarStory()'), 'War module must expose story-driven campaign state');
   assert(warModule.includes('storyWar ? storyWar.war : shellWar'), 'Story-driven SVG rendering must be separate from the standalone war shell');
-  assert(warModule.includes("wRaw.key !== 'guandu'"), 'Guandu must suppress the standalone campaign gate in the prototype');
+  assert(warModule.includes('_warHasStory(w.key)') && warModule.includes('_warHasStory(linkWar.key)'), 'Gate, chronicle rows and deep links must route story-backed campaigns to the unified experience');
+
+  const warKeys = new Set(wars.map((w) => w.key));
+  const storyByWarKey = new Map();
+  for (const profile of loreData.PERSON_PROFILES || []) {
+    if (profile && profile.warKey) storyByWarKey.set(profile.warKey, profile);
+  }
+  // An-Shi keeps its curated 10-stop editorial storyline and standalone
+  // tactical sandbox; every other campaign must use the unified experience.
+  for (const w of wars) {
+    if (w.key === 'an-shi') {
+      assert(!storyByWarKey.has('an-shi'), 'An-Shi must keep its curated storyline (no warKey profile)');
+      continue;
+    }
+    const profile = storyByWarKey.get(w.key);
+    assert(profile, `Campaign ${w.key} must have a formal isStory profile`);
+    assert.strictEqual(profile.isStory, true, `Campaign ${w.key} profile must be a storyline`);
+    assert.deepStrictEqual(Array.from(profile.span), Array.from(w.span), `Campaign ${w.key} story span must match the war span`);
+    assert.strictEqual(profile.evCount, w.steps.length, `Campaign ${w.key} story must advertise one scene per war step`);
+  }
+  assert.strictEqual(storyByWarKey.size, wars.length - 1, 'Exactly the non-An-Shi campaigns carry warKey story profiles');
   assert(
     warModule.includes("window.innerWidth <= 900") && /#war-balloon[\s\S]*display:\s*none\s*!important/.test(styleCss),
     'Tablet/mobile war mode must keep the narrative in the bottom sheet and suppress the duplicate map balloon'
