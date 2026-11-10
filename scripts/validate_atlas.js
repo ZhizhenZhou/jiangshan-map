@@ -9,6 +9,7 @@
  *   - trace       (suite_trace_genealogy.js) : Place genealogy (点地溯源), person chronicle (点人溯事) & landmarks
  *   - cartography (suite_cartography_ui.js)  : Dynastic border accuracy (Zizhi Tongjian / 24 Histories) & timeline UI
  *   - ui          (suite_search_runtime.js)  : Compositor, quick search ranking, i18n, WebMCP, terrain & perf guards
+ *   - war         (suite_war_sandbox.js)     : 22-campaign data, lazy assets, span boundaries & mode ownership
  */
 'use strict';
 
@@ -19,6 +20,7 @@ const { runApiSearchSuite } = require('./tests/suite_api_search');
 const { runTraceGenealogySuite } = require('./tests/suite_trace_genealogy');
 const { runCartographyUiSuite } = require('./tests/suite_cartography_ui');
 const { runSearchRuntimeSuite } = require('./tests/suite_search_runtime');
+const { runWarSandboxSuite } = require('./tests/suite_war_sandbox');
 
 const SUITES = [
   { key: 'core', fn: runCoreDataSuite },
@@ -26,13 +28,14 @@ const SUITES = [
   { key: 'trace', fn: runTraceGenealogySuite },
   { key: 'cartography', fn: runCartographyUiSuite },
   { key: 'ui', fn: runSearchRuntimeSuite },
+  { key: 'war', fn: runWarSandboxSuite },
 ];
 
 const rawArgs = process.argv.slice(2);
 const CLI_ARGS = new Set(rawArgs);
 if (CLI_ARGS.has('--help') || CLI_ARGS.has('-h')) {
   console.log(
-    'Usage: node scripts/validate_atlas.js [--fast | --full] [--suite=<core,api,trace,cartography,ui>]\n' +
+    'Usage: node scripts/validate_atlas.js [--fast | --full] [--suite=<core,api,trace,cartography,ui,war>]\n' +
       '  --fast, -f        Fast iteration check (~4s): syntax, asset hashes, schemas, i18n, search & UI CUJs\n' +
       '  --full            Full validation (default): includes all 20k+ polygon topology, overlap grids & CLI/MCP subprocesses\n' +
       '  --suite=<names>   Run only specific suite(s): core, api, trace, cartography, ui (comma-separated)'
