@@ -747,6 +747,7 @@
 
     _ensureWarSandbox() {
       if (this._isWarLoaded()) {
+        this._hydrateWarStoryProfiles();
         this._restoreWarFromQuery();
         return Promise.resolve(true);
       }
@@ -761,6 +762,7 @@
               this._warPromise = null;
               return false;
             }
+            this._hydrateWarStoryProfiles();
             this._onWarLocaleChange();
             this._restoreWarFromQuery();
             return true;
@@ -4315,6 +4317,7 @@
     _findStoryForMilestone(dynasty, m) {
       if (!dynasty || !m) return null;
       const map = {
+        'donghan:200': { key: 'guandu', stopIdx: -1 },
         'tang:755': { key: 'anshi', stopIdx: -1 },
       };
       return map[`${dynasty.key}:${m.year}`] || null;
@@ -4440,10 +4443,15 @@
           ? `<button type="button" class="ep-relic-seal" title="${relicTitle}"><span class="seal-stamp">玺</span><span>${relicLabel}</span></button>`
           : '';
       const storyHit = this._findStoryForMilestone(dynasty, m);
-      const storyTitle =
-        this.locale === 'en'
-          ? 'Open the full multi-act historical storyline on the map'
-          : '点击展开「安史之乱」八年全脉络时空推演';
+      const storyProfile = storyHit
+        ? HistoricalAtlasController.PERSON_PROFILES.find((profile) => profile.key === storyHit.key)
+        : null;
+      const storyName = storyProfile
+        ? (this.locale === 'en' ? storyProfile.en : this._zh(storyProfile.zh))
+        : (this.locale === 'en' ? 'Event' : '大事件');
+      const storyTitle = this.locale === 'en'
+        ? `Open the full ${storyName} storyline on the map`
+        : `点击展开「${storyName}」全脉络时空推演`;
       const storyLabel = this.locale === 'en' ? 'Story ›' : '始末 ›';
       const storyHtml = storyHit
         ? `<button type="button" class="ep-relic-seal ep-story-seal" title="${storyTitle}"><span class="seal-stamp">事</span><span>${storyLabel}</span></button>`
@@ -5943,8 +5951,14 @@
             ? `<button type="button" class="ev-seal-tag" title="${this.locale === 'en' ? 'Heirloom Seal of the Realm — click to trace across dynasties' : '传国玉玺流转节点 · 点击查看历代流转轨迹'}">${this.locale === 'en' ? 'Seal' : '玺'}</button>`
             : '';
         const storyHit = this._findStoryForMilestone(dynasty, m);
+        const storyProfile = storyHit
+          ? HistoricalAtlasController.PERSON_PROFILES.find((profile) => profile.key === storyHit.key)
+          : null;
+        const storyName = storyProfile
+          ? (this.locale === 'en' ? storyProfile.en : this._zh(storyProfile.zh))
+          : (this.locale === 'en' ? 'Event' : '大事件');
         const storyBadge = storyHit
-          ? `<button type="button" class="ev-seal-tag ev-story-tag" title="${this.locale === 'en' ? 'Event Storyline — click to trace the full multi-act campaign' : '大事件全脉络 · 点击展开安史之乱八年兴亡推演'}">${this.locale === 'en' ? 'Story' : '始末'}</button>`
+          ? `<button type="button" class="ev-seal-tag ev-story-tag" title="${this.locale === 'en' ? `${storyName} storyline — click to trace the full campaign` : `大事件全脉络 · 点击展开「${storyName}」时空推演`}">${this.locale === 'en' ? 'Story' : '始末'}</button>`
           : '';
         li.innerHTML = `<span class="ev-yr">${yrLabel}</span><span>${this.milestoneHeadline(dynasty, m)}${badge}${sealBadge}${storyBadge}</span>`;
         const sealBtn = li.querySelector('.ev-seal-tag:not(.ev-story-tag)');

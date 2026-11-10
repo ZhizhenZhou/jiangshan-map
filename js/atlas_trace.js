@@ -471,6 +471,7 @@
             isMapChange: Boolean(st.isMapChange),
             byPersonsTag: false,
             journeyStopIdx: sIdx,
+            warStepIdx: Number.isInteger(st.warStepIdx) ? st.warStepIdx : null,
             prio: 3,
           };
         });
@@ -1012,6 +1013,15 @@
       if (!profiles.length) return false;
       const state = this._buildPersonTracksAndEvents(profiles);
       if (!state || !state.events.length) {
+        const pendingWarStory = profiles.find(
+          (profile) => profile && profile.warKey && (!Array.isArray(profile.stops) || !profile.stops.length)
+        );
+        if (pendingWarStory && typeof this._ensureWarSandbox === 'function') {
+          this._ensureWarSandbox().then((ok) => {
+            if (ok) this.openPersonChronicle(personOrQuery, initialIdx);
+          });
+          return true;
+        }
         if (!this._isLoreDetailLoaded()) {
           this._ensureLoreDetail().then(() => {
             this.openPersonChronicle(personOrQuery, initialIdx);
@@ -2460,6 +2470,10 @@
           }
         }
 
+        const warForcesHtml =
+          profile.warKey && typeof this._warStoryForcesHtml === 'function'
+            ? this._warStoryForcesHtml(profile, ev)
+            : '';
         const copyHtml =
           isShared && Array.isArray(ev.distinctNotes) && ev.distinctNotes.length > 1
             ? ev.distinctNotes
@@ -2478,6 +2492,7 @@
           `<span class="t-val">` +
           `<span class="person-site-line"><span>${siteLabel}${mapBadge}</span>${traceBtn}</span>` +
           `${copyHtml}` +
+          `${warForcesHtml}` +
           `${quoteHtml}` +
           `</span>`;
 

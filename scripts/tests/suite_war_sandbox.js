@@ -129,6 +129,20 @@ async function runWarSandboxSuite(ctx) {
   assert.strictEqual(activeAt(1277), 'yashan', 'Yashan must take ownership from 1277');
   assert.strictEqual(activeAt(1279), 'yashan', 'Yashan must own its 1279 climax');
 
+  const guanduWar = wars.find((w) => w.key === 'guandu');
+  const guanduStory = (loreData.PERSON_PROFILES || []).find((p) => p.key === 'guandu');
+  assert(guanduStory && guanduStory.isStory && guanduStory.warKey === 'guandu', 'Guandu must be registered as a formal war-backed story profile');
+  assert.deepStrictEqual(Array.from(guanduStory.span), [199, 202], 'Guandu story span must include Yuan Shao\'s death in 202');
+  assert.strictEqual(guanduStory.evCount, 7, 'Guandu story must advertise seven scenes before lazy war hydration');
+  assert.deepStrictEqual(Array.from(guanduWar.span), [199, 202], 'Guandu war span must end in 202');
+  assert.strictEqual(guanduWar.steps.length, 7, 'Guandu war must retain seven tactical steps');
+  assert.strictEqual(guanduWar.steps[6].y, 202.2, 'Guandu aftermath must place Yuan Shao\'s death in 202');
+  guanduWar.steps.forEach((step, idx) => {
+    assert(Number.isFinite(step.storyYear), `Guandu step ${idx} needs an integer storyYear`);
+    assert(step.storySiteZh && step.storySiteEn, `Guandu step ${idx} needs bilingual story site labels`);
+  });
+  assert(guanduWar.steps[0].actZh && guanduWar.steps[3].actZh && guanduWar.steps[4].actZh, 'Guandu story must define three act boundaries');
+
   const anshiWar = wars.find((w) => w.key === 'an-shi');
   const anshiStory = (loreData.PERSON_PROFILES || []).find((p) => p.key === 'anshi');
   assert(anshiStory && Array.isArray(anshiStory.camps), 'Main An-Shi storyline must be available');
@@ -171,6 +185,10 @@ async function runWarSandboxSuite(ctx) {
   assert(warModule.includes("document.getElementById('terrain-relief-layer')"), 'War zoom fade must target main terrain wrapper');
   assert(warModule.includes('{ duration: WAR_FLIGHT_MS }'), 'War camera flights must use main object options API');
   assert(warModule.includes("query.has('event') || query.has('person') || query.has('journey')"), 'Story/person deep links must own immersive state');
+  assert(warModule.includes('_hydrateWarStoryProfiles()'), 'War module must hydrate formal story profiles from WAR_DATA');
+  assert(warModule.includes('_activeWarStory()'), 'War module must expose story-driven campaign state');
+  assert(warModule.includes('storyWar ? storyWar.war : shellWar'), 'Story-driven SVG rendering must be separate from the standalone war shell');
+  assert(warModule.includes("wRaw.key !== 'guandu'"), 'Guandu must suppress the standalone campaign gate in the prototype');
   assert(
     warModule.includes("window.innerWidth <= 900") && /#war-balloon[\s\S]*display:\s*none\s*!important/.test(styleCss),
     'Tablet/mobile war mode must keep the narrative in the bottom sheet and suppress the duplicate map balloon'

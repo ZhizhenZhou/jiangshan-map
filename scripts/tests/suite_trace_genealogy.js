@@ -1337,8 +1337,9 @@ async function runTraceGenealogySuite(ctx) {
     const sparseProfiles = [];
     for (const p of loreData.PERSON_PROFILES) {
       const evs = getCachedPersonEvents(p);
-      if (evs.length < 3) {
-        sparseProfiles.push(`${p.key} (${p.zh}): ${evs.length} -> ${evs.map((e) => e.year + '@' + e.siteZh).join(' | ')}`);
+      const expectedCount = p.warKey && Number.isFinite(p.evCount) ? p.evCount : evs.length;
+      if (expectedCount < 3) {
+        sparseProfiles.push(`${p.key} (${p.zh}): ${expectedCount} -> ${evs.map((e) => e.year + '@' + e.siteZh).join(' | ')}`);
       }
     }
     assert(

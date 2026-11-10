@@ -539,6 +539,13 @@ async function runSearchRuntimeSuite(ctx) {
         {
           for (const p of loreData.PERSON_PROFILES) {
             const actualEvCount = ctrl._collectPersonEvents(p).length;
+            if (p.warKey && (!Array.isArray(p.stops) || !p.stops.length)) {
+              assert(
+                typeof p.evCount === 'number' && p.evCount >= 3 && actualEvCount === 0,
+                `Lazy war-backed story ${p.key} must publish evCount before WAR_DATA hydration`
+              );
+              continue;
+            }
             assert.strictEqual(
               p.evCount,
               actualEvCount,

@@ -171,11 +171,14 @@
           this.dynasties.find((item) => item.key === p.dynastyKey) ||
           this.dynasties[this._findDynastyIndex(p.span ? p.span[0] : 0)] ||
           this.dynasties[0];
-        const evCount = loreLoaded
-          ? this._collectPersonEvents(p).length
-          : typeof p.evCount === 'number'
+        const evCount =
+          p.warKey && (!Array.isArray(p.stops) || !p.stops.length) && typeof p.evCount === 'number'
             ? p.evCount
-            : this._collectPersonEvents(p).length;
+            : loreLoaded
+              ? this._collectPersonEvents(p).length
+              : typeof p.evCount === 'number'
+                ? p.evCount
+                : this._collectPersonEvents(p).length;
         const aliases = this._personSearchAliases(p);
         if (p.isStory) {
           const spanStr = Array.isArray(p.span) ? `${p.span[0]}—${p.span[1]}` : '';

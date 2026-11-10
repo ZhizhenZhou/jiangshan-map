@@ -124,6 +124,11 @@
     }
 
     _engageWar(w) {
+      if (!w) return false;
+      if (w.key === 'guandu' && typeof this.openPersonChronicle === 'function') {
+        const idx = Math.max(0, this._warStepIndex(w));
+        return this.openPersonChronicle('guandu', idx);
+      }
       if (!this._prepareWarEngagement(w)) return false;
       this._syncWarOverlay();
       return true;
@@ -152,6 +157,9 @@
       if (!linkWar) {
         this._syncWarOverlay();
         return false;
+      }
+      if (linkWar.key === 'guandu' && typeof this.openPersonChronicle === 'function') {
+        return this.openPersonChronicle('guandu', Math.max(0, this._warStepIndex(linkWar, frac)));
       }
       this._warEngagedKey = linkWar.key;
       this._warSeekTo(frac);
@@ -185,6 +193,80 @@
 
     _warSide(w, key) {
       return (w.sides || []).find((s) => s.key === key) || { key, color: '#8a7a63' };
+    }
+
+    _hydrateWarStoryProfiles() {
+      const profiles = HistoricalAtlasController && HistoricalAtlasController.PERSON_PROFILES;
+      if (!Array.isArray(profiles)) return false;
+      let changed = false;
+      for (const profile of profiles) {
+        if (!profile || !profile.warKey || (Array.isArray(profile.stops) && profile.stops.length)) continue;
+        const war = this._warData().find((item) => item.key === profile.warKey);
+        if (!war) continue;
+        profile.descZh = war.descZh;
+        profile.descEn = war.descEn;
+        profile.camps = (war.sides || []).map((side) => ({
+          key: side.key,
+          zh: side.nameZh,
+          en: side.nameEn,
+          color: side.color,
+          calmColor: side.color,
+        }));
+        profile.stops = (war.steps || []).map((step, idx) => {
+          const battle = (step.battles || [])[0] || null;
+          const move = (step.moves || [])[0] || null;
+          const pts = move ? this._warPointList(move) : [];
+          const coord = step.storyCoord || (battle && battle.at) || (pts.length ? pts[pts.length - 1] : null);
+          const fromCoord = pts.length > 1 ? pts[0] : null;
+          const titleZh = step.titleZh || (battle && (battle.nameZh || battle.titleZh)) || (move && move.titleZh) || '';
+          const titleEn = step.titleEn || (battle && (battle.nameEn || battle.titleEn)) || (move && move.titleEn) || titleZh;
+          const descZh = (battle && battle.descZh) || (move && move.descZh) || step.descZh || '';
+          const descEn = (battle && battle.descEn) || (move && move.descEn) || step.descEn || descZh;
+          const camp = (battle && battle.side) || (move && move.side) || ((war.sides || [])[0] || {}).key || '';
+          return {
+            year: Number.isFinite(step.storyYear) ? step.storyYear : Math.trunc(step.y),
+            month: Number.isFinite(step.y) ? Math.max(1, Math.min(12, Math.round((step.y % 1) * 12) || 1)) : 6,
+            subEraZh: step.subEraZh || '',
+            subEraEn: step.subEraEn || '',
+            actZh: step.actZh || '',
+            actEn: step.actEn || '',
+            camp,
+            ancientZh: step.storySiteZh || (battle && battle.placeZh) || titleZh,
+            ancientEn: step.storySiteEn || (battle && battle.placeEn) || titleEn,
+            modernZh: step.storyModernZh || '',
+            modernEn: step.storyModernEn || '',
+            coord,
+            fromCoord,
+            via: pts.length > 2 ? pts.slice(1, -1) : null,
+            titleZh,
+            titleEn,
+            descZh,
+            descEn,
+            warStepIdx: idx,
+            warKey: war.key,
+          };
+        }).filter((stop) => Array.isArray(stop.coord));
+        changed = true;
+      }
+      if (changed) {
+        this.searchIndex = null;
+        this._soloPersonEventsCache = null;
+      }
+      return changed;
+    }
+
+    _activeWarStory() {
+      const profile = this.activePerson && this.activePerson.profile;
+      if (!profile || !profile.warKey) return null;
+      const war = this._warData().find((item) => item.key === profile.warKey);
+      if (!war) return null;
+      const selected = this.activePersonEventIdx;
+      const idx = selected >= 0
+        ? Number.isInteger((this.activePerson.events[selected] || {}).warStepIdx)
+          ? this.activePerson.events[selected].warStepIdx
+          : selected
+        : Math.max(0, war.steps.length - 1);
+      return { profile, war, idx, zi: this._warZoneIndex(war, war.steps[idx].y), overview: selected < 0 };
     }
 
     _warStepTitle(w, s) {
@@ -931,6 +1013,13 @@
       });
     }
 
+    _warStoryForcesHtml(profile, ev) {
+      if (!profile || !profile.warKey || !ev || !Number.isInteger(ev.warStepIdx)) return '';
+      const w = this._warData().find((item) => item.key === profile.warKey);
+      const step = w && w.steps[ev.warStepIdx];
+      return step ? this._warForceBarsHtml(w, step) : '';
+    }
+
     _warForceBarsHtml(w, s) {
       const forces = this._warStepForces(w, s);
       if (!forces.length) return '';
@@ -1267,7 +1356,7 @@
                 const y = Number(row.dataset.evYear);
                 if (!Number.isFinite(y)) return;
                 const war = this._warData().find((x) => y >= x.span[0] && y <= x.span[1]);
-                if (war) this._prepareWarEngagement(war);
+                if (war && war.key !== 'guandu') this._prepareWarEngagement(war);
               } catch (err) {
                 /* non-fatal */
               }
@@ -1278,22 +1367,23 @@
         }
       }
       const wRaw = this._activeWar();
-      // 沙盘接管门控：未进入（见 _warEngagedWar）时按"无战役"渲染——
-      // 普通播放/拖轴扫过战役年份不出卡片、不收相位面板、不出箭头、不动相机
-      const w = wRaw && this._warEngagedKey === wRaw.key ? wRaw : null;
-      const idx = w ? this._warStepIndex(w) : -1;
-      const zi = w ? this._warZoneIndex(w) : -1;
-      // 战争卡片激活：阶段面板收拢成相位条、卡片上移让位（平滑过渡，
-      // 战争嵌在历史进程里而非硬切换）
+      const storyWar = this._activeWarStory();
+      // Standalone sandbox ownership and story-driven campaign rendering are
+      // separate. Guandu uses the main story card but still supplies the SVG war.
+      const shellWar = wRaw && this._warEngagedKey === wRaw.key ? wRaw : null;
+      const w = storyWar ? storyWar.war : shellWar;
+      const idx = storyWar ? storyWar.idx : w ? this._warStepIndex(w) : -1;
+      const zi = storyWar ? storyWar.zi : w ? this._warZoneIndex(w) : -1;
+      // Only the standalone shell condenses the legend and renders war-card.
       const vf = this._id('viewport-frame');
-      const warActive = Boolean(w) && !this.activePerson && !this.activeTrace && !this.challenge;
+      const warActive = Boolean(shellWar) && !this.activePerson && !this.activeTrace && !this.challenge;
       if (vf) vf.classList.toggle('has-active-war', warActive);
       const mk = this._id('map-key');
       if (mk) mk.classList.toggle('is-condensed', warActive);
       const grp = this._warGroup();
       if (grp) {
         const chk = this._id('chk-war');
-        if (!w || (chk && !chk.checked)) grp.classList.add('is-hidden');
+        if (!w || (!storyWar && chk && !chk.checked)) grp.classList.add('is-hidden');
         else grp.classList.remove('is-hidden');
       }
       // 情境入口胶囊：年份落在战役窗口且未接管时，地图底缘给出显眼入口
@@ -1302,7 +1392,7 @@
       const gate = this._warGateEl();
       if (gate) {
         const showGate =
-          Boolean(wRaw) && !w &&
+          Boolean(wRaw) && wRaw.key !== 'guandu' && !w &&
           !this.activePerson && !this.activeTrace && !this.challenge &&
           this._warLayerOn();
         gate.classList.toggle('is-hidden', !showGate);
@@ -1326,13 +1416,14 @@
       // 激活进场飞行预判：与下方激活块同一谓词（勿两处维护）——飞行发生在
       // 渲染之后，渲染端只能靠预判决定行军绘制的延迟/时长/门控缩放基准
       const warFly =
-        w && this._warTheaterKey !== w.key && !reducedMotion() &&
+        shellWar && this._warTheaterKey !== shellWar.key && !reducedMotion() &&
         !this.isScrubbing && !this.challenge && !this.activePerson && !this.activeTrace
-          ? this._warTheaterFit(w)
+          ? this._warTheaterFit(shellWar)
           : null;
       this._renderWarSvg(w, idx, zi, warFly);
-      this._renderWarCard(w, idx);
-      this._syncWarBalloon(w, idx);
+      this._renderWarCard(storyWar ? null : shellWar, idx);
+      if (storyWar) this._hideWarBalloon();
+      else this._syncWarBalloon(shellWar, idx);
       this._dedupeMilestonePins();
       this._syncZoomDependentState();
       // 战局激活（从无到有）→ 相机自动飞入战场全境，并登记进战前取景；
@@ -1340,10 +1431,10 @@
       // 对称飞回进战前取景——拖轴进出战役是一个完整的"推近/拉回"镜头，
       // 只进不回会让人拖回 195 后地图还停在官渡特写（逻辑不顺畅实测）。
       // 拖轴途中不抢相机。
-      if (w && this._warTheaterKey !== w.key) {
-        this._warTheaterKey = w.key;
+      if (shellWar && this._warTheaterKey !== shellWar.key) {
+        this._warTheaterKey = shellWar.key;
         this._warLastAnchor = null; // 换战役：叙事步锚点不跨场沿用
-        const fit = this._warTheaterFit(w);
+        const fit = this._warTheaterFit(shellWar);
         this._warTheaterFitUsed = fit || null;
         this._warCamBefore = { ...this.camera };
         if (fit && !this.isScrubbing && !this.challenge && !this.activePerson && !this.activeTrace) {
@@ -1354,7 +1445,7 @@
             this._animateCameraTo(fit, { duration: WAR_FLIGHT_MS });
           }
         }
-      } else if (!w) {
+      } else if (!shellWar) {
         const hadTheater = this._warTheaterKey != null;
         const fitUsed = this._warTheaterFitUsed;
         const camBefore = this._warCamBefore;
@@ -1703,6 +1794,12 @@
       const w = this._warData().find((x) => x.key === nodeEl.dataset.war);
       if (!w) return;
       const i = parseInt(nodeEl.dataset.step, 10);
+      const storyWar = this._activeWarStory();
+      if (storyWar && storyWar.war.key === w.key && typeof this.selectPersonEvent === 'function') {
+        const eventIdx = this.activePerson.events.findIndex((ev) => ev.warStepIdx === i);
+        if (eventIdx >= 0) this.selectPersonEvent(eventIdx, true);
+        return;
+      }
       this._gotoWarStep(w, i);
     }
   }
@@ -1780,8 +1877,21 @@
     const baseOpenPerson = Ctrl.prototype.openPersonChronicle;
     if (typeof baseOpenPerson === 'function') {
       Ctrl.prototype.openPersonChronicle = function (...args) {
+        let targetWarProfile = null;
         try {
-          if (this._leaveWarForModeSwitch) this._leaveWarForModeSwitch();
+          const profiles = typeof this._resolvePersonProfiles === 'function'
+            ? this._resolvePersonProfiles(args[0])
+            : [];
+          targetWarProfile = profiles.find((profile) => profile && profile.warKey) || null;
+          if (targetWarProfile) {
+            this._warEngagedKey = null;
+            this._warTheaterKey = null;
+            this._warTheaterFitUsed = null;
+            this._warCamBefore = null;
+            this._warSvgSig = null;
+          } else if (this._leaveWarForModeSwitch) {
+            this._leaveWarForModeSwitch();
+          }
         } catch (e) {
           /* non-fatal */
         }
@@ -1795,11 +1905,36 @@
       };
     }
 
+    const baseRenderPersonPins = Ctrl.prototype._renderPersonPinsOverlay;
+    if (typeof baseRenderPersonPins === 'function') {
+      Ctrl.prototype._renderPersonPinsOverlay = function (...args) {
+        const profile = this.activePerson && this.activePerson.profile;
+        if (profile && profile.warKey) {
+          if (this.grpJourney) this.grpJourney.innerHTML = '';
+          try {
+            this._warSvgSig = null;
+            this._syncWarOverlay();
+          } catch (e) {
+            /* non-fatal */
+          }
+          return;
+        }
+        return baseRenderPersonPins.apply(this, args);
+      };
+    }
+
     const baseCloseGenealogy = Ctrl.prototype.closeGenealogyCard;
     if (typeof baseCloseGenealogy === 'function') {
       Ctrl.prototype.closeGenealogyCard = function (...args) {
+        const closingWarStory = Boolean(
+          this.activePerson && this.activePerson.profile && this.activePerson.profile.warKey
+        );
         const result = baseCloseGenealogy.apply(this, args);
         try {
+          if (closingWarStory) {
+            this._warEngagedKey = null;
+            this._warSvgSig = null;
+          }
           this._syncWarOverlay();
         } catch (e) {
           /* non-fatal */
