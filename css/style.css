@@ -5983,10 +5983,8 @@ button.story-inline-person:hover {
   stroke-linecap: butt;
 }
 /* 当前行军箭头由 JS 设 inline dasharray/dashoffset + warMarchDraw 渐进绘制 */
-#grp-war .war-march.is-claimed {
-  stroke-dasharray: 2.5 3.5;
-  animation: none;
-}
+/* 号称（claimed）地图箭头统一实线：粗虚线读作断线且故事模式无图例解释；
+ * 兵力质量的区分交给兵力条（斜纹 + （号称）标注 + 出处 tooltip）。 */
 
 @keyframes warMarchDraw {
   to {
