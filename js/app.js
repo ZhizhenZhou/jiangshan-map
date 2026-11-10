@@ -4317,7 +4317,30 @@
     _findStoryForMilestone(dynasty, m) {
       if (!dynasty || !m) return null;
       const map = {
+        'zhanguo:-260': { key: 'changping', stopIdx: -1 },
+        'qin:-207': { key: 'julu', stopIdx: -1 },
+        'xihan:-202': { key: 'gaixia', stopIdx: -1 },
+        'xihan:-119': { key: 'mobei', stopIdx: -1 },
+        'xihan:23': { key: 'kunyang', stopIdx: -1 },
         'donghan:200': { key: 'guandu', stopIdx: -1 },
+        'donghan:208': { key: 'chibi', stopIdx: -1 },
+        'sanguo:221': { key: 'yiling', stopIdx: -1 },
+        'dongjin:383': { key: 'feishui', stopIdx: -1 },
+        'sui:589': { key: 'sui-chen', stopIdx: -1 },
+        'beisong:1127': { key: 'jingkang', stopIdx: -1 },
+        'nansong:1140': { key: 'yancheng', stopIdx: -1 },
+        'nansong:1259': { key: 'mengsong', stopIdx: -1 },
+        'nansong:1273': { key: 'mengsong', stopIdx: -1 },
+        'nansong:1279': { key: 'yashan', stopIdx: -1 },
+        'ming:1399': { key: 'jingnan', stopIdx: -1 },
+        'ming:1449': { key: 'tumu-beijing', stopIdx: -1 },
+        'ming:1619': { key: 'saerhu', stopIdx: -1 },
+        'qing:1673': { key: 'sanfan', stopIdx: -1 },
+        'qing:1681': { key: 'sanfan', stopIdx: -1 },
+        'qing:1840': { key: 'yapian', stopIdx: -1 },
+        'qing:1851': { key: 'taiping', stopIdx: -1 },
+        'qing:1864': { key: 'taiping', stopIdx: -1 },
+        'qing:1894': { key: 'jiawu', stopIdx: -1 },
         'tang:755': { key: 'anshi', stopIdx: -1 },
       };
       return map[`${dynasty.key}:${m.year}`] || null;

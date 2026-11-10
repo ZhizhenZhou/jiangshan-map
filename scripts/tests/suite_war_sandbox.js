@@ -209,6 +209,22 @@ async function runWarSandboxSuite(ctx) {
     assert.strictEqual(profile.evCount, w.steps.length, `Campaign ${w.key} story must advertise one scene per war step`);
   }
   assert.strictEqual(storyByWarKey.size, wars.length - 1, 'Exactly the non-An-Shi campaigns carry warKey story profiles');
+
+  // Every non-An-Shi campaign must keep at least one 始末 badge year in the
+  // chronicle milestone list (_findStoryForMilestone mapping in app.js).
+  const appModule = fs.readFileSync(path.join(JS_DIR, 'app.js'), 'utf8');
+  const badgeWars = new Set(
+    Array.from(
+      appModule.matchAll(/'([a-z]+:-?\d+)':\s*\{\s*key:\s*'([a-z-]+)'/g)
+    ).map((m) => m[2])
+  );
+  for (const w of wars) {
+    if (w.key === 'an-shi') continue;
+    assert(
+      badgeWars.has(w.key),
+      `Campaign ${w.key} must have a 始末 story badge on at least one chronicle milestone`
+    );
+  }
   assert(
     warModule.includes("window.innerWidth <= 900") && /#war-balloon[\s\S]*display:\s*none\s*!important/.test(styleCss),
     'Tablet/mobile war mode must keep the narrative in the bottom sheet and suppress the duplicate map balloon'
