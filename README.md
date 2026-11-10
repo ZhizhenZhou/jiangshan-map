@@ -88,7 +88,19 @@ Each time you step to the next event (`‹ / ›`, `← / →`, or `Space` to au
 
 ---
 
-### Feature 4: Easter Egg · Map Pinpoint Challenge — What Imperial Court Rank Would You Earn?
+### Feature 4: War Sandbox — Replay 22 Campaigns on the Living Timeline
+
+When the timeline enters a campaign window, a contextual **War Sandbox** gate appears at the bottom of the map. Enter it to replay the campaign step by step without leaving the historical atlas:
+- **Arrows That March With the Army**: each route grows forward with its arrowhead attached to the line; width encodes the sourced troop strength (`recorded`, `claimed`, or `approx.`), with bilingual citations available in the force bars.
+- **Battlefield State, Not Just Dots**: battle diamonds are colored by the side that held the field, while schematic control zones shift with the campaign. The situation callout waits until every active axis arrives before revealing the outcome.
+- **Opt-In and Timeline-Native**: ordinary playback remains unchanged. Enter through the contextual gate, a campaign event row, or a fractional-year deep link; exit to return to the previous camera. On tablet and mobile the complete narrative stays in the bottom sheet rather than covering the map twice.
+- **Storyline Coexistence**: the An–Shi event storyline and its tactical sandbox are separate, mutually exclusive views—open the `Story` seal for the editorial ten-stop chronicle, or the war gate for troop movements, strengths, battle sites, and front shifts.
+
+The 22 campaigns span more than two millennia: **Changping, Mobei, Julu, Gaixia, Kunyang, Guandu, Red Cliffs, Yiling, Feishui, the Sui conquest of Chen, the An–Shi Rebellion, Jingkang, Yue Fei's Yancheng–Zhuxianzhen offensive, the Mongol conquest of Song (Diaoyucheng and Xiangyang), Yamen, the Jingnan Campaign, Tumu and the defense of Beijing, Sarhu, the Revolt of the Three Feudatories, the First Opium War, the Taiping War, and the First Sino-Japanese War**.
+
+---
+
+### Feature 5: Easter Egg · Map Pinpoint Challenge — What Imperial Court Rank Would You Earn?
 
 Think you know Chinese historical geography? Click **`Quiz ›`** in the corner of the **Universal Search Box** guide bar (or type `quiz` for **`Map Pinpoint · Ancient Place Quiz`**):
 - **Dynastic Historical Clues + Blind Map Pinpointing**: City labels are hidden while the prompt asks you to locate an ancient city across a 10-round progressive difficulty deck—accompanied by **dynastic historical clues** (without spoiling the modern city name). Drop your pin to preview and adjust, click the on-pin **`✓ Confirm`** button to lock in your answer with concentric distance score rings, and earn points based on great-circle distance to the true coordinates!
