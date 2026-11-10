@@ -92,7 +92,7 @@ Each time you step to the next event (`‹ / ›`, `← / →`, or `Space` to au
 
 When the timeline enters a campaign window, a contextual **War Sandbox** gate appears at the bottom of the map. Enter it to replay the campaign step by step without leaving the historical atlas:
 - **Arrows That March With the Army**: each route grows forward with its arrowhead attached to the line; width encodes the sourced troop strength (`recorded`, `claimed`, or `approx.`), with bilingual citations available in the force bars.
-- **Battlefield State, Not Just Dots**: battle diamonds are colored by the side that held the field, while schematic control zones shift with the campaign. The situation callout waits until every active axis arrives before revealing the outcome.
+- **Battlefield State, Not Just Dots**: battle diamonds are colored by the side that held the field, and the territory situation is read directly from the era's own polity map. The situation callout waits until every active axis arrives before revealing the outcome.
 - **Opt-In and Timeline-Native**: ordinary playback remains unchanged. Enter through the contextual gate, a campaign event row, or a fractional-year deep link; exit to return to the previous camera. On tablet and mobile the complete narrative stays in the bottom sheet rather than covering the map twice.
 - **Storyline Coexistence**: the An–Shi event storyline and its tactical sandbox are separate, mutually exclusive views—open the `Story` seal for the editorial ten-stop chronicle, or the war gate for troop movements, strengths, battle sites, and front shifts.
 

@@ -277,7 +277,7 @@
           ? this.activePerson.events[selected].warStepIdx
           : selected
         : Math.max(0, war.steps.length - 1);
-      return { profile, war, idx, zi: this._warZoneIndex(war, war.steps[idx].y), overview: selected < 0 };
+      return { profile, war, idx, overview: selected < 0 };
     }
 
     _warStepTitle(w, s) {
@@ -1406,7 +1406,10 @@
       const shellWar = wRaw && this._warEngagedKey === wRaw.key ? wRaw : null;
       const w = storyWar ? storyWar.war : shellWar;
       const idx = storyWar ? storyWar.idx : w ? this._warStepIndex(w) : -1;
-      const zi = storyWar ? storyWar.zi : w ? this._warZoneIndex(w) : -1;
+      // 故事模式不渲染控制区多边形：当前疆域态势由 main 的政区图层表达，
+      // 粗虚线 zone 在精细地图上没有文字说明（旧沙盘的说明随 war-card 退役），
+      // 只会被读成莫名的选框。箭头与战役菱形不受影响。
+      const zi = storyWar ? -1 : w ? this._warZoneIndex(w) : -1;
       // Only the standalone shell condenses the legend and renders war-card.
       const vf = this._id('viewport-frame');
       const warActive = Boolean(shellWar) && !this.activePerson && !this.activeTrace && !this.challenge;
