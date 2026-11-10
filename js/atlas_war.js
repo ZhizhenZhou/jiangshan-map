@@ -804,9 +804,11 @@
             { d: info.d, class: cls, stroke: side.color },
             g
           );
-          if (isCur && !claimed) {
+          if (isCur) {
             // 当前行先隐藏：绘制延迟期间未写 dash 的全线会裸奔
             //（用户读作"先出现一根线又消失"）。_startWarDraw 首帧带 dash 显形。
+            // 号称（is-claimed）当前行同样先藏后画——用户要求所有当前箭头都播
+            // 骑线行军动画，虚线也不例外。
             casing.style.visibility = 'hidden';
             p.style.visibility = 'hidden';
           }
@@ -849,11 +851,13 @@
               }, dir);
             }
           }
-          if (isCur && !claimed) {
+          if (isCur) {
             // 骑乘楔形头：绘制期间骑在生长端点上，画完移除、静态楔形接管。
             // 行军只在目标缩放下读得出来时才播——按目标缩放投影线长，低于
             // WAR_DRAW_MIN_PX（全国视角整条线 ~20px，骑乘头恒定 ~19px）就整箭
-            // 瞬时落位，不播糊团。沙盘内逐步推进相机不飞：100ms 即起跑、
+            // 瞬时落位，不播糊团。战役故事卡的取景由 main 的事件框定，可能比
+            // 沙盘自身的步对焦更远——故事模式下取消该门槛：用户点名某一站，
+            // 短箭头也要骑线生长。沙盘内逐步推进相机不飞：100ms 即起跑、
             // WAR_DRAW_MS 走完；激活进场（warFly，_syncWarOverlay 调用处传入）
             // 让线在飞行 30% 处（ease-out 已达 ~66%）开始生长、落位在定帧后
             // 不久——箭头与线从头到尾是一个整体。播放变速时整套时序同比缩放。
@@ -864,7 +868,11 @@
               Lu0 = 0;
             }
             const kProj = this._warKScreen(warFly || null);
-            if (!(Lu0 > 2) || Lu0 * kProj < WAR_DRAW_MIN_PX) {
+            const storyMode = Boolean(
+              this.activePerson && this.activePerson.profile && this.activePerson.profile.warKey
+            );
+            const drawMinPx = storyMode ? 0 : WAR_DRAW_MIN_PX;
+            if (!(Lu0 > 2) || Lu0 * kProj < drawMinPx) {
               // 远景/退化路径：整箭瞬时落位（无骑乘头、无计时器）；
               // 浮签随其后 _syncWarBalloon 正常揭幕（pending 未置位）
               casing.style.visibility = 'visible';

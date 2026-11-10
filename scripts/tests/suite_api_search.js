@@ -333,8 +333,11 @@ async function runApiSearchSuite(ctx) {
   );
   const eventSearch = ctrl._queryQuickSearch('淝水之战');
   assert(
-    eventSearch.some((item) => item.kind === 'event' && item.year === 383),
-    'Quick search for "淝水之战" must return 383 CE milestone event'
+    eventSearch.some((item) => item.kind === 'story' && item.storyKey === 'feishui') &&
+      !eventSearch.some(
+        (item) => item.kind === 'event' && String(item.titleZh || '').includes('淝水之战')
+      ),
+    'Quick search for "淝水之战" must return the unified storyline and suppress the duplicate 383 CE event row'
   );
   for (const [query, year, title] of [
     ['nanjingtiaoyue', 1842, '南京条约'],

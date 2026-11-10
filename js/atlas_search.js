@@ -1180,6 +1180,32 @@
 
       if (!deduped.length) return [];
 
+      // A campaign storyline supersedes plain event rows about the same battle:
+      // when a story hit is present, drop event hits whose title contains the
+      // story title and whose year falls inside the campaign span (searching
+      // 淝水之战 used to surface the storyline AND a duplicate 淝水之战 event).
+      const storyHits = deduped.filter((it) => it.kind === 'story' && it.personProfile);
+      if (storyHits.length) {
+        for (let i = deduped.length - 1; i >= 0; i--) {
+          const it = deduped[i];
+          if (it.kind !== 'event') continue;
+          const zhT = String(it.titleZh || '');
+          const enT = String(it.titleEn || '');
+          const evYear = typeof it.rawYear === 'number' ? it.rawYear : it.year;
+          const duplicated = storyHits.some((st) => {
+            const p = st.personProfile;
+            const zh = String((p && p.zh) || '');
+            const en = String((p && p.en) || '');
+            const inSpan =
+              typeof evYear === 'number' && Array.isArray(p && p.span)
+                ? evYear >= p.span[0] && evYear <= p.span[1]
+                : true;
+            return inSpan && ((zh && zhT.includes(zh)) || (en && enT.includes(en)));
+          });
+          if (duplicated) deduped.splice(i, 1);
+        }
+      }
+
       const buckets = {
         regime: [],
         person_era: [],
