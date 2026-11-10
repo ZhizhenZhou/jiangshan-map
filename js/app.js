@@ -379,6 +379,7 @@
             window.ATLAS_LORE_DATA.PLACE_LANDMARK_EVENTS.length > 0)
       );
       this._loreDetailPromise = null;
+      this._warPromise = null;
       this._hydrateSnapshots();
 
       this._setEnglishLocale(window.EN_LOCALE || {
@@ -496,6 +497,13 @@
             ? (fn) => window.requestIdleCallback(fn, { timeout: 200 })
             : (fn) => setTimeout(fn, 80);
         scheduleIdle(() => this._ensureLoreDetail());
+      }
+      if (typeof window !== 'undefined') {
+        const scheduleWar =
+          typeof window.requestIdleCallback === 'function'
+            ? (fn) => window.requestIdleCallback(fn, { timeout: 500 })
+            : (fn) => setTimeout(fn, 180);
+        scheduleWar(() => this._ensureWarSandbox());
       }
     }
 
@@ -731,6 +739,34 @@
         }
         return ok;
       });
+    }
+
+    _isWarLoaded() {
+      return Array.isArray(window.WAR_DATA) && typeof this._syncWarOverlay === 'function';
+    }
+
+    _ensureWarSandbox() {
+      if (this._isWarLoaded()) {
+        this._restoreWarFromQuery();
+        return Promise.resolve(true);
+      }
+      if (!this._warPromise) {
+        const dataReady = Array.isArray(window.WAR_DATA)
+          ? Promise.resolve()
+          : this._loadScriptOnce(this._lazyAssetUrl('js/war_data.js', 'vWarData'));
+        this._warPromise = dataReady
+          .then(() => this._loadScriptOnce(this._lazyAssetUrl('js/atlas_war.js', 'vWar')))
+          .then(() => {
+            if (!this._isWarLoaded()) {
+              this._warPromise = null;
+              return false;
+            }
+            this._onWarLocaleChange();
+            this._restoreWarFromQuery();
+            return true;
+          });
+      }
+      return this._warPromise;
     }
 
     _isLoreDetailLoaded() {
@@ -5358,6 +5394,7 @@
         this._polityEventsCache = events;
         for (const ev of events) {
           const li = document.createElement('li');
+          li.dataset.evYear = String(ev.year);
           const yrLabel = en ? this.formatYear(ev.year) : `${ev.year <= 0 ? '前' + -ev.year : ev.year} 年`;
           const text = ev.milestone
             ? this.milestoneHeadline(ev.dynasty, ev.milestone)
@@ -5876,6 +5913,7 @@
       this._lastHighlightedMilestoneKey = null;
       for (const m of dynasty.milestones || []) {
         const li = document.createElement('li');
+        li.dataset.evYear = String(m.year);
         const targetY = this._clampYearToDynasty(dynasty, m.year);
         const prevY = Math.max(dynasty.fromYear, targetY - 1);
         const targetSnapKey = this._resolveSnapKey(dynasty, targetY);
@@ -9676,7 +9714,7 @@
             e.target &&
             e.target.closest &&
             e.target.closest(
-              '#genealogy-card, #journey-card, #milestone-balloon, #map-search-results, #challenge-card'
+              '#genealogy-card, #journey-card, #milestone-balloon, #map-search-results, #challenge-card, #war-card, #war-balloon'
             )
           ) {
             return;
@@ -9865,6 +9903,11 @@
           }
           return null;
         };
+        const warHoverEl = findClosest('.war-node');
+        if (warHoverEl && typeof this._warHoverTip === 'function') {
+          this._warHoverTip(warHoverEl, e);
+          return;
+        }
         const journeyNodeEl = findClosest('.journey-node');
         const settlementNameEl = findClosest('.settlement-node .name, .cap-hint-tag');
         const settlementEl = findClosest('.settlement-node');
@@ -10194,6 +10237,11 @@
             }
             return null;
           };
+          const warClickEl = findClosest('.war-node');
+          if (warClickEl && typeof this._warClickNode === 'function') {
+            this._warClickNode(warClickEl);
+            return;
+          }
           let journeyNodeEl = findClosest('.journey-node');
           if (!journeyNodeEl && e.pointerType === 'touch' && this.activePerson) {
             journeyNodeEl = this._findNearestPersonPin(e.clientX, e.clientY, 26);

@@ -3876,7 +3876,7 @@
                   this.locale === 'en'
                     ? this.formatYear(ev.year)
                     : `${ev.year <= 0 ? '前' + -ev.year : ev.year}年`;
-                return `<div class="t-ev-row" data-ev-idx="${evIdx}"><span class="t-ev-yr">▸ ${yrLabel}</span><span class="t-ev-txt">${ev.text}</span></div>`;
+                return `<div class="t-ev-row" data-ev-idx="${evIdx}" data-ev-year="${ev.year}"><span class="t-ev-yr">▸ ${yrLabel}</span><span class="t-ev-txt">${ev.text}</span></div>`;
               })
               .join('');
             eventsHtml = `<div class="t-events">${evItems}</div>`;

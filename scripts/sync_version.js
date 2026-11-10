@@ -24,6 +24,7 @@ const CONTROLLER_SCRIPTS = [
   'js/atlas_trace.js',
   'js/atlas_search.js',
   'js/atlas_api.js',
+  'js/atlas_war.js',
   'js/atlas_quiz.js',
 ];
 
@@ -50,6 +51,8 @@ const LAZY_ATTR_ASSETS = [
   { attr: 'data-v-pinyin', datasetKey: 'vPinyin', relPath: 'js/event_pinyin.js' },
   { attr: 'data-v-hant', datasetKey: 'vHant', relPath: 'js/zh_hant.js' },
   { attr: 'data-v-quiz', datasetKey: 'vQuiz', relPath: 'js/atlas_quiz.js' },
+  { attr: 'data-v-war-data', datasetKey: 'vWarData', relPath: 'js/war_data.js' },
+  { attr: 'data-v-war', datasetKey: 'vWar', relPath: 'js/atlas_war.js' },
 ];
 
 function shortSha256(filePath) {

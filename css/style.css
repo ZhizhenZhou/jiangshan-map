@@ -5918,3 +5918,796 @@ button.story-inline-person:hover {
 .genealogy-list li.person-ev-row[style*="--camp-color"] .person-ev-quote {
   border-left-color: color-mix(in srgb, var(--camp-color) 42%, transparent);
 }
+
+/* ============================== War Sandbox Overlay (战争沙盘 · 西点式) ============================== */
+
+/* --- control zones (战线推移 · 示意复原) --- */
+#grp-war .war-zone {
+  fill-opacity: 0.18;
+  stroke-opacity: 0.75;
+  stroke-width: 2.2;
+  stroke-dasharray: 6 4;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+#grp-war .war-zone.is-ghost {
+  animation: warZoneGhost 2.6s ease-out forwards;
+}
+
+@keyframes warZoneGhost {
+  from {
+    fill-opacity: 0.14;
+    stroke-opacity: 0.7;
+  }
+  100% {
+    fill-opacity: 0;
+    stroke-opacity: 0;
+  }
+}
+
+/* --- march arrows (行军箭头 · 宽度编码兵力四档) --- */
+#grp-war .war-march-casing {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke: #f6f1e6;
+  stroke-opacity: 0.85;
+  stroke-width: calc(var(--war-w, 3px) + 3.4px);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+#grp-war .war-march {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: var(--war-w, 2.1px);
+  pointer-events: none;
+}
+#grp-war .war-march.t0, #grp-war .war-march-casing.t0 { --war-w: 3.6px; }
+#grp-war .war-march.t1, #grp-war .war-march-casing.t1 { --war-w: 5.2px; }
+#grp-war .war-march.t2, #grp-war .war-march-casing.t2 { --war-w: 6.6px; }
+#grp-war .war-march.t3, #grp-war .war-march-casing.t3 { --war-w: 9.2px; }
+#grp-war .war-march.is-past {
+  stroke-opacity: 0.8;
+  stroke-dasharray: none;
+}
+#grp-war .war-march.is-cur {
+  stroke-opacity: 0.95;
+  stroke-width: calc(var(--war-w, 3px) + 1.2px);
+}
+/* 当前步行端平头帽：圆头帽会从箭头鼻尖下探出半线宽的小圆头 */
+#grp-war .war-march.is-cur,
+#grp-war .war-march-casing.is-cur {
+  stroke-linecap: butt;
+}
+/* 当前行军箭头由 JS 设 inline dasharray/dashoffset + warMarchDraw 渐进绘制 */
+#grp-war .war-march.is-claimed {
+  stroke-dasharray: 2.5 3.5;
+  animation: none;
+}
+
+@keyframes warMarchDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* --- directional chevrons（组 transform 由 JS _warRescaleGlyphs 按 1/kScreen 全补偿，屏幕尺寸恒定） ---
+ * 子路径的档位缩放由 JS 写【transform 属性】（原点恒为本地 (0,0)=底边），
+ * 不用 CSS scale——其 origin/box 语义随 reference box 漂移，深 zoom 下楔形
+ * 会被画离锚点。WEDGE_D 底边在原点、锥尖朝 +x 前方：底边与线端齐平。 */
+#grp-war .war-dir {
+  pointer-events: none;
+}
+#grp-war .war-chevron-under {
+  fill: #f6f1e6;
+}
+#grp-war .war-chevron {
+  fill: currentColor;
+}
+/* 画线期间终点不落"幽灵箭头"：is-cur 整组隐藏（含浅色底衬——旧实现只藏
+ * 彩色楔形，奶油色底衬比成品还大 14%，在终点坐满整个延迟+绘制期，用户
+ * 读作"箭头和线分开"）。绘制期间唯一的箭头就是骑在线尖上的骑乘头；到位
+ * 帧 JS 加 .is-arrived 与移除骑乘头同一 tick，像素级替换（_warPathEnd 与
+ * 骑乘头同一 getPointAtLength 公式，同位/同角/同尺寸；不做缩放/弹跳——
+ * 旧 0.4→1 过渡让箭头在终点"缩一下再弹出"）。 */
+#grp-war .war-dir.is-cur { visibility: hidden; }
+#grp-war .war-dir.is-cur.is-arrived { visibility: visible; }
+
+/* --- battle diamonds (战役点 · 同址微散在 JS 侧) --- */
+#grp-war .war-node {
+  cursor: pointer;
+}
+#grp-war .war-ring {
+  fill: #f6f1e6;
+  fill-opacity: 0.85;
+  stroke-width: 1.6;
+}
+#grp-war .war-node.is-cur .war-ring {
+  animation: warPulse 1.7s ease-out infinite;
+}
+#grp-war .war-core {
+  transform: scale(var(--core-s, 1));
+}
+#grp-war .war-core.t0 { --core-s: 0.9; }
+#grp-war .war-core.t1 { --core-s: 1.1; }
+#grp-war .war-core.t2 { --core-s: 1.35; }
+#grp-war .war-core.t3 { --core-s: 1.65; }
+#grp-war .war-diamond {
+  stroke: #f6f1e6;
+  stroke-width: 1.1;
+}
+
+@keyframes warPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+/* --- battle name labels (当前步战名牌) --- */
+#grp-war .war-lbl {
+  pointer-events: none;
+}
+#grp-war .war-lbl-text {
+  font-family: var(--serif-stack, Georgia, serif);
+  font-size: 12.5px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #f6f1e6;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+/* --- campaign card (#war-card, 与 #journey-card 同槽互斥；表面配方对齐 genealogy/challenge 卡) --- */
+#war-card {
+  position: absolute;
+  left: 14px;
+  bottom: 26px;
+  z-index: 8;
+  width: min(340px, calc(100% - 28px));
+  background: rgba(250, 246, 237, 0.96);
+  border: 1px solid var(--hairline);
+  border-radius: var(--corner-radius);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+  animation: warCardIn 0.3s cubic-bezier(0.22, 0.9, 0.32, 1) both;
+}
+#viewport-frame.is-camera-moving #war-card {
+  animation: none;
+}
+/* --- 战争沙盘入口胶囊：年份落在战役窗口且未接管时，底缘居中的显眼入口
+   （旧入口藏在编年行/图层弹层里，用户找不到）。语言沿用提示胶囊习语
+   （start-guide：999px 圆角 + 宣纸底 + hairline），hover 转 vermilion
+   同 .canvas-reset-btn。接管后隐藏；左缘避开 map-key（右缘 ≤352px），
+   右缘避开 canvas-br-dock，1440 下居中跨 ~560-880。 */
+#war-gate {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: min(78vw, 460px);
+  padding: 7px 14px 7px 12px;
+  border-radius: 999px;
+  background: rgba(250, 246, 237, 0.92);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+#war-gate .wico {
+  color: var(--vermilion);
+  flex: none;
+}
+#war-gate b {
+  font-family: var(--serif-stack);
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#war-gate i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-muted);
+  flex: none;
+}
+#war-gate em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vermilion);
+  flex: none;
+}
+#war-gate:hover {
+  border-color: rgba(181, 69, 47, 0.45);
+  transform: translateX(-50%) translateY(-1px);
+  box-shadow: 0 6px 18px rgba(43, 38, 34, 0.16);
+}
+#war-gate:focus-visible {
+  outline: 2px solid rgba(181, 69, 47, 0.5);
+  outline-offset: 2px;
+}
+/* 窄桌面：map-key 右缘 ≤352px，居中胶囊会压到它——改贴其右侧排布 */
+@media (min-width: 901px) and (max-width: 1150px) {
+  #war-gate {
+    left: 368px;
+    transform: none;
+    max-width: calc(100% - 610px);
+  }
+  #war-gate:hover {
+    transform: translateY(-1px);
+  }
+}
+/* 战争沙盘接管：底缘相位条整体让位（用户反馈：进入后不要这条东汉收拢条，
+   地图让给沙盘本身）——面板淡出，卡片回到常态位置；退出时反向恢复 */
+#viewport-frame.has-active-war #map-key {
+  opacity: 0;
+  pointer-events: none;
+}
+@media (min-width: 901px) {
+  #map-key {
+    overflow: hidden;
+    transition: opacity 0.22s ease;
+  }
+  #map-key.is-condensed {
+    max-height: none;
+  }
+  /* 收拢 = 只留相位条：display 隐藏其余行，杜绝 max-height 硬裁的残影 */
+  #map-key.is-condensed > :not(.key-phase-bar) {
+    display: none;
+  }
+  #war-card {
+    transition: bottom 0.34s cubic-bezier(0.22, 0.9, 0.32, 1), opacity 0.22s ease;
+  }
+  /* 战争卡片淡入淡出代替硬显示切换（全局 .is-hidden 是 display:none，无法过渡）。
+   * 必须写 animation:none：warCardIn 的 forwards 填充会永久钉住 opacity:1，
+   * 级联上压过这里的普通 opacity:0 声明（动画 > 普通声明）——实测退场后
+   * 卡片赖着不走。animation:none 同时让每次重新显示都重放入场滑动。 */
+  #war-card.is-hidden {
+    display: block !important;
+    animation: none;
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+  }
+}
+#war-balloon.is-hidden {
+  display: block !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes warCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.war-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 11px 14px 9px;
+  border-bottom: 1px solid var(--hairline);
+  cursor: pointer;
+  user-select: none;
+}
+.war-title {
+  font-family: var(--serif-stack);
+  font-weight: 800;
+  font-size: 15.5px;
+  color: var(--text-main);
+  letter-spacing: 0.02em;
+}
+.war-years {
+  font-family: var(--sans-stack);
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.war-fold {
+  margin-left: auto;
+  align-self: center;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  line-height: 1;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 0.18s;
+}
+/* 退出战争沙盘 ✕：靠右，折叠 ▾ 挨在其右侧（ep-close 圆钮语言） */
+#war-card .war-exit {
+  margin-left: auto;
+  align-self: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(166, 58, 40, 0.08);
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+#war-card .war-exit:hover {
+  background: var(--vermilion);
+  color: #fffaf2;
+}
+#war-card .war-exit + .war-fold {
+  margin-left: 4px;
+}
+#war-card.is-folded .war-fold {
+  transform: rotate(-90deg);
+}
+
+.war-body {
+  padding: 9px 14px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: min(58vh, 430px);
+  overflow-y: auto;
+}
+#war-card.is-folded .war-body {
+  display: none;
+}
+
+.war-sides {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: center;
+}
+.war-side {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--sans-stack);
+  font-size: 11.5px;
+  color: var(--text-main);
+}
+.war-side i {
+  width: 9px;
+  height: 9px;
+  transform: rotate(45deg);
+  display: inline-block;
+  border: 1px solid rgba(36, 28, 20, 0.28);
+}
+.war-narr {
+  position: relative;
+  font-family: var(--sans-stack);
+  font-size: 12.2px;
+  line-height: 1.62;
+  color: var(--text-main);
+  padding: 2px 0 2px 10px;
+  border-left: 2px solid var(--vermilion);
+}
+.war-narr b {
+  color: var(--vermilion);
+}
+
+.war-fbars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 7px 9px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.42);
+}
+.war-fbars-head {
+  font-family: var(--sans-stack);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+.war-fbar-row {
+  display: grid;
+  grid-template-columns: 88px 1fr 62px;
+  align-items: center;
+  gap: 8px;
+}
+.war-fbar-name {
+  font-family: var(--sans-stack);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.war-fbar-track {
+  height: 7px;
+  border-radius: 4px;
+  background: rgba(90, 74, 58, 0.14);
+  overflow: hidden;
+}
+.war-fbar-bar {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  opacity: 0.85;
+}
+.war-fbar-bar.is-claimed {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.5) 0 3px,
+    transparent 3px 6px
+  );
+  opacity: 0.55;
+}
+.war-fbar-bar.is-est {
+  opacity: 0.62;
+}
+.war-fbar-num {
+  font-family: var(--sans-stack);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: right;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.war-steps {
+  position: relative; /* 使 .war-step 的 offsetTop 相对列表自身，自动滚动定位才正确 */
+  display: flex;
+  flex-direction: column;
+  max-height: 148px;
+  overflow-y: auto;
+  border-top: 1px solid var(--hairline);
+  padding-top: 4px;
+}
+.war-step {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4.5px 6px 4.5px 9px;
+  font-family: var(--sans-stack);
+  font-size: 11.8px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.war-step:hover {
+  background: rgba(181, 69, 47, 0.07);
+}
+.war-step .wy {
+  font-weight: 700;
+  font-size: 10.5px;
+  min-width: 30px;
+  text-align: right;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.war-step .wt {
+  color: var(--text-main);
+}
+.war-step.is-cur {
+  background: rgba(181, 69, 47, 0.09);
+}
+.war-step.is-cur::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--vermilion);
+}
+.war-step.is-cur .wy {
+  color: var(--vermilion);
+}
+.war-step.is-cur .wt {
+  font-weight: 700;
+  color: var(--vermilion);
+}
+
+.war-ctrl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: rgba(90, 74, 58, 0.1);
+  border-radius: 9px;
+  padding: 4px 8px;
+}
+.war-btn {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-main);
+  font-family: var(--sans-stack);
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.14s, color 0.14s;
+}
+.war-btn .wico {
+  display: block;
+}
+.war-btn:hover {
+  background: rgba(181, 69, 47, 0.1);
+  color: var(--vermilion);
+}
+.war-btn.is-ico {
+  flex: 0 0 auto;
+  min-width: 30px;
+  text-align: center;
+  font-size: 12.5px;
+  line-height: 1;
+}
+/* 边界禁用：步 0 的回起始/上一步、末步的下一步/到结束 */
+.war-btn.is-disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+/* 步数嵌片：固定宽度（tabular 数位不跳动），整簇居中而非弹簧拉伸 */
+.war-stepcount {
+  min-width: 48px;
+  text-align: center;
+  padding: 3px 8px;
+  background: rgba(90, 74, 58, 0.13);
+  border-radius: 6px;
+  font-family: var(--sans-stack);
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.war-zone-note {
+  display: block;
+  margin-top: 5px;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+}
+
+.war-foot {
+  font-family: var(--sans-stack);
+  font-size: 9.8px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 900px) {
+  #war-card {
+    width: calc(100% - 20px);
+    left: 10px;
+    bottom: 14px;
+  }
+  .war-fbar-row {
+    grid-template-columns: 72px 1fr 54px;
+  }
+  /* The card becomes a full-width bottom sheet on tablet/mobile and already
+     contains the complete step narrative. A second map-anchored callout would
+     sit underneath that sheet rather than beside it. */
+  #war-balloon {
+    display: none !important;
+  }
+}
+
+/* --- 战争态势浮签（战争年份接管自动叙事；与里程碑气泡互斥出现） --- */
+#war-balloon {
+  position: absolute;
+  z-index: 6;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(348px, calc(100vw - 24px));
+  background: rgba(252, 248, 240, 0.95);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(166, 58, 40, 0.5);
+  border-radius: 9px;
+  padding: 7px 11px 8px;
+  box-shadow: var(--card-shadow);
+  font-size: 12.2px;
+  line-height: 1.42;
+  pointer-events: auto;
+  transition: opacity 0.16s ease;
+}
+
+#war-balloon::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgba(252, 248, 240, 0.96);
+  border: 0 solid rgba(166, 58, 40, 0.52);
+  pointer-events: none;
+}
+
+#war-balloon[data-caret="left"]::before {
+  left: -4.5px;
+  top: var(--caret-y, 24px);
+  transform: translateY(-50%) rotate(45deg);
+  border-left-width: 1px;
+  border-bottom-width: 1px;
+}
+
+#war-balloon[data-caret="right"]::before {
+  right: -4.5px;
+  top: var(--caret-y, 24px);
+  transform: translateY(-50%) rotate(45deg);
+  border-right-width: 1px;
+  border-top-width: 1px;
+}
+
+#war-balloon[data-caret="bottom"]::before {
+  bottom: -4.5px;
+  left: var(--caret-x, 50%);
+  transform: translateX(-50%) rotate(45deg);
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
+#war-balloon[data-caret="top"]::before {
+  top: -4.5px;
+  left: var(--caret-x, 50%);
+  transform: translateX(-50%) rotate(45deg);
+  border-left-width: 1px;
+  border-top-width: 1px;
+}
+
+#war-balloon.is-offscreen {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#war-balloon .ep-head {
+  display: flex;
+  align-items: center;
+  gap: 4px 6px;
+  flex-wrap: wrap;
+  padding-right: 22px;
+}
+
+#war-balloon .ep-year {
+  font-family: var(--serif-stack);
+  font-weight: 700;
+  color: var(--vermilion);
+  font-size: 11.8px;
+}
+
+#war-balloon .ep-text {
+  color: var(--text-main);
+  margin-top: 4px;
+  font-weight: 500;
+  overflow-wrap: break-word;
+}
+
+#war-balloon .ep-close {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(166, 58, 40, 0.08);
+  color: var(--text-secondary);
+  font-family: var(--sans-stack);
+  font-size: 13px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+
+#war-balloon .ep-close:hover {
+  background: var(--vermilion);
+  color: #fffaf2;
+}
+
+.war-balloon-forces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-top: 5px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(90, 74, 58, 0.14);
+  font-family: var(--sans-stack);
+  font-size: 10.8px;
+  color: var(--text-secondary);
+}
+.war-bf-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.war-bf-item i {
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  display: inline-block;
+}
+
+
+/* --- 战争沙盘深 zoom 可读性 + 双标记去重 + 名签显隐 --- */
+/* 深 zoom（<120 单位 ≈ 9°）：zone 与底衬降噪，名签顶上 */
+#atlas-svg.war-deep #grp-war .war-zone {
+  fill-opacity: 0.1;
+}
+#atlas-svg.war-deep #grp-war .war-march-casing {
+  stroke-opacity: 0.5;
+}
+#atlas-svg .war-lbl {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+#atlas-svg.war-deep .war-lbl {
+  opacity: 1;
+}
+/* 同事件里程碑钉让位战役菱形 */
+#grp-milestones .milestone-pin.war-shadowed {
+  opacity: 0.18;
+}
+#grp-milestones .milestone-pin.war-shadowed .ev-ring {
+  animation: none;
+}
+.war-balloon-side {
+  margin-top: 3px;
+  font-family: var(--sans-stack);
+  font-size: 10.8px;
+  font-weight: 700;
+}
+.war-balloon-place {
+  margin-top: 2px;
+  font-family: var(--sans-stack);
+  font-size: 10.2px;
+  color: #8a7a63;
+}
+.war-balloon-desc {
+  margin-top: 4px;
+  font-family: var(--serif-stack, Georgia, serif);
+  font-size: 11.6px;
+  line-height: 1.5;
+  color: #3d3629;
+}
+
+/* --- 骑乘楔形头（绘制期间骑在生长端点上，底边与线端齐平） --- */
+#grp-war .war-rider {
+  pointer-events: none;
+}
+#grp-war .war-rider-wedge-under {
+  fill: #f6f1e6;
+}
+#grp-war .war-rider-wedge {
+  fill: currentColor;
+}
