@@ -236,7 +236,7 @@
             : 0;
           const CN_MONTHS = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
           const EN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-          const seasonOf = (m) => ([12, 1, 2].includes(m) ? '冬' : [3, 4, 5].includes(m) ? '春' : [6, 7, 8].includes(m) ? '夏' : '秋');
+          const seasonOf = (m) => ([1, 2, 3].includes(m) ? '春' : [4, 5, 6].includes(m) ? '夏' : [7, 8, 9].includes(m) ? '秋' : '冬');
           const autoSubEraZh = autoMonth ? (autoMonth === 1 ? '正月' : `${seasonOf(autoMonth)}${CN_MONTHS[autoMonth - 1]}月`) : '';
           const autoSubEraEn = autoMonth ? `${EN_MONTHS[autoMonth - 1]} ${Math.trunc(step.y)}` : '';
           // 古今地名对（手写 storySite/storyModern 优先）：battle.placeZh 的
@@ -309,13 +309,13 @@
       const war = this._warData().find((item) => item.key === profile.warKey);
       if (!war) return null;
       const selected = this.activePersonEventIdx;
-      // 总览（selected<0）idx=-1：故事总览不剧透——只画全部战役菱形
-      //（静置、可点击跳站），不画行军箭头（对齐官方 journey 总览语言）。
+      // 总览（selected<0）= 渲染整场战役的完整态势（所有箭头+全部标记）。
+      // 用户口径：总览即全貌；标注与箭头秩序由名签分层 + 过站 muted 解决。
       const idx = selected >= 0
         ? Number.isInteger((this.activePerson.events[selected] || {}).warStepIdx)
           ? this.activePerson.events[selected].warStepIdx
           : selected
-        : -1;
+        : Math.max(0, war.steps.length - 1);
       return { profile, war, idx, overview: selected < 0 };
     }
 
@@ -544,22 +544,53 @@
         n.setAttribute('transform', `translate(${(tx + ox).toFixed(1)},${(ty + oy).toFixed(1)}) scale(${s})`);
         if (n.classList.contains('is-cur')) curOff = [ox, oy];
       }
-      // 名签随当前步菱形一同避让（锚点与菱形保持对齐）
-      const curN0 = grp.querySelector('g.war-node.is-cur');
-      grp
-        .querySelectorAll('g.war-lbl[data-x]')
-        .forEach((n) => {
-          let ox = 0;
-          let oy = 0;
-          if ((curOff[0] || curOff[1]) && curN0 &&
-              n.dataset.x === curN0.dataset.x && n.dataset.y === curN0.dataset.y) {
-            ox = curOff[0];
-            oy = curOff[1];
+      // 名签：跟随所属菱形/圆点的避让偏移（data-ni → nodes 序号），随后做
+      // 屏幕碰撞去重——focus（当前站）优先落位，muted（过站/总览）让位，
+      // 撞了的挂 is-crowded 隐藏（官方名签去重同款语义）。
+      const lbls = [...grp.querySelectorAll('g.war-lbl[data-x]')];
+      const boxes = [];
+      const ordered = [...lbls].sort(
+        (a, b) => (a.classList.contains('is-past-lbl') ? 1 : 0) - (b.classList.contains('is-past-lbl') ? 1 : 0)
+      );
+      for (const n of ordered) {
+        const tx0 = parseFloat(n.dataset.x);
+        const ty0 = parseFloat(n.dataset.y);
+        let ox = 0;
+        let oy = 0;
+        const ni = n.dataset.ni != null ? +n.dataset.ni : -1;
+        const host = ni >= 0 ? nodes[ni] : null;
+        if (host) {
+          const ht = /translate\(([\d.-]+),([\d.-]+)\)/.exec(host.getAttribute('transform') || '');
+          if (ht) {
+            ox = +ht[1] - tx0;
+            oy = +ht[2] - ty0;
           }
-          const lx = parseFloat(n.dataset.x) + ox;
-          const ly = parseFloat(n.dataset.y) + oy;
-          n.setAttribute('transform', `translate(${lx.toFixed(1)},${ly.toFixed(1)}) scale(${s})`);
-        });
+        }
+        n.setAttribute(
+          'transform',
+          `translate(${(tx0 + ox).toFixed(1)},${(ty0 + oy).toFixed(1)}) scale(${s})`
+        );
+        // 屏幕碰撞盒：child 点 p → 屏幕 px = (T + p)（scale=1/k 与 ×k 相抵）
+        let hide = false;
+        try {
+          const bb = n.getBBox();
+          if (bb.width > 0 && bb.height > 0) {
+            const bx = (tx0 + ox) * k + bb.x;
+            const by = (ty0 + oy) * k + bb.y;
+            const bw = bb.width;
+            const bh = bb.height;
+            hide = boxes.some(
+              (q) => !(bx + bw < q[0] || q[0] + q[2] < bx || by + bh < q[1] || q[1] + q[3] < by)
+            );
+            if (!hide) boxes.push([bx, by, bw, bh]);
+          } else {
+            hide = true;
+          }
+        } catch (e) {
+          hide = false;
+        }
+        n.classList.toggle('is-crowded', hide);
+      }
       // 锚点同步：浮签/去重用的是菱形的【当前落位】
       const curN = grp.querySelector('g.war-node.is-cur');
       if (curN) {
@@ -729,14 +760,18 @@
     // warFly：激活进场即将飞相机时传战区取景（_warTheaterFit 结果），否则 null。
     // 由 _syncWarOverlay 在渲染前用与激活块同一谓词预判传入——飞行发生在渲染
     // 之后，渲染端只能靠预判决定绘制的延迟/时长/门控缩放基准。
-    _renderWarSvg(w, idx, zi, warFly) {
+    _renderWarSvg(w, idx, zi, warFly, storyOverview) {
       const grp = this._warGroup();
       if (!grp) return;
+      // 总览（storyOverview）：所有箭头等权全显——无聚焦、无 muted、无骑乘
+      // 动画，用户口径"总览=全貌"；聚焦只发生在选中某一站时。
+      const overview = !!storyOverview;
       const sig = [
         this.locale,
         w ? w.key : '-',
         idx,
         zi,
+        overview ? 1 : 0,
         this._warLayerOn() ? 1 : 0,
       ].join('|');
       if (sig === this._warSvgSig) return;
@@ -748,6 +783,8 @@
       }
       this._cancelWarDraws();
       grp.innerHTML = '';
+      // 总览态类标记：CSS 据此豁免过站楔形的减淡（总览全部等权高亮）
+      grp.classList.toggle('war-overview', overview);
       this._warCurMoveTip = null;       // 当前行军箭头落点（浮签锚，取主轴）
       this._warCurMoveTipTier = null;   // 主轴的兵力档
       this._warBattleAnchor = null;     // ≤当前步的最后一役（叙事步浮签锚）
@@ -822,7 +859,7 @@
       }
       for (let i = 0; i <= idx; i++) {
         const s = w.steps[i];
-        const isCur = i === idx;
+        const isCur = i === idx && !overview;
         for (const mv of s.moves || []) {
           const pts = this._warPointList(mv);
           if (pts.length < 2) continue;
@@ -832,12 +869,13 @@
           const tier = mv.force ? this._warForceTier(mv.force.n) : 0;
           const claimed = mv.force && mv.force.quality === 'claimed';
           // 浅色底衬把彩色箭头从繁杂地形里托出来（宣纸制图惯例）
+          // 总览（overview）：全部箭头等权高亮——不带 is-cur/is-past 任何状态类
           const casing = this._svgNode(
             'path',
-            { d: info.d, class: `war-march-casing t${tier}${isCur ? ' is-cur' : ''}` },
+            { d: info.d, class: `war-march-casing t${tier}${overview ? '' : isCur ? ' is-cur' : ' is-past'}` },
             g
           );
-          const cls = `war-march t${tier}${isCur ? ' is-cur' : ' is-past'}${claimed ? ' is-claimed' : ''}`;
+          const cls = `war-march t${tier}${overview ? '' : isCur ? ' is-cur' : ' is-past'}${claimed ? ' is-claimed' : ''}`;
           const p = this._svgNode(
             'path',
             { d: info.d, class: cls, stroke: side.color },
@@ -967,13 +1005,16 @@
       }
 
       // --- battle diamonds + labels ---
-      // 总览（idx<0）：画全部战役菱形（静置、可点击跳站），行军箭头已整体
-      // 跳过——总览即"不剧透"的战役地图（对齐官方 journey 总览只画钉）。
+      // 总览与选中态同构：≤当前步的每场战役都有菱形+编号+名签（当前站
+      // focus、过站 muted），名签碰撞去重在 _warRescaleGlyphs 里做——
+      // 总览即全貌（用户口径），标注与箭头秩序由分层解决。
       const lblNodes = [];
-      const battleEnd = idx < 0 ? w.steps.length - 1 : idx;
+      const battleEnd = idx;
+      let nodeIdx = 0;
+      let lastPt = null;
       for (let i = 0; i <= battleEnd; i++) {
         const s = w.steps[i];
-        const isCur = i === idx;
+        const isCur = i === idx && !overview;
         (s.battles || []).forEach((b, bi) => {
           if (!b.at) return;
           const side = this._warSide(w, b.side);
@@ -998,6 +1039,9 @@
           if (isCur) this._warCurSpot = { x: sx, y: sy };
           // 最近战场锚（≤当前步的最后一役）：叙事步浮签沿用它
           this._warBattleAnchor = { x: sx, y: sy };
+          // 透明命中盘：编号文字 pointer-events:none 会把小目标点的点击
+          // 穿透到地图（官方钉有 26px 最近拾取兜底，这里用命中盘同效）
+          this._svgNode('circle', { class: 'war-hit', r: 11, fill: '#000', 'fill-opacity': 0 }, node);
           this._svgNode('circle', { class: 'war-ring', r: 8.5, stroke: side.color }, node);
           const core = this._svgNode(
             'g',
@@ -1009,21 +1053,73 @@
             { class: 'war-diamond', points: '0,-4.6 4.6,0 0,4.6 -4.6,0', fill: side.color },
             core
           );
-          // 当前步战役名签（仅 war-deep 深 zoom 显示，广角由浮签命名）
-          if (isCur) {
-            lblNodes.push({
-              x: sx,
-              y: sy,
-              text: this._warField(b, 'name') || this._warStepTitle(w, s),
-              color: side.color,
-            });
+          // 步骤编号（官方编号钉同款语义）：菱形下方，屏幕恒定（父组 scale 补偿）
+          const num = this._svgNode(
+            'text',
+            { class: 'war-stepnum', x: 0, y: 15, 'text-anchor': 'middle' },
+            node
+          );
+          num.textContent = String(i + 1);
+          num.style.fill = side.color;
+          const lbl = this._warField(b, 'name') || this._warStepTitle(w, s);
+          if (lbl) {
+            lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, ni: nodeIdx });
           }
+          nodeIdx++;
+          lastPt = b.at;
         });
+        // 无战役的步（纯行军/叙事，如"衡州称帝""袁绍卒"）：圆点标记 + 编号
+        // + 名签——每一站都在地图上有自己的落点与说明（官方"每站有钉"语义）
+        if (!(s.battles || []).length) {
+          const mv = (s.moves || [])[0] || null;
+          const pts = mv ? this._warPointList(mv) : [];
+          const at = pts.length ? pts[pts.length - 1] : lastPt;
+          if (at) {
+            lastPt = at;
+            const side = this._warSide(w, (mv && mv.side) || ((w.sides || [])[0] || {}).key);
+            const [sx, sy] = this.projector.toScreen(at[0], at[1]);
+            const node = this._svgNode(
+              'g',
+              {
+                class: `war-node war-dotnode${isCur ? ' is-cur' : ''}`,
+                'data-x': sx.toFixed(1),
+                'data-y': sy.toFixed(1),
+                'data-war': w.key,
+                'data-step': String(i),
+              },
+              g
+            );
+            if (isCur) this._warCurSpot = { x: sx, y: sy };
+            this._warBattleAnchor = { x: sx, y: sy };
+            this._svgNode('circle', { class: 'war-hit', r: 11, fill: '#000', 'fill-opacity': 0 }, node);
+            this._svgNode('circle', { class: 'war-dot', r: 2.9, fill: side.color }, node);
+            const num = this._svgNode(
+              'text',
+              { class: 'war-stepnum', x: 0, y: 13, 'text-anchor': 'middle' },
+              node
+            );
+            num.textContent = String(i + 1);
+            num.style.fill = side.color;
+            const lbl = this._warStepTitle(w, s) || this._warField(s, 'title');
+            if (lbl) {
+              lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur, ni: nodeIdx });
+            }
+            nodeIdx++;
+          }
+        }
+        // 纯行军/叙事步的落点继承（供后续叙事步锚定）
+        const mvLast = (s.moves || []).length ? this._warPointList(s.moves[s.moves.length - 1]) : null;
+        if (mvLast && mvLast.length) lastPt = mvLast[mvLast.length - 1];
       }
       for (const lb of lblNodes) {
         const lg = this._svgNode(
           'g',
-          { class: 'war-lbl', 'data-x': lb.x.toFixed(1), 'data-y': lb.y.toFixed(1) },
+          {
+            class: `war-lbl${lb.muted ? ' is-past-lbl' : ''}`,
+            'data-x': lb.x.toFixed(1),
+            'data-y': lb.y.toFixed(1),
+            'data-ni': String(lb.ni != null ? lb.ni : -1),
+          },
           g
         );
         const t = this._svgNode(
@@ -1495,7 +1591,7 @@
         !this.isScrubbing && !this.challenge && !this.activePerson && !this.activeTrace
           ? this._warTheaterFit(shellWar)
           : null;
-      this._renderWarSvg(w, idx, zi, warFly);
+      this._renderWarSvg(w, idx, zi, warFly, storyWar ? storyWar.overview : false);
       this._renderWarCard(storyWar ? null : shellWar, idx);
       if (storyWar) this._hideWarBalloon();
       else this._syncWarBalloon(shellWar, idx);

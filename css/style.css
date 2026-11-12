@@ -5969,9 +5969,15 @@ button.story-inline-person:hover {
 #grp-war .war-march.t1, #grp-war .war-march-casing.t1 { --war-w: 5.2px; }
 #grp-war .war-march.t2, #grp-war .war-march-casing.t2 { --war-w: 6.6px; }
 #grp-war .war-march.t3, #grp-war .war-march-casing.t3 { --war-w: 9.2px; }
+/* 过站箭头 muted（官方 focus/muted 语言）：细一档 + 减淡——历史线退成
+ * 背景，当前行军箭头独自读作"现在进行时"，多箭头不再互相打架 */
 #grp-war .war-march.is-past {
-  stroke-opacity: 0.8;
+  stroke-opacity: 0.45;
+  stroke-width: calc(var(--war-w, 3px) * 0.6);
   stroke-dasharray: none;
+}
+#grp-war .war-march-casing.is-past {
+  stroke-opacity: 0.22;
 }
 #grp-war .war-march.is-cur {
   stroke-opacity: 0.95;
@@ -6049,7 +6055,7 @@ button.story-inline-person:hover {
   }
 }
 
-/* --- battle name labels (当前步战名牌) --- */
+/* --- battle name labels (全站战名牌：当前站 focus、过站 muted、碰撞隐藏) --- */
 #grp-war .war-lbl {
   pointer-events: none;
 }
@@ -6061,6 +6067,26 @@ button.story-inline-person:hover {
   stroke: #f6f1e6;
   stroke-width: 3px;
   stroke-linejoin: round;
+}
+#grp-war .war-lbl.is-past-lbl .war-lbl-text {
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.78;
+}
+#grp-war .war-lbl.is-crowded {
+  opacity: 0;
+}
+/* 步骤编号（菱形/圆点下方，父组 scale 补偿下屏幕恒定） */
+#grp-war .war-stepnum {
+  font-family: var(--sans-stack);
+  font-size: 6.4px;
+  font-weight: 700;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: #f6f1e6;
+  stroke-width: 2.2px;
+  stroke-linejoin: round;
+  pointer-events: none;
 }
 
 /* --- campaign card (#war-card, 与 #journey-card 同槽互斥；表面配方对齐 genealogy/challenge 卡) --- */
@@ -6665,11 +6691,23 @@ button.story-inline-person:hover {
 #atlas-svg.war-deep #grp-war .war-march-casing {
   stroke-opacity: 0.5;
 }
+/* 名签常显（官方"重要地点标注清楚"语言）：focus/muted 分层 + 碰撞去重，
+ * 不再依赖 war-deep 才显形 */
 #atlas-svg .war-lbl {
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.2s;
 }
-#atlas-svg.war-deep .war-lbl {
+#atlas-svg .war-dir:not(.is-cur) .war-chevron {
+  opacity: 0.5;
+}
+#atlas-svg .war-dir:not(.is-cur) .war-chevron-under {
+  opacity: 0.6;
+}
+/* 总览态：全部箭头等权高亮——楔形豁免减淡 */
+#atlas-svg .war-overview .war-dir .war-chevron {
+  opacity: 1;
+}
+#atlas-svg .war-overview .war-dir .war-chevron-under {
   opacity: 1;
 }
 /* 同事件里程碑钉让位战役菱形 */
@@ -6708,4 +6746,19 @@ button.story-inline-person:hover {
 }
 #grp-war .war-rider-wedge {
   fill: currentColor;
+}
+
+/* 透明命中盘：小目标标记（圆点/菱形+编号文字）的点击面积兜底 */
+#grp-war .war-hit {
+  pointer-events: all;
+  cursor: pointer;
+}
+
+/* 无战役步的圆点标记（每站有钉：叙事/纯行军步也有落点与编号） */
+#grp-war .war-dotnode {
+  cursor: pointer;
+}
+#grp-war .war-dotnode .war-dot {
+  stroke: #f6f1e6;
+  stroke-width: 1.4;
 }

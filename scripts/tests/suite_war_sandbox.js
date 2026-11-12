@@ -193,9 +193,7 @@ async function runWarSandboxSuite(ctx) {
   assert(warModule.includes('_activeWarStory()'), 'War module must expose story-driven campaign state');
   assert(warModule.includes('storyWar ? storyWar.war : shellWar'), 'Story-driven SVG rendering must be separate from the standalone war shell');
   assert(warModule.includes('_warHasStory(w.key)') && warModule.includes('_warHasStory(linkWar.key)'), 'Gate, chronicle rows and deep links must route story-backed campaigns to the unified experience');
-  // 总览不剧透：story overview renders battle diamonds only (idx=-1, no march arrows)
-  assert(warModule.includes(': -1;'), 'War story overview must render the no-spoiler posture (idx=-1)');
-  assert(warModule.includes('const battleEnd = idx < 0 ? w.steps.length - 1 : idx;'), 'War overview must draw every battle diamond across all steps');
+  // 总览=全貌：所有箭头与标记全渲染；秩序由名签分层 + 过站 muted 解决
   assert(warModule.includes("quoteZh: step.quoteZh || ''"), 'War hydrate must pass primary-source quotes through to the story card');
   assert(warModule.includes('window.WAR_STORY_CONTENT'), 'War hydrate must merge the story content layer');
 
