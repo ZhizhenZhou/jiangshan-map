@@ -229,18 +229,36 @@
           const descZh = (battle && battle.descZh) || (move && move.descZh) || step.descZh || '';
           const descEn = (battle && battle.descEn) || (move && move.descEn) || step.descEn || descZh;
           const camp = (battle && battle.side) || (move && move.side) || ((war.sides || [])[0] || {}).key || '';
+          // 月令自动派生（手写 subEra 优先）：war_data 的小数年编码了月令
+          // 意图（755.95=冬十一月），这里把它读回故事卡；整数年步留空。
+          const autoMonth = Number.isFinite(step.y) && (step.y % 1) > 0
+            ? Math.max(1, Math.min(12, Math.round((step.y % 1) * 12) || 1))
+            : 0;
+          const CN_MONTHS = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+          const EN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+          const seasonOf = (m) => ([12, 1, 2].includes(m) ? '冬' : [3, 4, 5].includes(m) ? '春' : [6, 7, 8].includes(m) ? '夏' : '秋');
+          const autoSubEraZh = autoMonth ? (autoMonth === 1 ? '正月' : `${seasonOf(autoMonth)}${CN_MONTHS[autoMonth - 1]}月`) : '';
+          const autoSubEraEn = autoMonth ? `${EN_MONTHS[autoMonth - 1]} ${Math.trunc(step.y)}` : '';
+          // 古今地名对（手写 storySite/storyModern 优先）：battle.placeZh 的
+          // "（今X）"/"今X" 标记拆出今名；无标记的纯古地名保持原样、今名留空。
+          const placeZh = battle ? String(battle.placeZh || '') : '';
+          const placeEn = battle ? String(battle.placeEn || '') : '';
+          const today = (placeZh.match(/（今([^）]+)）/) || placeZh.match(/^今(.+)$/) || [])[1] || '';
+          const ancientAuto = today ? placeZh.replace(/（?今[^）]*）?/, '').trim() : placeZh;
           return {
             year: Number.isFinite(step.storyYear) ? step.storyYear : Math.trunc(step.y),
             month: Number.isFinite(step.y) ? Math.max(1, Math.min(12, Math.round((step.y % 1) * 12) || 1)) : 6,
-            subEraZh: step.subEraZh || '',
-            subEraEn: step.subEraEn || '',
+            subEraZh: step.subEraZh || autoSubEraZh,
+            subEraEn: step.subEraEn || autoSubEraEn,
             actZh: step.actZh || '',
             actEn: step.actEn || '',
             camp,
-            ancientZh: step.storySiteZh || (battle && String(battle.placeZh || '').replace(/^（?今/, '').replace(/（今[^）)]*）/,'')) || titleZh,
-            ancientEn: step.storySiteEn || (battle && battle.placeEn) || titleEn,
-            modernZh: step.storyModernZh || '',
-            modernEn: step.storyModernEn || '',
+            ancientZh: step.storySiteZh || (battle ? (ancientAuto || titleZh) : titleZh),
+            ancientEn: step.storySiteEn || (battle && !today && placeEn) || titleEn,
+            modernZh: step.storyModernZh || (battle && today) || '',
+            modernEn: step.storyModernEn || (battle && today && placeEn) || '',
+            quoteZh: step.quoteZh || '',
+            quoteEn: step.quoteEn || '',
             coord,
             fromCoord,
             via: pts.length > 2 ? pts.slice(1, -1) : null,
@@ -252,6 +270,25 @@
             warKey: war.key,
           };
         });
+        // 内容层合并（war_story_content.js）：引文/幕结构/人物表与战术旁白
+        // 分层，对齐官方「lore_core 壳 + lore_detail 正文」的架构。手写
+        // story 字段（官渡等）仍最优先。
+        const storyContent = (window.WAR_STORY_CONTENT || {})[war.key];
+        if (storyContent && storyContent.steps) {
+          profile.stops = profile.stops.map((stop, sIdx) => {
+            const c = storyContent.steps[sIdx];
+            if (!c) return stop;
+            return Object.assign({}, stop, {
+              subEraZh: c.subEraZh || stop.subEraZh,
+              subEraEn: c.subEraEn || stop.subEraEn,
+              actZh: c.actZh || stop.actZh || '',
+              actEn: c.actEn || stop.actEn || '',
+              quoteZh: c.quoteZh || stop.quoteZh || '',
+              quoteEn: c.quoteEn || stop.quoteEn || '',
+              actors: Array.isArray(c.actors) && c.actors.length ? c.actors : (stop.actors || null),
+            });
+          });
+        }
         changed = true;
       }
       if (changed) {
@@ -272,11 +309,13 @@
       const war = this._warData().find((item) => item.key === profile.warKey);
       if (!war) return null;
       const selected = this.activePersonEventIdx;
+      // 总览（selected<0）idx=-1：故事总览不剧透——只画全部战役菱形
+      //（静置、可点击跳站），不画行军箭头（对齐官方 journey 总览语言）。
       const idx = selected >= 0
         ? Number.isInteger((this.activePerson.events[selected] || {}).warStepIdx)
           ? this.activePerson.events[selected].warStepIdx
           : selected
-        : Math.max(0, war.steps.length - 1);
+        : -1;
       return { profile, war, idx, overview: selected < 0 };
     }
 
@@ -928,8 +967,11 @@
       }
 
       // --- battle diamonds + labels ---
+      // 总览（idx<0）：画全部战役菱形（静置、可点击跳站），行军箭头已整体
+      // 跳过——总览即"不剧透"的战役地图（对齐官方 journey 总览只画钉）。
       const lblNodes = [];
-      for (let i = 0; i <= idx; i++) {
+      const battleEnd = idx < 0 ? w.steps.length - 1 : idx;
+      for (let i = 0; i <= battleEnd; i++) {
         const s = w.steps[i];
         const isCur = i === idx;
         (s.battles || []).forEach((b, bi) => {

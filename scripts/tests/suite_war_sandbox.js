@@ -11,6 +11,8 @@ async function runWarSandboxSuite(ctx) {
   const warDataPath = path.join(JS_DIR, 'war_data.js');
   const warCode = fs.readFileSync(warDataPath, 'utf8');
   vm.runInContext(warCode, sandbox, { filename: 'war_data.js' });
+  const storyContentCode = fs.readFileSync(path.join(JS_DIR, 'war_story_content.js'), 'utf8');
+  vm.runInContext(storyContentCode, sandbox, { filename: 'war_story_content.js' });
 
   const wars = sandbox.window.WAR_DATA;
   assert(Array.isArray(wars), 'war_data.js must expose window.WAR_DATA');
@@ -159,26 +161,28 @@ async function runWarSandboxSuite(ctx) {
   assert(styleCss.includes('.war-rider-wedge'), 'style.css must retain the rider wedge styles');
 
   const lazyWarPaths = new Set(
-    LAZY_ATTR_ASSETS.filter((a) => a.datasetKey === 'vWarData' || a.datasetKey === 'vWar').map(
-      (a) => a.relPath
-    )
+    LAZY_ATTR_ASSETS.filter(
+      (a) => a.datasetKey === 'vWarData' || a.datasetKey === 'vWar' || a.datasetKey === 'vWarStory'
+    ).map((a) => a.relPath)
   );
   assert.deepStrictEqual(
     [...lazyWarPaths].sort(),
-    ['js/atlas_war.js', 'js/war_data.js'],
-    'War data and controller must be registered as lazy assets'
+    ['js/atlas_war.js', 'js/war_data.js', 'js/war_story_content.js'],
+    'War data, controller and story content must be registered as lazy assets'
   );
   assert(
     !STATIC_TAG_ASSETS.includes('js/atlas_war.js') && !STATIC_TAG_ASSETS.includes('js/war_data.js'),
     'War bundles must stay out of the synchronous first-paint asset list'
   );
   assert(
-    !/<script[^>]+src="js\/(?:atlas_war|war_data)\.js/i.test(indexHtml),
+    !/<script[^>]+src="js\/(?:atlas_war|war_data|war_story_content)\.js/i.test(indexHtml),
     'index.html must not synchronously load the war bundles'
   );
   assert(
-    /data-v-war-data="[a-f0-9]{8}"/.test(indexHtml) && /data-v-war="[a-f0-9]{8}"/.test(indexHtml),
-    'atlas-app-script must publish content hashes for both lazy war bundles'
+    /data-v-war-data="[a-f0-9]{8}"/.test(indexHtml) &&
+      /data-v-war="[a-f0-9]{8}"/.test(indexHtml) &&
+      /data-v-war-story="[a-f0-9]{8}"/.test(indexHtml),
+    'atlas-app-script must publish content hashes for the lazy war bundles'
   );
 
   const warModule = fs.readFileSync(path.join(JS_DIR, 'atlas_war.js'), 'utf8');
@@ -189,6 +193,11 @@ async function runWarSandboxSuite(ctx) {
   assert(warModule.includes('_activeWarStory()'), 'War module must expose story-driven campaign state');
   assert(warModule.includes('storyWar ? storyWar.war : shellWar'), 'Story-driven SVG rendering must be separate from the standalone war shell');
   assert(warModule.includes('_warHasStory(w.key)') && warModule.includes('_warHasStory(linkWar.key)'), 'Gate, chronicle rows and deep links must route story-backed campaigns to the unified experience');
+  // 总览不剧透：story overview renders battle diamonds only (idx=-1, no march arrows)
+  assert(warModule.includes(': -1;'), 'War story overview must render the no-spoiler posture (idx=-1)');
+  assert(warModule.includes('const battleEnd = idx < 0 ? w.steps.length - 1 : idx;'), 'War overview must draw every battle diamond across all steps');
+  assert(warModule.includes("quoteZh: step.quoteZh || ''"), 'War hydrate must pass primary-source quotes through to the story card');
+  assert(warModule.includes('window.WAR_STORY_CONTENT'), 'War hydrate must merge the story content layer');
 
   const warKeys = new Set(wars.map((w) => w.key));
   const storyByWarKey = new Map();
@@ -209,6 +218,52 @@ async function runWarSandboxSuite(ctx) {
     assert.strictEqual(profile.evCount, w.steps.length, `Campaign ${w.key} story must advertise one scene per war step`);
   }
   assert.strictEqual(storyByWarKey.size, wars.length - 1, 'Exactly the non-An-Shi campaigns carry warKey story profiles');
+
+  // Story content layer (war_story_content.js): quotes/acts/actors live apart
+  // from the tactical narration, mirroring the official two-layer authoring.
+  // An-Shi is excluded by design (curated lore_detail storyline).
+  const storyContent = sandbox.window.WAR_STORY_CONTENT;
+  assert(storyContent && typeof storyContent === 'object', 'war_story_content.js must expose window.WAR_STORY_CONTENT');
+  // vm-realm arrays carry another prototype: bring both sides to the host realm
+  // before deepStrictEqual (it compares prototypes).
+  assert.deepStrictEqual(
+    Object.keys(storyContent).sort(),
+    Array.from(wars)
+      .filter((w) => w.key !== 'an-shi')
+      .map((w) => w.key)
+      .sort(),
+    'Story content must cover exactly the non-An-Shi campaigns'
+  );
+  const profileKeys = new Set((loreData.PERSON_PROFILES || []).map((p) => p && p.key));
+  for (const w of wars) {
+    const content = storyContent[w.key];
+    if (!content) continue;
+    const sideKeys = new Set(w.sides.map((s) => s.key));
+    for (const [idxKey, stepContent] of Object.entries(content.steps || {})) {
+      const idx = Number(idxKey);
+      assert(
+        Number.isInteger(idx) && idx >= 0 && idx < w.steps.length,
+        `${w.key} story content step ${idxKey} is outside the campaign timeline`
+      );
+      if (stepContent.quoteZh || stepContent.quoteEn) {
+        assert(stepContent.quoteZh && stepContent.quoteEn, `${w.key} step ${idx} quote must be bilingual`);
+        // source named either as 《书名》 or as an inline attribution (诏书/挽联/条约/诗)
+        assert(
+          /《[^》]+》/.test(stepContent.quoteZh) || /^[^："]{2,24}：/.test(stepContent.quoteZh),
+          `${w.key} step ${idx} quote must name its source`
+        );
+        assert(stepContent.quoteZh.length >= 12 && stepContent.quoteEn.length >= 24, `${w.key} step ${idx} quote is too thin`);
+      }
+      if (stepContent.actZh) {
+        assert(stepContent.actEn, `${w.key} step ${idx} act header must be bilingual`);
+      }
+      for (const actor of stepContent.actors || []) {
+        assert(actor.key && profileKeys.has(actor.key), `${w.key} step ${idx} actor key ${actor.key} must exist in PERSON_PROFILES`);
+        assert(sideKeys.has(actor.camp), `${w.key} step ${idx} actor camp ${actor.camp} must be a war side`);
+        assert(actor.zh && actor.en, `${w.key} step ${idx} actor must be bilingual`);
+      }
+    }
+  }
 
   // Every non-An-Shi campaign must keep at least one 始末 badge year in the
   // chronicle milestone list (_findStoryForMilestone mapping in app.js).

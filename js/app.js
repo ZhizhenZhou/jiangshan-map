@@ -757,6 +757,7 @@
           : this._loadScriptOnce(this._lazyAssetUrl('js/war_data.js', 'vWarData'));
         this._warPromise = dataReady
           .then(() => this._loadScriptOnce(this._lazyAssetUrl('js/atlas_war.js', 'vWar')))
+          .then(() => this._loadScriptOnce(this._lazyAssetUrl('js/war_story_content.js', 'vWarStory')))
           .then(() => {
             if (!this._isWarLoaded()) {
               this._warPromise = null;
