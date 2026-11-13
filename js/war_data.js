@@ -2242,8 +2242,22 @@ window.WAR_DATA = [
       {
         y: 1911.33,
         battles: [{ side: 'geming', at: [113.27, 23.13], nameZh: '黄花岗起义', nameEn: 'The Huanghuagang rising', placeZh: '广州（今广州越秀）', placeEn: 'Guangzhou',
+          date0: [1911, 4, 27],
+          resultZh: '起义失败：八十六人死难，七十二具忠骸合葬黄花岗',
+          resultEn: 'The rising was crushed: 86 died, 72 buried together at Huanghuagang',
+          commanders: [
+            { side: 'geming', nameZh: '黄兴（革命军总指挥）', nameEn: 'Huang Xing (revolutionary commander)' },
+            { side: 'qingchao', nameZh: '张鸣岐（两广总督） · 李准（水师提督）', nameEn: 'Zhang Mingqi (viceroy) · Li Zhun (admiral)' },
+          ],
+          units: [
+            { side: 'geming', zh: '同盟会「选锋」百二十余人', en: '~130 picked men of the Tongmenghui vanguard' },
+            { side: 'qingchao', zh: '两广督署卫队及巡防营', en: 'Viceregal guards and patrol battalions' },
+          ],
           forces: [
             { side: 'geming', n: 130, quality: 'recorded', srcZh: '黄兴率「选锋」百二十余人攻总督署（当事人回忆录汇总）', srcEn: 'Huang Xing led ~130 picked men against the viceroy\'s yamen.' },
+          ],
+          casualties: [
+            { side: 'geming', n: 86, quality: 'recorded', srcZh: '死难八十六人，七十二具忠骸合葬黄花岗（后查明殉难者名单）', srcEn: '86 died; 72 martyrs were buried together at Huanghuagang.' },
           ],
           descZh: '三月廿九，黄兴率「选锋」百二十余人直攻两广总督署——喻培伦胸前挂满炸弹，林觉民中弹被俘就义。八十六人死难，七十二具忠骸合葬黄花岗。同盟会十年南方起义至此最壮烈的一败，半年之后，武昌的枪声替他们回答。',
           descEn: 'Huang Xing led 130 picked men straight at the viceroy\'s yamen; 86 died, 72 buried together at Huanghuagang. The most tragic of a decade of failed risings — six months later Wuchang answered for them.' }],
@@ -2251,6 +2265,17 @@ window.WAR_DATA = [
       {
         y: 1911.81,
         battles: [{ side: 'geming', at: [114.31, 30.54], nameZh: '武昌首义', nameEn: 'The Wuchang rising', placeZh: '武昌（今武汉武昌区）', placeEn: 'Wuchang, Wuhan',
+          date0: [1911, 10, 10], date1: [1911, 10, 11],
+          resultZh: '首义成功：翌日鄂军都督府成立，废除宣统年号',
+          resultEn: 'The rising won: the Hubei military government was proclaimed next day',
+          commanders: [
+            { side: 'geming', nameZh: '熊秉坤（首义枪响） · 吴兆麟（临时总指挥）', nameEn: 'Xiong Bingkun · Wu Zhaolin (interim commander)' },
+            { side: 'qingchao', nameZh: '瑞澂（湖广总督，弃城遁） · 张彪（第八镇统制）', nameEn: 'Rui Cheng (viceroy, fled) · Zhang Biao (division commander)' },
+          ],
+          units: [
+            { side: 'geming', zh: '湖北新军工程第八营等', en: '8th Engineer Battalion and mutinying New Army units' },
+            { side: 'qingchao', zh: '湖广督署卫队及第八镇残部', en: 'Viceregal guards and 8th Division remnants' },
+          ],
           descZh: '十月十日夜，工程第八营熊秉坤、金兆龙首义，夺取楚望台军械库，一夜而下湖广总督署；翌日中华民国军政府鄂军都督府成立，推新军协统黎元洪为都督，废除宣统年号——两千年的帝制，从这里开始倒计时。',
           descEn: 'On the night of October 10 the Eighth Engineer Battalion mutinied, seized the Chuwangtai arsenal and took the viceroy\'s yamen; by dawn the Hubei military government was proclaimed and the reign name abolished.' }],
       },
@@ -2269,6 +2294,17 @@ window.WAR_DATA = [
           descZh: '冯国璋、段祺瑞部沿京汉铁路压向汉口——民军先胜刘家庙，再败于市区巷战。',
           descEn: 'Feng Guozhang and Duan Qirui pressed down the railway on Hankou — the rebels won at Liujiamiao, then lost the street fighting.' }],
         battles: [{ side: 'qingchao', at: [114.27, 30.60], nameZh: '阳夏保卫战·汉口鏖兵', nameEn: 'The defense of Hankou', placeZh: '汉口（今武汉汉口）', placeEn: 'Hankou, Wuhan',
+          date0: [1911, 10, 18], date1: [1911, 10, 27],
+          resultZh: '民军先胜刘家庙，终失汉口；冯国璋纵火焚城三日',
+          resultEn: 'Rebels won at Liujiamiao, then lost Hankou; Feng burned the city for three days',
+          commanders: [
+            { side: 'geming', nameZh: '黄兴（10月28日驰援，就任战时总司令）', nameEn: 'Huang Xing (arrived Oct 28 as field commander)' },
+            { side: 'qingchao', nameZh: '冯国璋（第4镇） · 段祺瑞（第6镇）', nameEn: 'Feng Guozhang (4th Div.) · Duan Qirui (6th Div.)' },
+          ],
+          units: [
+            { side: 'geming', zh: '湖北民军（新军扩编）及各省援军', en: 'Hubei rebel columns and provincial volunteers' },
+            { side: 'qingchao', zh: '北洋第4镇 · 第6镇主力', en: 'Two Beiyang divisions (4th & 6th)' },
+          ],
           forces: [
             { side: 'geming', n: 20000, quality: 'est', srcZh: '湖北新军扩编民军约两万（阳夏战史汇总）', srcEn: '~20,000 rebel troops after expansion.' },
             { side: 'qingchao', n: 20000, quality: 'est', srcZh: '北洋第四镇、第六镇主力约两万', srcEn: 'Two Beiyang divisions, ~20,000.' },
@@ -2284,6 +2320,17 @@ window.WAR_DATA = [
           descZh: '黄兴登坛拜将，督民军反攻汉阳不克——十一月二十七日汉阳陷落，武昌危城凭江而守。',
           descEn: 'Huang Xing took the field and counterattacked Hanyang in vain; its fall on November 27 left Wuchang holding the river alone.' }],
         battles: [{ side: 'qingchao', at: [114.22, 30.55], nameZh: '汉阳失守', nameEn: 'The fall of Hanyang', placeZh: '汉阳（今武汉汉阳区）', placeEn: 'Hanyang, Wuhan',
+          date0: [1911, 11, 17], date1: [1911, 11, 27],
+          resultZh: '反攻不克，11月27日汉阳失守，武昌凭江而守',
+          resultEn: 'The counterattack failed; Hanyang fell Nov 27, Wuchang held the river',
+          commanders: [
+            { side: 'geming', nameZh: '黄兴（战时总司令）', nameEn: 'Huang Xing (field commander)' },
+            { side: 'qingchao', nameZh: '冯国璋', nameEn: 'Feng Guozhang' },
+          ],
+          units: [
+            { side: 'geming', zh: '民军主力及各省援军', en: 'Rebel main force with provincial reinforcements' },
+            { side: 'qingchao', zh: '北洋军主力', en: 'Beiyang main force' },
+          ],
           forces: [
             { side: 'geming', n: 20000, quality: 'est', srcZh: '民军反攻兵力约两万（黄兴所部及各省援军）', srcEn: '~20,000 including provincial reinforcements.' },
             { side: 'qingchao', n: 30000, quality: 'est', srcZh: '北军增至三万余（冯国璋部）', srcEn: 'Beiyang strength grew past 30,000.' },
@@ -2300,6 +2347,17 @@ window.WAR_DATA = [
           descZh: '徐绍桢率江浙联军自镇江进逼，乌龙山、幕府山炮台反正——东南既定，为临时政府定都南京铺路。',
           descEn: 'Xu Shaozhen\'s army advanced from Zhenjiang as river forts defected — the southeast was secured for the provisional government.' }],
         battles: [{ side: 'geming', at: [118.78, 32.06], nameZh: '江浙联军克南京', nameEn: 'Nanjing falls to the allies', placeZh: '南京（今江苏南京）', placeEn: 'Nanjing',
+          date0: [1911, 12, 1], date1: [1911, 12, 2],
+          resultZh: '12月2日克城，张勋部北逃，东南底定',
+          resultEn: 'The city fell on Dec 2; Zhang Xun fled north and the southeast was secured',
+          commanders: [
+            { side: 'geming', nameZh: '徐绍桢（江浙联军总司令）', nameEn: 'Xu Shaozhen (allied commander-in-chief)' },
+            { side: 'qingchao', nameZh: '张勋（江防营） · 铁良（江宁将军）', nameEn: 'Zhang Xun · Tie Liang (garrison commanders)' },
+          ],
+          units: [
+            { side: 'geming', zh: '江浙联军（苏、浙、沪、镇各军）', en: 'Jiangsu–Zhejiang allied armies' },
+            { side: 'qingchao', zh: '江防营及江宁驻防旗营', en: 'River defense corps and Nanjing banner garrison' },
+          ],
           descZh: '十二月二日联军攻入仪凤门，张勋部北逃——南京光复，东南财赋之区尽入民军之手。四天之后，各省代表齐集南京，议定以南京为临时政府所在地。',
           descEn: 'On December 2 the allies stormed Yifeng Gate and Zhang Xun fled north; four days later provincial delegates chose Nanjing as the provisional capital.' }],
       },
@@ -2360,9 +2418,35 @@ window.WAR_DATA = [
           descEn: 'The columns force-marched north with Ye Ting\'s Independent Regiment in the van — the Tingsi bridgehead ahead.' }],
         battles: [
           { side: 'nra', at: [114.19, 29.78], nameZh: '汀泗桥之战', nameEn: 'The battle of Tingsi Bridge', placeZh: '汀泗桥（今湖北咸宁）', placeEn: 'Tingsiqiao, Hubei',
+            date0: [1926, 8, 26], date1: [1926, 8, 27],
+            resultZh: '北伐军胜：夜袭破阵，吴军天险尽失',
+            resultEn: 'NRA victory: a night flank march carried the fortified bridge',
+            commanders: [
+              { side: 'nra', nameZh: '陈可钰（第4军副军长） · 张发奎（第12师） · 叶挺（独立团）', nameEn: 'Chen Keyu (4th Corps dep. cmdr) · Zhang Fakui · Ye Ting' },
+              { side: 'beiyang', nameZh: '宋大霈（吴军前线指挥）', nameEn: 'Song Dapian (Wu\'s frontline commander)' },
+            ],
+            units: [
+              { side: 'nra', zh: '第4军第12师 · 叶挺独立团', en: '4th Corps, 12th Division with Ye Ting\'s Independent Regiment' },
+              { side: 'beiyang', zh: '吴佩孚部宋大霈等守备队', en: 'Wu Peifu\'s defending force under Song Dapian' },
+            ],
+            casualties: [
+              { side: 'nra', n: 390, quality: 'recorded', srcZh: '北伐军阵亡134、伤256、失踪5（汀泗桥战役战报与咸宁史料）', srcEn: 'NRA losses: 134 killed, 256 wounded, 5 missing.' },
+              { side: 'beiyang', n: 2453, quality: 'recorded', srcZh: '毙敌千余，俘军官157、士兵2,296，缴炮4门机枪数十挺（同上）', srcEn: '~1,000 killed; 157 officers and 2,296 soldiers captured; 4 guns and dozens of machine guns taken.' },
+            ],
             descZh: '吴佩孚凭铁桥天险设防，大刀队督战——第四军自侧面绝壁迂回，一夜破阵。「铁军」之名自此始。',
             descEn: 'Wu\'s cliff-guarded rail bridge fell overnight to a flank march over the escarpment — the "Iron Army" won its name here.' },
           { side: 'nra', at: [114.36, 30.12], nameZh: '贺胜桥之战', nameEn: 'The battle of Hesheng Bridge', placeZh: '贺胜桥（今湖北武汉江夏）', placeEn: 'Heshengqiao, Wuhan',
+            date0: [1926, 8, 30],
+            resultZh: '北伐军胜：吴佩孚亲督不支，武汉门户洞开',
+            resultEn: 'NRA victory: Wu supervised in person and broke — Wuhan lay open',
+            commanders: [
+              { side: 'nra', nameZh: '李宗仁（第7军） · 张发奎（第12师）', nameEn: 'Li Zongren (7th Corps) · Zhang Fakui' },
+              { side: 'beiyang', nameZh: '吴佩孚（亲赴前线督战）', nameEn: 'Wu Peifu (in personal command)' },
+            ],
+            units: [
+              { side: 'nra', zh: '第4军 · 第7军主力', en: 'Main force of the 4th and 7th corps' },
+              { side: 'beiyang', zh: '吴佩孚直系主力', en: 'Wu Peifu\'s Zhili-clique main force' },
+            ],
             descZh: '吴佩孚亲赴贺胜桥督战，大刀队砍退兵亦不能止溃——两日两桥尽失，武汉门户洞开。',
             descEn: 'Wu supervised in person, his executioners cutting down routed men in vain — both bridges fell in two days and Wuhan lay open.' },
         ],
@@ -2370,6 +2454,17 @@ window.WAR_DATA = [
       {
         y: 1926.79,
         battles: [{ side: 'nra', at: [114.31, 30.54], nameZh: '武昌围城', nameEn: 'The siege of Wuchang', placeZh: '武昌（今武汉武昌区）', placeEn: 'Wuchang, Wuhan',
+          date0: [1926, 9, 3], date1: [1926, 10, 10],
+          resultZh: '围城四十日，10月10日缘梯登城克之，刘玉春、陈嘉谟被俘',
+          resultEn: 'After a forty-day siege the walls were stormed on Oct 10; the defenders were captured',
+          commanders: [
+            { side: 'nra', nameZh: '蒋介石（亲督首次强攻） · 陈可钰（围城指挥）', nameEn: 'Chiang Kai-shek (first assault) · Chen Keyu (siege commander)' },
+            { side: 'beiyang', nameZh: '刘玉春（守城司令，被俘） · 陈嘉谟（湖北督理，被俘）', nameEn: 'Liu Yuchun (city commander, POW) · Chen Jiamo (POW)' },
+          ],
+          units: [
+            { side: 'nra', zh: '第4、7、8军各一部', en: 'Detachments of the 4th, 7th and 8th corps' },
+            { side: 'beiyang', zh: '武昌守军（凭城墙死守）', en: 'Wuchang garrison behind the walls' },
+          ],
           forces: [
             { side: 'nra', n: 50000, quality: 'est', srcZh: '第四、七、八军主力约五万（战报汇总）', srcEn: '~50,000 NRA troops in the Wuhan theater.' },
             { side: 'beiyang', n: 100000, quality: 'est', srcZh: '吴佩孚两湖部队约十万（号称二十万）', srcEn: 'Wu\'s Hunan–Hubei field army ~100,000 (claimed 200,000).' },
@@ -2386,6 +2481,17 @@ window.WAR_DATA = [
           descZh: '程潜第六军一度突入南昌，孤军复失，蒋介石亲督中路再举——孙传芳「保境」幻梦在江西碎裂。',
           descEn: 'Cheng Qian\'s 6th corps briefly seized Nanchang and lost it again; Chiang took personal command for the second attempt.' }],
         battles: [{ side: 'nra', at: [115.89, 28.68], nameZh: '南昌三失三得', nameEn: 'Nanchang, thrice lost and taken', placeZh: '南昌（今江西南昌）', placeEn: 'Nanchang, Jiangxi',
+          date0: [1926, 9, 19], date1: [1926, 11, 8],
+          resultZh: '三失三得，11月8日终克南昌，孙传芳江西主力尽丧',
+          resultEn: 'Thrice lost, thrice retaken; Nanchang fell for good on Nov 8',
+          commanders: [
+            { side: 'nra', nameZh: '程潜（第6军） · 蒋介石（亲督再举）', nameEn: 'Cheng Qian (6th Corps) · Chiang Kai-shek (personal command)' },
+            { side: 'beiyang', nameZh: '孙传芳（五省联军总司令）', nameEn: 'Sun Chuanfang (five-province federation)' },
+          ],
+          units: [
+            { side: 'nra', zh: '第2、3、6、7军', en: 'The 2nd, 3rd, 6th and 7th corps' },
+            { side: 'beiyang', zh: '五省联军江西部队', en: 'Federation troops in Jiangxi' },
+          ],
           forces: [
             { side: 'nra', n: 60000, quality: 'est', srcZh: '中路二、三、六、七军约六万', srcEn: '~60,000 in the Jiangxi theater.' },
             { side: 'beiyang', n: 100000, quality: 'est', srcZh: '孙传芳赣省部队约十万（号称二十万）', srcEn: 'Sun\'s Jiangxi army ~100,000 (claimed 200,000).' },
@@ -2410,15 +2516,41 @@ window.WAR_DATA = [
             descEn: 'Nanjing fell on March 23, giving the Nationalist Government the whole lower Yangtze — as the Wuhan–Nanjing split opened.' },
         ],
         battles: [{ side: 'nra', at: [118.78, 32.06], nameZh: '克复南京', nameEn: 'The capture of Nanjing', placeZh: '南京（今江苏南京）', placeEn: 'Nanjing',
+          date0: [1927, 3, 23],
+          resultZh: '3月23日克城，长江下游悉入国民政府之手',
+          resultEn: 'The city fell on Mar 23, giving the Nationalist Government the lower Yangtze',
+          commanders: [
+            { side: 'nra', nameZh: '程潜（第6军军长）', nameEn: 'Cheng Qian (6th Corps commander)' },
+            { side: 'beiyang', nameZh: '直鲁联军（张宗昌部）', nameEn: 'Zhilu allied army (Zhang Zongchang\'s force)' },
+          ],
+          units: [
+            { side: 'nra', zh: '第6军', en: 'The 6th Corps' },
+            { side: 'beiyang', zh: '直鲁联军守备部队', en: 'Zhilu allied garrison troops' },
+          ],
           descZh: '三月二十三日第六军攻克南京——从广州到南京，八个月两千余里。国民政府自此定鼎长江下游。',
           descEn: 'Nanjing fell on March 23 — 2,000 li from Guangzhou in eight months. The Nationalist Government settled on the lower Yangtze.' }],
       },
       {
         y: 1927.67,
         battles: [{ side: 'nra', at: [119.10, 32.12], nameZh: '龙潭之役', nameEn: 'The battle of Longtan', placeZh: '龙潭（今南京栖霞区龙潭）', placeEn: 'Longtan, Nanjing',
+          date0: [1927, 8, 25], date1: [1927, 8, 31],
+          resultZh: '七日聚歼：孙传芳渡江6万余人尽墨，「北伐成败最大之关键」',
+          resultEn: 'Seven days of annihilation: Sun\'s 60,000 crossing force was destroyed',
+          commanders: [
+            { side: 'nra', nameZh: '李宗仁 · 白崇禧 · 何应钦（三路合围）', nameEn: 'Li Zongren · Bai Chongxi · He Yingqin (three columns)' },
+            { side: 'beiyang', nameZh: '孙传芳（亲督渡江）', nameEn: 'Sun Chuanfang (in person)' },
+          ],
+          units: [
+            { side: 'nra', zh: '第1军 · 第7军等三路主力', en: 'Three columns built on the 1st and 7th corps' },
+            { side: 'beiyang', zh: '孙传芳部渡江兵团', en: 'Sun\'s river-crossing army' },
+          ],
           forces: [
             { side: 'nra', n: 60000, quality: 'est', srcZh: '第一、七军等部约六万（何应钦、李宗仁、白崇禧三路）', srcEn: '~60,000 in three converging columns.' },
             { side: 'beiyang', n: 60000, quality: 'est', srcZh: '孙传芳渡江部队六万余（号称十万）', srcEn: 'Sun\'s crossing force ~60,000 (claimed 100,000).' },
+          ],
+          casualties: [
+            { side: 'nra', n: 8000, quality: 'recorded', srcZh: '国民革命军伤亡约8,000（龙潭战役战后统计）', srcEn: 'NRA casualties ~8,000.' },
+            { side: 'beiyang', n: 60000, quality: 'recorded', srcZh: '孙部渡江6万余人尽墨：死伤约3万，余尽被俘，缴步枪35,000支、野炮30门（同上）', srcEn: 'Sun\'s force annihilated: ~30,000 casualties, the rest captured, with 35,000 rifles and 30 guns taken.' },
           ],
           descZh: '孙传芳趁宁汉相持后的空虚，六万大军夜渡长江夺龙潭西站——李宗仁、白崇禧、何应钦三路合围，七日聚歼。孙传芳主力自此不复存在，「龙潭一役为北伐成败最大之关键」。',
           descEn: 'Sun Chuanfang threw 60,000 across the Yangtze at night to seize Longtan; Li Zongren, Bai Chongxi and He Yingqin closed the pincers and annihilated them in a week — the decisive battle of the expedition.' }],
@@ -2432,6 +2564,18 @@ window.WAR_DATA = [
           descZh: '蒋、冯、阎、桂四个集团军合兵北上——五月一日克济南，日军随即出兵干涉制造五三惨案，蔡公时殉难，北伐军绕道渡河北上。',
           descEn: 'Four army groups marched north; Jinan fell on May 1 — then Japanese troops intervened with the Jinan massacre, and the columns detoured across the river.' }],
         battles: [{ side: 'nra', at: [117.00, 36.65], nameZh: '济南五三惨案', nameEn: 'The Jinan massacre', placeZh: '济南（今山东济南）', placeEn: 'Jinan, Shandong',
+          date0: [1928, 5, 3],
+          resultZh: '日军屠杀中国军民，北伐军绕道渡河北上',
+          resultEn: 'Japanese troops massacred civilians and soldiers; the NRA detoured north',
+          commanders: [
+            { side: 'nra', nameZh: '蒋介石（第1集团军总司令） · 蔡公时（外交处主任，殉难）', nameEn: 'Chiang Kai-shek (1st Army Group) · Cai Gongshi (consular officer, murdered)' },
+          ],
+          units: [
+            { side: 'nra', zh: '第1集团军（驻济南各部）', en: '1st Army Group units in Jinan' },
+          ],
+          casualties: [
+            { side: 'nra', n: 6123, quality: 'recorded', srcZh: '国民政府外交部调查死难6,123人（另有统计逾万，口径不一）', srcEn: 'Foreign Ministry inquiry counted 6,123 dead; other tallies run above 10,000.' },
+          ],
           descZh: '五月三日，日军在济南肆意枪杀外交官蔡公时及军民，死难者逾万——「北伐」撞上了「列强」：统一中国之路，还要从日本军刀下面绕过去。',
           descEn: 'On May 3 Japanese troops murdered consul Cai Gongshi and thousands of civilians — the expedition to unify China had to detour around Japanese bayonets.' }],
       },
@@ -2480,12 +2624,34 @@ window.WAR_DATA = [
       {
         y: 1931.71,
         battles: [{ side: 'japan', at: [123.43, 41.81], nameZh: '九一八事变', nameEn: 'The Mukden Incident', placeZh: '沈阳（今辽宁沈阳）', placeEn: 'Shenyang',
+          date0: [1931, 9, 18],
+          resultZh: '一夜占沈阳，四月而失三省，十四年占领自此始',
+          resultEn: 'Shenyang fell in a night; within four months all three northeastern provinces',
+          commanders: [
+            { side: 'japan', nameZh: '本庄繁（关东军司令官） · 板垣征四郎 · 石原莞尔（策划）', nameEn: 'Honjo Shigeru (Kwantung Army) · Itagaki · Ishiwara (planners)' },
+            { side: 'china', nameZh: '王以哲（独立第7旅旅长，奉令不抵抗）', nameEn: 'Wang Yizhe (7th Brigade, ordered not to resist)' },
+          ],
+          units: [
+            { side: 'japan', zh: '关东军独立守备队 · 第2师团', en: 'Kwantung Army independent garrison units · 2nd Division' },
+            { side: 'china', zh: '东北军独立第7旅（北大营）', en: 'Northeastern Army 7th Brigade at Beidaying' },
+          ],
           descZh: '九月十八日夜，关东军自爆柳条湖铁路，反诬中国军队，炮轰北大营——张学良部奉「不抵抗」方针，一夜之间沈阳陷落，四月而失三省。三千万人的东北，从此十四年不见青天白日。',
           descEn: 'The Kwantung Army blew up its own railway, blamed China, and shelled the Beidaying barracks; Shenyang fell in a night, the three northeastern provinces in four months — fourteen years of occupation began.' }],
       },
       {
         y: 1937.58,
         battles: [{ side: 'china', at: [116.20, 39.85], nameZh: '卢沟桥事变', nameEn: 'The Marco Polo Bridge Incident', placeZh: '卢沟桥（今北京丰台）', placeEn: 'Lugouqiao, Beijing',
+          date0: [1937, 7, 7],
+          resultZh: '守军还击，全面抗战自此爆发',
+          resultEn: 'The garrison fired back; the full-scale war began',
+          commanders: [
+            { side: 'china', nameZh: '吉星文（第219团团长） · 金振中（第3营营长）', nameEn: 'Ji Xingwen (219th Regiment) · Jin Zhenzhong (3rd Battalion)' },
+            { side: 'japan', nameZh: '牟田口廉也（第1联队长）', nameEn: 'Mutaguchi Renya (1st Infantry Regiment)' },
+          ],
+          units: [
+            { side: 'china', zh: '第29军第37师第219团', en: '29th Army, 37th Division, 219th Regiment' },
+            { side: 'japan', zh: '中国驻屯军（华北）', en: 'Japan\'s China Garrison Army' },
+          ],
           descZh: '七月七日夜宛平城外枪声——吉星文团金振中营坚守回击，八年全面抗战自此开场。七月十七日蒋介石庐山谈话宣布：「如果战端一开，那就是地无分南北，年无分老幼，无论何人，皆有守土抗战之责任。」',
           descEn: 'Shots outside Wanping on the night of July 7 were answered by Ji Xingwen\'s regiment — the eight-year war began, and Chiang Kai-shek pledged at Lushan: "Once war is opened, north and south, old and young, all share the duty of resistance."' }],
       },
@@ -2498,9 +2664,24 @@ window.WAR_DATA = [
           descZh: '战事由闸北巷战扩至海陆合围——十一月五日金山卫登陆抄后路，中国军队全线西撤。',
           descEn: 'Street fighting in Zhabei became an encirclement by sea; the Jinshanwei landing on November 5 turned the flank and the Chinese line withdrew west.' }],
         battles: [{ side: 'japan', at: [121.47, 31.23], nameZh: '淞沪会战', nameEn: 'The battle of Shanghai', placeZh: '上海（今上海市区）', placeEn: 'Shanghai',
+          date0: [1937, 8, 13], date1: [1937, 11, 12],
+          resultZh: '上海失守，但「三月亡华」破产，日军主力被拖向长江',
+          resultEn: 'Shanghai fell, but the three-month conquest boast died and Japan\'s axis swung to the Yangtze',
+          commanders: [
+            { side: 'china', nameZh: '蒋介石（第三战区） · 张治中 · 陈诚', nameEn: 'Chiang Kai-shek (3rd War Zone) · Zhang Zhizhong · Chen Cheng' },
+            { side: 'japan', nameZh: '松井石根（华中方面军） · 柳川平助（第10军）', nameEn: 'Matsui Iwane (Central China Area Army) · Yanagawa Heisuke (10th Army)' },
+          ],
+          units: [
+            { side: 'china', zh: '第三战区73个师（逐次投入）', en: '73 divisions of the 3rd War Zone, committed piecemeal' },
+            { side: 'japan', zh: '上海派遣军 + 第10军（9个师团）', en: 'Shanghai Expeditionary Army + 10th Army (9 divisions)' },
+          ],
           forces: [
-            { side: 'china', n: 700000, quality: 'est', srcZh: '中方逐次投入约七十万（各集团军战报汇总）', srcEn: '~700,000 committed piecemeal by China.' },
+            { side: 'china', n: 700000, quality: 'est', srcZh: '中方73个师逐次投入约七十万（各集团军战报汇总）', srcEn: '~700,000 committed piecemeal by China.' },
             { side: 'japan', n: 300000, quality: 'est', srcZh: '日方两度增兵后约三十万（日方战史）', srcEn: '~300,000 after two waves of reinforcement.' },
+          ],
+          casualties: [
+            { side: 'china', n: 250000, quality: 'est', srcZh: '中方伤亡25万以上（一说33万，含撤退溃散；综合战史口径）', srcEn: 'Chinese casualties above 250,000 (some tallies 330,000 incl. stragglers).' },
+            { side: 'japan', n: 40000, quality: 'claimed', srcZh: '日军自报伤亡4万余（《战史丛书·中国事变陆军作战史》第一卷；学界认为低估，一说9万）', srcEn: 'Japanese self-reported ~40,000 (War History Series; scholars regard it as low).' },
           ],
           descZh: '蒋介石以七十万大军主动逐次投入淞沪，血战三个月——「三月亡华」的狂言碎在罗店、大场的泥泞里。十一月十二日上海失守：一场输掉的会战，换来了把日军主力从华北拉到长江的战线，和不肯再低头的民心。',
           descEn: 'Chiang committed 700,000 over three blood-soaked months; the boast of conquering China in three months died in the mud of Luodian. Shanghai was lost — but Japan\'s axis of advance was dragged to the Yangtze.' }],
@@ -2521,9 +2702,35 @@ window.WAR_DATA = [
         ],
         battles: [
           { side: 'china', at: [113.93, 39.41], nameZh: '平型关大捷', nameEn: 'Victory at Pingxingguan', placeZh: '平型关（今山西灵丘）', placeEn: 'Pingxingguan, Shanxi',
+            date0: [1937, 9, 25],
+            resultZh: '伏击全胜：全面抗战以来第一个歼灭战',
+            resultEn: 'A complete ambush victory — the war\'s first annihilating engagement',
+            commanders: [
+              { side: 'china', nameZh: '林彪 · 聂荣臻（第115师）', nameEn: 'Lin Biao · Nie Rongzhen (115th Division)' },
+              { side: 'japan', nameZh: '板垣征四郎（第5师团）', nameEn: 'Itagaki Seishiro (5th Division)' },
+            ],
+            units: [
+              { side: 'china', zh: '八路军第115师（685、686、687团）', en: '8th Route Army 115th Division (685th, 686th, 687th Regiments)' },
+              { side: 'japan', zh: '第21旅团辎重卫队及驰援队', en: '21st Brigade transport escort and relief column' },
+            ],
+            casualties: [
+              { side: 'japan', n: 1000, quality: 'claimed', srcZh: '八路军战报歼敌千余（含驰援队）', srcEn: 'Eighth Route Army claim: 1,000+ destroyed.' },
+              { side: 'japan', n: 200, quality: 'claimed', srcZh: '日方史料自报死伤约200（第6兵站汽车队战报口径，双方口径差异极大）', srcEn: 'Japanese records admit ~200 casualties (drone convoy report) — a wide caliber gap.' },
+            ],
             descZh: '九月二十五日，八路军一一五师于乔沟设伏，歼日军辎重部队千余——全面抗战以来第一个歼灭战，打破了「日军不可战胜」的神话。',
             descEn: 'On September 25 the Eighth Route Army\'s 115th Division ambushed a Japanese column at Qiaogou, wiping out over 1,000 — the first annihilating victory of the war.' },
           { side: 'japan', at: [112.55, 37.87], nameZh: '太原失守', nameEn: 'The fall of Taiyuan', placeZh: '太原（今山西太原）', placeEn: 'Taiyuan',
+            date0: [1937, 11, 8],
+            resultZh: '11月8日太原陷落，华北正面战场转入游击相持',
+            resultEn: 'Taiyuan fell on Nov 8; North China\'s front dissolved into guerrilla stalemate',
+            commanders: [
+              { side: 'china', nameZh: '卫立煌（第14集团军，忻口正面） · 阎锡山（第2战区）', nameEn: 'Wei Lihuang (14th Army Group) · Yan Xishan (2nd War Zone)' },
+              { side: 'japan', nameZh: '板垣征四郎（第5师团）', nameEn: 'Itagaki Seishiro (5th Division)' },
+            ],
+            units: [
+              { side: 'china', zh: '第14集团军（忻口正面）', en: '14th Army Group on the Xinkou front' },
+              { side: 'japan', zh: '第5师团及察哈尔派遣兵团', en: '5th Division with the Chahar detachment' },
+            ],
             descZh: '十一月八日太原陷落——忻口、娘子关两路俱失，山西省政府西撤，华北的正面战场交给了游击队。',
             descEn: 'Taiyuan fell on November 8; both gates lost, Shanxi\'s government withdrew, and North China\'s front passed to the guerrillas.' },
         ],
@@ -2531,6 +2738,20 @@ window.WAR_DATA = [
       {
         y: 1937.96,
         battles: [{ side: 'japan', at: [118.78, 32.06], nameZh: '南京保卫战与大屠杀', nameEn: 'Nanjing and the massacre', placeZh: '南京（今江苏南京）', placeEn: 'Nanjing',
+          date0: [1937, 12, 1], date1: [1937, 12, 13],
+          resultZh: '12月13日城破，随后六周大屠杀',
+          resultEn: 'The city fell on Dec 13, followed by six weeks of massacre',
+          commanders: [
+            { side: 'china', nameZh: '唐生智（卫戍司令长官）', nameEn: 'Tang Shengzhi (garrison commander)' },
+            { side: 'japan', nameZh: '松井石根（华中方面军） · 朝香宫鸠彦（上海派遣军）', nameEn: 'Matsui Iwane · Prince Asaka (Shanghai Expeditionary Army)' },
+          ],
+          units: [
+            { side: 'china', zh: '南京卫戍军约15万', en: '~150,000-strong Nanjing garrison' },
+            { side: 'japan', zh: '华中方面军4个师团及支队', en: '4 divisions plus detachments of the Central China Area Army' },
+          ],
+          casualties: [
+            { side: 'china', n: 300000, quality: 'recorded', srcZh: '南京审判战犯军事法庭判定遇难30万以上（远东国际军事法庭另判20万以上，日方有异说）', srcEn: 'The Nanjing war-crimes tribunal found 300,000+ victims; the Tokyo tribunal found 200,000+.' },
+          ],
           descZh: '十二月十三日南京陷落，松井石根部纵兵屠城六周——三十万平民与放下武器的士兵遇难。《拉贝日记》《魏特琳日记》逐日存证：这是二十世纪最黑暗的一页，也是中国决不投降的理由。',
           descEn: 'Nanjing fell on December 13; for six weeks Japanese troops massacred 300,000 civilians and disarmed soldiers — recorded day by day in the diaries of Rabe and Vautrin. It became the reason China would not surrender.' }],
       },
@@ -2543,9 +2764,25 @@ window.WAR_DATA = [
           descZh: '津浦线矶谷师团沿运河南扑，潍县板垣师团东来——李宗仁以杂牌军二十万张网以待。',
           descEn: 'The Isogai and Itagaki columns converged on the Grand Canal town — Li Zongren spread 200,000 second-line troops as the net.' }],
         battles: [{ side: 'china', at: [117.73, 34.56], nameZh: '台儿庄大捷', nameEn: 'Victory at Taierzhuang', placeZh: '台儿庄（今山东枣庄）', placeEn: 'Taierzhuang, Shandong',
+          date0: [1938, 3, 23], date1: [1938, 4, 7],
+          resultZh: '内外合击获捷：全面抗战以来正面战场首次大捷',
+          resultEn: 'The first great frontal victory of the war',
+          commanders: [
+            { side: 'china', nameZh: '李宗仁（第5战区） · 孙连仲（第2集团军） · 汤恩伯（第20军团）', nameEn: 'Li Zongren (5th War Zone) · Sun Lianzhong (2nd Army Group) · Tang Enbo (20th Corps)' },
+            { side: 'japan', nameZh: '矶谷廉介（第10师团） · 板垣征四郎（第5师团）', nameEn: 'Isogai Rensuke (10th Division) · Itagaki Seishiro (5th Division)' },
+          ],
+          units: [
+            { side: 'china', zh: '第2集团军（庄内死守） + 第20军团（外线迂回）', en: '2nd Army Group (inner defence) + 20th Corps (outer envelopment)' },
+            { side: 'japan', zh: '第10师团濑谷支队 · 第5师团坂本支队', en: 'Sekiya detachment (10th Div.) · Sakamoto detachment (5th Div.)' },
+          ],
           forces: [
             { side: 'china', n: 200000, quality: 'est', srcZh: '第五战区各军约二十万（李宗仁回忆录）', srcEn: '~200,000 of the 5th War Zone.' },
             { side: 'japan', n: 30000, quality: 'est', srcZh: '日军两师团主力约三万', srcEn: '~30,000 from two divisions.' },
+          ],
+          casualties: [
+            { side: 'japan', n: 10000, quality: 'claimed', srcZh: '中方战时公布歼敌万余（李宗仁上报的宣传口径）', srcEn: 'Chinese wartime claim: over 10,000 destroyed (propaganda caliber).' },
+            { side: 'japan', n: 16000, quality: 'est', srcZh: '日方档案按含临沂等外围战的大口径伤亡约1.6万（学界折中统计）', srcEn: 'Japanese archives on the broadest scope (incl. Linyi): ~16,000.' },
+            { side: 'china', n: 30000, quality: 'est', srcZh: '中方伤亡约3万（综合战史统计口径）', srcEn: 'Chinese casualties ~30,000.' },
           ],
           descZh: '汤恩伯部外线迂回，孙连仲部庄内死守——四月七日内外合击，歼敌万余，弃城而走的日军辎重塞满运河。全面抗战以来正面战场首次大捷：杂牌军打出了中央军的名字。',
           descEn: 'Inner defence and outer envelopment met on April 7, destroying over 10,000 Japanese — the first great frontal victory of the war, won by "second-line" troops.' }],
@@ -2559,9 +2796,24 @@ window.WAR_DATA = [
           descZh: '沿江、大别山两路合击——中方百万兵力节节设防，逐次抵抗四个月。',
           descEn: 'Along the river and through the Dabie Mountains, four months of fighting retreat against a million-strong Chinese defense.' }],
         battles: [{ side: 'japan', at: [114.31, 30.59], nameZh: '武汉会战', nameEn: 'The battle of Wuhan', placeZh: '武汉（今湖北武汉）', placeEn: 'Wuhan, Hubei',
+          date0: [1938, 6, 11], date1: [1938, 10, 25],
+          resultZh: '武汉撤守，但日军「速决战」彻底破产，抗战转入相持',
+          resultEn: 'Wuhan was given up — but Japan\'s quick-decision war was dead; the stalemate began',
+          commanders: [
+            { side: 'china', nameZh: '蒋介石（军委会） · 陈诚（武汉卫戍总司令）', nameEn: 'Chiang Kai-shek (Military Affairs Commission) · Chen Cheng (Wuhan garrison)' },
+            { side: 'japan', nameZh: '畑俊六（华中派遣军）', nameEn: 'Hata Shunroku (Central China Expeditionary Army)' },
+          ],
+          units: [
+            { side: 'china', zh: '第5、9战区约100个师', en: '~100 divisions across the 5th and 9th war zones' },
+            { side: 'japan', zh: '第2军 · 第11军', en: 'Japan\'s 2nd and 11th Armies' },
+          ],
           forces: [
             { side: 'china', n: 1000000, quality: 'est', srcZh: '第五、九战区合计约百万（军委会部署）', srcEn: '~1,000,000 across two war zones.' },
             { side: 'japan', n: 300000, quality: 'est', srcZh: '日军第十一军、第二军约三十万', srcEn: '~300,000 in two Japanese armies.' },
+          ],
+          casualties: [
+            { side: 'china', n: 400000, quality: 'est', srcZh: '中方伤亡约40万（综合战史统计口径）', srcEn: 'Chinese casualties ~400,000.' },
+            { side: 'japan', n: 100000, quality: 'est', srcZh: '日军伤亡约10万（学界折中；日方自报约3.5万，口径差异大）', srcEn: 'Japanese casualties ~100,000 (scholarly estimate; self-reported ~35,000).' },
           ],
           descZh: '十月二十五日武汉撤守、两日后广州亦陷——但日军的「速决战」至此彻底破产：战线拉到三千公里，五十四个师团深陷中国。抗战自此转入相持。半年前毛泽东已在《论持久战》里写下了这一结局。',
           descEn: 'Wuhan and then Guangzhou fell in October — but Japan\'s war of quick decision was dead: fifty-four divisions were now pinned across 3,000 km of front, exactly as Mao had predicted.' }],
@@ -2574,8 +2826,23 @@ window.WAR_DATA = [
           descZh: '晋察冀、晋冀鲁豫两侧同时出击，铁轨枕木一夜化为篝火——正太线中断月余。',
           descEn: 'Rails and sleepers went up in flames along the Zhengding–Taiyuan line, which stayed severed for a month.' }],
         battles: [{ side: 'china', at: [113.90, 38.00], nameZh: '百团大战·娘子关', nameEn: 'Hundred Regiments at Niangzi Pass', placeZh: '娘子关（今山西平定）', placeEn: 'Niangziguan, Shanxi',
+          date0: [1940, 8, 20], date1: [1940, 12, 5],
+          resultZh: '破袭1800余次，正太线中断月余，敌后战场成为中流砥柱',
+          resultEn: '1,800 actions over three and a half months; the rear battlefield became the spine of the stalemate',
+          commanders: [
+            { side: 'china', nameZh: '彭德怀 · 左权（八路军总部）', nameEn: 'Peng Dehuai · Zuo Quan (Eighth Route Army HQ)' },
+            { side: 'japan', nameZh: '多田骏（华北方面军司令官）', nameEn: 'Tada Hayao (North China Area Army)' },
+          ],
+          units: [
+            { side: 'china', zh: '八路军105个团（晋察冀、第129师、第120师）', en: '105 regiments: Jin-Cha-Ji, 129th and 120th divisions' },
+            { side: 'japan', zh: '华北方面军独立混成旅团（正太线）', en: 'Independent mixed brigades on the Zhengtai line' },
+          ],
           forces: [
             { side: 'china', n: 200000, quality: 'est', srcZh: '八路军参战一百零五个团约二十余万（十八集团军战报）', srcEn: '105 regiments, 200,000+ Eighth Route Army troops.' },
+          ],
+          casualties: [
+            { side: 'japan', n: 20000, quality: 'claimed', srcZh: '八路军战报毙伤日伪2万余（含伪军，百团大战战报口径）', srcEn: 'Eighth Route Army claim: 20,000+ Japanese and puppet casualties.' },
+            { side: 'china', n: 17000, quality: 'recorded', srcZh: '八路军伤亡1.7万余（十八集团军野战政治部统计）', srcEn: 'Eighth Route Army casualties ~17,000.' },
           ],
           descZh: '八月二十日起，八路军一百零五个团同日破袭，三个半月大小战斗一千八百余次——敌后战场在正面战场沉寂之后，成为相持阶段的中流砥柱。',
           descEn: 'From August 20, 105 regiments struck the railways on the same day — 1,800 actions in three and a half months; the rear battlefield became the spine of the stalemate.' }],
@@ -2583,9 +2850,25 @@ window.WAR_DATA = [
       {
         y: 1942.005,
         battles: [{ side: 'china', at: [112.94, 28.23], nameZh: '第三次长沙会战', nameEn: 'The third battle of Changsha', placeZh: '长沙（今湖南长沙）', placeEn: 'Changsha, Hunan',
+          date0: [1941, 12, 24], date1: [1942, 1, 16],
+          resultZh: '天炉战法获捷：日军攻城不克、败退原防线',
+          resultEn: 'The "heavenly furnace" won: the Japanese assault broke and fell back',
+          commanders: [
+            { side: 'china', nameZh: '薛岳（第9战区司令长官）', nameEn: 'Xue Yue (9th War Zone commander)' },
+            { side: 'japan', nameZh: '阿南惟几（第11军司令官）', nameEn: 'Anan Korechika (11th Army commander)' },
+          ],
+          units: [
+            { side: 'china', zh: '第9战区各军（侧击·尾击·堵击）', en: '9th War Zone armies in flank, rear and block positions' },
+            { side: 'japan', zh: '第11军（第3、6、40师团等）', en: '11th Army (3rd, 6th, 40th divisions et al.)' },
+          ],
           forces: [
             { side: 'china', n: 300000, quality: 'est', srcZh: '第九战区各军约三十万（薛岳「天炉」部署）', srcEn: '~300,000 of the 9th War Zone.' },
             { side: 'japan', n: 120000, quality: 'est', srcZh: '日军第十一军约十二万', srcEn: '~120,000 of Japan\'s 11th Army.' },
+          ],
+          casualties: [
+            { side: 'japan', n: 56900, quality: 'claimed', srcZh: '第9战区战报毙伤俘日军5.6万余（中方统计口径）', srcEn: '9th War Zone claim: 56,900+ Japanese casualties.' },
+            { side: 'japan', n: 6000, quality: 'claimed', srcZh: '日方战史自报伤亡约6千（第11军统计，仅计撤退段，口径差异极大）', srcEn: 'Japanese self-report ~6,000 (retreat phase only) — a wide gap.' },
+            { side: 'china', n: 28000, quality: 'est', srcZh: '中方伤亡约2.8万（第9战区统计口径）', srcEn: 'Chinese casualties ~28,000.' },
           ],
           descZh: '薛岳「天炉战法」节节侧击、尾击，日军攻城不克、补给线尽断——撤退路上伤亡五万余。珍珠港事变后盟军的首场大捷，外媒称中国军队仍在作战、仍在打胜仗。',
           descEn: 'Xue Yue\'s "heavenly furnace" ground the Japanese advance to pieces; 50,000 casualties on the retreat — the Allies\' first victory after Pearl Harbor.' }],
@@ -2599,6 +2882,21 @@ window.WAR_DATA = [
           descZh: '八个月连下郑州、长沙、桂林柳州，前锋深入贵州独山——豫湘桂大溃退：正面战场最黑暗的一页，一百四十六座城市失守。',
           descEn: 'Eight months took Zhengzhou, Changsha and Guilin–Liuzhou, reaching Dushan in Guizhou — 146 cities lost in the darkest retreat of the war.' }],
         battles: [{ side: 'japan', at: [112.57, 26.89], nameZh: '衡阳保卫战', nameEn: 'The siege of Hengyang', placeZh: '衡阳（今湖南衡阳）', placeEn: 'Hengyang, Hunan',
+          date0: [1944, 6, 23], date1: [1944, 8, 8],
+          resultZh: '死守47日城破：方先觉被俘，守军伤亡殆尽',
+          resultEn: 'Forty-seven days of siege ended in the city\'s fall; Fang Xianjue was taken',
+          commanders: [
+            { side: 'china', nameZh: '方先觉（第10军军长，被俘后脱险）', nameEn: 'Fang Xianjue (10th Corps commander)' },
+            { side: 'japan', nameZh: '横山勇（第11军司令官）', nameEn: 'Yokoyama Isamu (11th Army commander)' },
+          ],
+          units: [
+            { side: 'china', zh: '第10军4个师约1.7万', en: 'Four divisions of the 10th Corps, ~17,000' },
+            { side: 'japan', zh: '第11军4个师团（轮番攻城）', en: 'Four divisions of the 11th Army in rotation' },
+          ],
+          casualties: [
+            { side: 'china', n: 15000, quality: 'est', srcZh: '第10军伤亡1.5万余，余者被俘（综合战史口径）', srcEn: '10th Corps casualties above 15,000; the rest captured.' },
+            { side: 'japan', n: 19000, quality: 'est', srcZh: '日军伤亡近2万（中方统计口径；日方自报约1.2万）', srcEn: 'Japanese casualties near 20,000 (Chinese caliber; self-reported ~12,000).' },
+          ],
           descZh: '方先觉第十军一万七千人死守四十七日，日军倾第十一军全力方才破城，伤亡近两万——「东方的莫斯科保卫战」。城破之日，衡阳全城只剩断壁。',
           descEn: 'Fang Xianjue\'s 17,000 held out for forty-seven days against the whole 11th Army — the "Moscow of the East" fell with the city in ruins.' }],
       },
@@ -2612,9 +2910,39 @@ window.WAR_DATA = [
           descEn: '200,000 Chinese troops crossed the Salween as the Ledo Road crawled east from India.' }],
         battles: [
           { side: 'china', at: [98.97, 24.66], nameZh: '松山血战', nameEn: 'The siege of Songshan', placeZh: '松山（今云南龙陵）', placeEn: 'Songshan, Yunnan',
+            date0: [1944, 6, 4], date1: [1944, 9, 7],
+            resultZh: '95日全歼守敌，滇缅路咽喉打通',
+            resultEn: 'Ninety-five days annihilated the garrison and reopened the Burma Road\'s throat',
+            commanders: [
+              { side: 'china', nameZh: '卫立煌（远征军司令长官） · 李弥（第8军副军长）', nameEn: 'Wei Lihuang (Expeditionary Force) · Li Mi (8th Army)' },
+              { side: 'japan', nameZh: '金光惠次郎（拉孟守备队长，战死）', nameEn: 'Maj. Kanemitsu Keijiro (garrison commander, KIA)' },
+            ],
+            units: [
+              { side: 'china', zh: '第8军（荣誉第1师、第82师、第103师）', en: '8th Army: Honor 1st, 82nd and 103rd divisions' },
+              { side: 'japan', zh: '第113联队拉孟守备队', en: 'Ramon garrison of the 113th Infantry Regiment' },
+            ],
+            casualties: [
+              { side: 'japan', n: 1250, quality: 'recorded', srcZh: '守备队1,250余人全歼，仅数人漏网（滇西战史统计）', srcEn: 'Garrison of ~1,250 annihilated; only a handful escaped.' },
+              { side: 'china', n: 7763, quality: 'recorded', srcZh: '远征军伤亡7,763人（第8军战报）', srcEn: 'Expeditionary Force casualties 7,763.' },
+            ],
             descZh: '日军坚固要塞扼住滇缅路咽喉——远征军血战九十五日，逐壕爆破，全歼守敌千余，八个团打剩一个团。',
             descEn: 'Ninety-five days of trench-by-trench demolition destroyed the fortress garrison to the last man and cost eight regiments their strength.' },
           { side: 'china', at: [98.50, 25.03], nameZh: '腾冲全歼战', nameEn: 'The fall of Tengchong', placeZh: '腾冲（今云南腾冲）', placeEn: 'Tengchong, Yunnan',
+            date0: [1944, 7, 2], date1: [1944, 9, 14],
+            resultZh: '全歼守敌3,000余，无一生还；腾冲全城巷战成焦土',
+            resultEn: 'The garrison of 3,000+ was wiped out to the last man',
+            commanders: [
+              { side: 'china', nameZh: '霍揆彰（第20集团军总司令）', nameEn: 'Huo Kuisang (20th Army Group commander)' },
+              { side: 'japan', nameZh: '藏重康美（第148联队长，战死）', nameEn: 'Col. Kurashige Yasumi (148th Regiment, KIA)' },
+            ],
+            units: [
+              { side: 'china', zh: '第20集团军5个师', en: 'Five divisions of the 20th Army Group' },
+              { side: 'japan', zh: '混成第148联队守备队', en: 'Garrison built on the 148th Infantry Regiment' },
+            ],
+            casualties: [
+              { side: 'japan', n: 3000, quality: 'recorded', srcZh: '守敌3,000余全歼，无一生还（滇西战史统计）', srcEn: 'Garrison of 3,000+ annihilated, none surviving.' },
+              { side: 'china', n: 9168, quality: 'recorded', srcZh: '国殇墓园收葬阵亡将士9,168名（腾冲战役阵亡将士）', srcEn: 'The Guoshang Cemetery holds 9,168 fallen of the Tengchong campaign.' },
+            ],
             descZh: '全城巷战四十余日，日军三千余人无一生还——中国战场第一次全歼日军守备队的反攻；一九四五年一月与驻印军会师芒友，中印公路全线贯通。',
             descEn: 'Forty days of street fighting left no Japanese survivor — China\'s first annihilation of a whole garrison; the Ledo Road opened in January 1945.' },
         ],
@@ -2622,9 +2950,24 @@ window.WAR_DATA = [
       {
         y: 1945.33,
         battles: [{ side: 'china', at: [110.60, 27.10], nameZh: '湘西会战', nameEn: 'The battle of West Hunan', placeZh: '雪峰山（今湖南洞口·武冈）', placeEn: 'Xuefeng Mountains, Hunan',
+          date0: [1945, 4, 9], date1: [1945, 6, 7],
+          resultZh: '日军败退原出发线：正面战场对日最后一场大规模会战',
+          resultEn: 'The Japanese fell back to their start lines — the last big frontal battle',
+          commanders: [
+            { side: 'china', nameZh: '王耀武（第4方面军） · 何应钦（陆军总司令）', nameEn: 'Wang Yaowu (4th Front Army) · He Yingqin (Army C-in-C)' },
+            { side: 'japan', nameZh: '坂西一良（第20军司令官）', nameEn: 'Banzo Ichiro (20th Army commander)' },
+          ],
+          units: [
+            { side: 'china', zh: '第4方面军4个军（第74、100军正面） + 中美空军', en: 'Four corps of the 4th Front Army (74th & 100th in line) + Sino-American air' },
+            { side: 'japan', zh: '第20军3个师团', en: 'Three divisions of the 20th Army' },
+          ],
           forces: [
             { side: 'china', n: 200000, quality: 'est', srcZh: '第四方面军及增援各军约二十万', srcEn: '~200,000 Chinese troops.' },
             { side: 'japan', n: 80000, quality: 'est', srcZh: '日军六个师团约八万', srcEn: '~80,000 in six divisions.' },
+          ],
+          casualties: [
+            { side: 'japan', n: 20000, quality: 'est', srcZh: '日军伤亡约2万（综合战史口径；中方战报2.4万+，日方自报1.1万）', srcEn: 'Japanese casualties ~20,000 (Chinese claims 24,000+, self-report 11,000).' },
+            { side: 'china', n: 20000, quality: 'est', srcZh: '中方伤亡约2万（综合战史统计口径）', srcEn: 'Chinese casualties ~20,000.' },
           ],
           descZh: '日军进犯芷江机场，被七十四军、一百军正面顶住，中美空军掌握了制空权——日军败退原出发线。正面战场对日最后一场大规模会战：这一次，是日军退，中国军队追。',
           descEn: 'The drive on Zhijiang airfield broke against the 74th and 100th armies under Allied air cover — the last big frontal battle of the war, and this time the Japanese retreated.' }],
@@ -2674,9 +3017,24 @@ window.WAR_DATA = [
       {
         y: 1948.73,
         battles: [{ side: 'pla', at: [117.00, 36.65], nameZh: '济南战役', nameEn: 'The battle of Jinan', placeZh: '济南（今山东济南）', placeEn: 'Jinan, Shandong',
+          date0: [1948, 9, 16], date1: [1948, 9, 24],
+          resultZh: '八昼夜破城：王耀武被俘，华北华东解放区连成一片',
+          resultEn: 'Eight days took the city; Wang Yaowu was captured and the two regions joined',
+          commanders: [
+            { side: 'pla', nameZh: '许世友（攻城集团指挥） · 王建安（副）', nameEn: 'Xu Shiyou (assault group) · Wang Jian\'an (deputy)' },
+            { side: 'kmt', nameZh: '王耀武（第2绥靖区司令官，被俘） · 吴化文（第96军，阵前起义）', nameEn: 'Wang Yaowu (POW) · Wu Huawen (defected)' },
+          ],
+          units: [
+            { side: 'pla', zh: '华东野战军攻城集团（东西两集团）', en: 'EFA assault group, eastern and western columns' },
+            { side: 'kmt', zh: '第2绥靖区守军', en: '2nd Pacification Area garrison' },
+          ],
           forces: [
             { side: 'pla', n: 140000, quality: 'est', srcZh: '攻城集团十四万（另有打援十八万）', srcEn: '140,000 assault troops (180,000 more covering).' },
             { side: 'kmt', n: 100000, quality: 'est', srcZh: '王耀武部约十万', srcEn: 'Wang Yaowu\'s garrison ~100,000.' },
+          ],
+          casualties: [
+            { side: 'kmt', n: 84000, quality: 'recorded', srcZh: '歼敌8.4万余人，其中吴化文部2万阵前起义（中央军委战报口径）', srcEn: '84,000 lost, incl. Wu Huawen\'s 20,000 defecting.' },
+            { side: 'pla', n: 26000, quality: 'recorded', srcZh: '攻城部队伤亡2.6万余（同上）', srcEn: 'Assault troops lost ~26,000.' },
           ],
           descZh: '许世友部东西对进，吴化文两万阵前起义——八昼夜破城，王耀武化装出逃被俘。济南易手，华北、华东解放区连成一片；美国记者写道：「从此共军可以随意选择决战地点。」',
           descEn: 'Eight days took the city as Wu Huawen\'s 20,000 defected; Wang Yaowu fled disguised and was caught. North and East China liberation zones were now joined.' }],
@@ -2685,13 +3043,43 @@ window.WAR_DATA = [
         y: 1948.83,
         battles: [
           { side: 'pla', at: [121.13, 41.10], nameZh: '攻克锦州', nameEn: 'The storming of Jinzhou', placeZh: '锦州（今辽宁锦州）', placeEn: 'Jinzhou, Liaoning',
+            date0: [1948, 10, 14], date1: [1948, 10, 15],
+            resultZh: '31小时破城，范汉杰被俘——东北国军陆上退路断绝',
+            resultEn: 'Walls fell in 31 hours; Fan Hanjie captured — the Northeast was sealed',
+            commanders: [
+              { side: 'pla', nameZh: '林彪 · 罗荣桓（东北野战军）', nameEn: 'Lin Biao · Luo Ronghuan (Northeast Field Army)' },
+              { side: 'kmt', nameZh: '范汉杰（锦州指挥所主任，被俘） · 卢浚泉（第6兵团，被俘）', nameEn: 'Fan Hanjie (POW) · Lu Junquan (6th Corps, POW)' },
+            ],
+            units: [
+              { side: 'pla', zh: '攻锦集团6个纵队 + 炮兵纵队', en: 'Six corps plus the artillery corps' },
+              { side: 'kmt', zh: '第6兵团（第93军、新8军）', en: '6th Corps (93rd and New 8th Armies)' },
+            ],
             forces: [
               { side: 'pla', n: 250000, quality: 'est', srcZh: '东北野战军攻锦集团六个纵队及炮纵约二十五万', srcEn: '~250,000 in six corps plus artillery.' },
               { side: 'kmt', n: 150000, quality: 'est', srcZh: '范汉杰部及锦州守军约十五万', srcEn: 'Fan Hanjie\'s garrison ~150,000.' },
             ],
+            casualties: [
+              { side: 'kmt', n: 100000, quality: 'recorded', srcZh: '守军10万余被歼：死伤1.9万、被俘约8万（《中国革命战争纪实·东北卷》）', srcEn: '~100,000 lost: 19,000 casualties and ~80,000 captured.' },
+              { side: 'pla', n: 24548, quality: 'recorded', srcZh: '攻锦部队伤亡24,548（同上）', srcEn: 'Assault force casualties 24,548.' },
+            ],
             descZh: '三十一小时破城，范汉杰化装出逃被俘——东北国军陆上退路自此断绝。',
             descEn: 'The walls fell in thirty-one hours; Fan Hanjie fled disguised and was caught — the Northeast was sealed.' },
           { side: 'pla', at: [120.80, 40.70], nameZh: '塔山阻击战', nameEn: 'The stand at Tashan', placeZh: '塔山（今辽宁葫芦岛）', placeEn: 'Tashan, Huludao',
+            date0: [1948, 10, 10], date1: [1948, 10, 15],
+            resultZh: '六昼夜一线不退，东进兵团不能越雷池一步',
+            resultEn: 'Six days and nights; the relief column never broke through',
+            commanders: [
+              { side: 'pla', nameZh: '程子华（第2兵团司令员） · 吴克华（第4纵队司令员）', nameEn: 'Cheng Zihua (2nd Corps) · Wu Kehua (4th Column)' },
+              { side: 'kmt', nameZh: '侯镜如（第17兵团司令官，东进兵团）', nameEn: 'Hou Jingru (17th Corps, eastern relief force)' },
+            ],
+            units: [
+              { side: 'pla', zh: '第4纵队 · 第11纵队（第2兵团）', en: '4th and 11th Columns of the 2nd Corps' },
+              { side: 'kmt', zh: '东进兵团（轮番攻击11个师）', en: 'Eastern relief force, 11 divisions in rotation' },
+            ],
+            casualties: [
+              { side: 'kmt', n: 6000, quality: 'recorded', srcZh: '东进兵团伤亡6,000余（《中国革命战争纪实·东北卷》）', srcEn: 'Relief force casualties above 6,000.' },
+              { side: 'pla', n: 3546, quality: 'recorded', srcZh: '第4纵队伤亡3,546（四纵战史统计）', srcEn: '4th Column casualties 3,546.' },
+            ],
             descZh: '侯镜如东进兵团六昼夜轮番仰攻，四纵一线阵地前尸积如山而不能越——「塔山无塔，亦无山」，六个昼夜顶住海空炮火。',
             descEn: 'Six days and nights of naval- and air-backed assaults broke against the 4th Division\'s shallow trenches — "Tashan: no pagoda, no hill," only the line.' },
         ],
@@ -2701,21 +3089,50 @@ window.WAR_DATA = [
         moves: [{ side: 'pla', from: [121.13, 41.10], to: [122.12, 41.69],
           titleZh: '攻锦主力回师辽西',
           titleEn: 'The Jinzhou force wheels west',
-          descZh: '廖耀湘十万精锐徘徊黑山、大虎山下，进退失据——攻锦大军不喘息即回师东进。',
-          descEn: 'Liao Yaoxiang\'s 100,000 vacillated at Heishan as the victorious Jinzhou force wheeled east without pause.' }],
+          descZh: '廖耀湘精锐徘徊黑山、大虎山下，进退失据——攻锦大军不喘息即回师东进。',
+          descEn: 'Liao Yaoxiang\'s veterans vacillated at Heishan as the victorious Jinzhou force wheeled east without pause.' }],
         battles: [{ side: 'pla', at: [122.12, 41.69], nameZh: '辽西围歼战', nameEn: 'The annihilation in western Liaoning', placeZh: '黑山·大虎山（今辽宁黑山）', placeEn: 'Heishan–Dahushan, Liaoning',
-          forces: [
-            { side: 'kmt', n: 100000, quality: 'est', srcZh: '廖耀湘第九兵团约十万', srcEn: 'Liao Yaoxiang\'s 9th Corps ~100,000.' },
+          date0: [1948, 10, 20], date1: [1948, 10, 28],
+          resultZh: '48小时聚歼：廖耀湘被俘，第9兵团覆灭',
+          resultEn: 'Annihilated within 48 hours; Liao Yaoxiang captured',
+          commanders: [
+            { side: 'pla', nameZh: '林彪 · 罗荣桓（东北野战军）', nameEn: 'Lin Biao · Luo Ronghuan (Northeast Field Army)' },
+            { side: 'kmt', nameZh: '廖耀湘（第9兵团司令官，被俘）', nameEn: 'Liao Yaoxiang (9th Corps, POW)' },
           ],
-          descZh: '两天冲烂指挥中枢，四十八小时聚歼——廖耀湘兵团十万美械精锐一夕覆灭，廖耀湘被俘。东北之敌，至此只余沈阳一座孤城。',
-          descEn: 'In forty-eight hours the 100,000-strong American-equipped 9th Corps ceased to exist; Liao Yaoxiang was taken.' }],
+          units: [
+            { side: 'pla', zh: '东北野战军攻锦主力', en: 'Main force fresh from Jinzhou' },
+            { side: 'kmt', zh: '第9兵团（5个军12个师，含新1军、新6军）', en: '9th Corps: 5 armies, 12 divisions incl. New 1st and New 6th' },
+          ],
+          forces: [
+            { side: 'kmt', n: 120000, quality: 'est', srcZh: '廖耀湘第9兵团5个军12个师约12万（含新1军、新6军两大美械王牌）', srcEn: '9th Corps: 5 armies and 12 divisions, ~120,000.' },
+          ],
+          casualties: [
+            { side: 'kmt', n: 120000, quality: 'recorded', srcZh: '第9兵团约12万就歼（《中国革命战争纪实·东北卷》口径，含溃散收容）', srcEn: '~120,000 of the 9th Corps destroyed.' },
+          ],
+          descZh: '两天冲烂指挥中枢，四十八小时聚歼——廖耀湘兵团美械精锐一夕覆灭，廖耀湘被俘。东北之敌，至此只余沈阳一座孤城。',
+          descEn: 'In forty-eight hours the American-equipped 9th Corps ceased to exist; Liao Yaoxiang was taken.' }],
       },
       {
         y: 1948.92,
         battles: [{ side: 'pla', at: [123.43, 41.81], nameZh: '沈阳解放', nameEn: 'The liberation of Shenyang', placeZh: '沈阳（今辽宁沈阳）', placeEn: 'Shenyang',
+          date0: [1948, 11, 1], date1: [1948, 11, 2],
+          resultZh: '11月2日沈阳、营口解放：辽沈收官，歼敌47.2万',
+          resultEn: 'Shenyang and Yingkou fell on Nov 2: 472,000 Nationalist troops lost overall',
+          commanders: [
+            { side: 'pla', nameZh: '林彪 · 罗荣桓（东北野战军）', nameEn: 'Lin Biao · Luo Ronghuan (Northeast Field Army)' },
+            { side: 'kmt', nameZh: '周福成（第8兵团司令官，被俘）', nameEn: 'Zhou Fucheng (8th Corps, POW)' },
+          ],
+          units: [
+            { side: 'pla', zh: '东野第1、2、12纵队等', en: '1st, 2nd and 12th Columns et al.' },
+            { side: 'kmt', zh: '第8兵团残部及沈阳守备队', en: '8th Corps remnants and Shenyang garrison' },
+          ],
           forces: [
             { side: 'pla', n: 1000000, quality: 'est', srcZh: '东北野战军及地方武装约百万（辽沈全程）', srcEn: '~1,000,000 PLA across the Liaoshen campaign.' },
             { side: 'kmt', n: 550000, quality: 'est', srcZh: '东北国军四个兵团约五十五万（辽沈全程被歼）', srcEn: '550,000 Nationalist troops destroyed overall.' },
+          ],
+          casualties: [
+            { side: 'kmt', n: 472000, quality: 'recorded', srcZh: '辽沈战役歼敌47.2万（沈阳13.45万、周福成以下将官106名被俘；毙伤5.68万、俘32.43万——《中国革命战争纪实·东北卷》）', srcEn: 'Liaoshen total: 472,000 destroyed (Shenyang alone 134,500).' },
+            { side: 'pla', n: 69211, quality: 'recorded', srcZh: '东北野战军伤亡69,211：阵亡14,009、负伤53,328、失踪1,874（同上）', srcEn: 'NEFA losses 69,211: 14,009 dead, 53,328 wounded, 1,874 missing.' },
           ],
           descZh: '十一月二日沈阳、营口解放，辽沈战役收官：五十二天歼敌四十七万二千，东北全境解放。国共兵力对比自此逆转——解放军三百万对国民党军二百九十万，历史上第一次。',
           descEn: 'Shenyang fell on November 2, ending Liaoshen: 472,000 Nationalist troops gone in fifty-two days. For the first time the PLA outnumbered the Nationalist armies.' }],
@@ -2728,9 +3145,23 @@ window.WAR_DATA = [
           descZh: '黄百韬兵团在新安镇空等四十四军两天，西撤路上桥断路毁——碾庄成了口袋底。',
           descEn: 'Huang Baitao waited two wasted days for a late unit, then found his bridges cut — Nianzhuang became the bottom of the sack.' }],
         battles: [{ side: 'pla', at: [117.94, 34.31], nameZh: '碾庄圩歼灭战', nameEn: 'The annihilation at Nianzhuang', placeZh: '碾庄（今江苏邳州）', placeEn: 'Nianzhuang, Jiangsu',
+          date0: [1948, 11, 12], date1: [1948, 11, 22],
+          resultZh: '血战12日全歼：黄百韬自戕，淮海第一仗锁定胜局',
+          resultEn: 'Twelve days annihilated the corps; Huang Baitao died by his own hand',
+          commanders: [
+            { side: 'pla', nameZh: '粟裕（华野代司令员兼政委）', nameEn: 'Su Yu (acting commander, East China Field Army)' },
+            { side: 'kmt', nameZh: '黄百韬（第7兵团司令官，自戕）', nameEn: 'Huang Baitao (7th Corps, suicide)' },
+          ],
+          units: [
+            { side: 'pla', zh: '华野第4、6、8、9、13纵队（攻坚）', en: 'EFA 4th, 6th, 8th, 9th and 13th Columns (assault)' },
+            { side: 'kmt', zh: '第7兵团5个军（第25、44、63、64、100军）', en: '7th Corps: 25th, 44th, 63rd, 64th and 100th Armies' },
+          ],
           forces: [
             { side: 'kmt', n: 120000, quality: 'est', srcZh: '黄百韬第七兵团约十二万', srcEn: 'Huang Baitao\'s 7th Corps ~120,000.' },
             { side: 'pla', n: 200000, quality: 'est', srcZh: '华野围歼及阻援主力约二十万', srcEn: '~200,000 assault and covering troops.' },
+          ],
+          casualties: [
+            { side: 'kmt', n: 120000, quality: 'recorded', srcZh: '第7兵团约12万人覆灭（淮海战役第一阶段统计）', srcEn: '7th Corps, ~120,000, destroyed.' },
           ],
           descZh: '血战十二日，十一月二十二日全歼，黄百韬自戕——淮海战役第一仗歼敌十七万八千。毛泽东起草的电报早已写定：「本战役第一阶段的重心，是集中兵力歼灭黄百韬兵团。」',
           descEn: 'Twelve days of trench fighting annihilated the corps; Huang died by his own hand — the first act of Huaihai, exactly as Mao\'s directive had planned.' }],
@@ -2744,9 +3175,23 @@ window.WAR_DATA = [
           descZh: '第十二兵团十二万人自确山东进四百里——中原野战军七纵且战且退，诱其入浍河口袋。',
           descEn: 'The 12th Corps marched 400 li from Queshan straight into the trap the Central Plains Army had laid along the Hui River.' }],
         battles: [{ side: 'pla', at: [116.85, 33.63], nameZh: '双堆集歼灭战', nameEn: 'The annihilation at Shuangduiji', placeZh: '双堆集（今安徽濉溪）', placeEn: 'Shuangduiji, Anhui',
+          date0: [1948, 11, 25], date1: [1948, 12, 15],
+          resultZh: '12日合围全歼：黄维被俘，胡琏突围脱险',
+          resultEn: 'Twelve days of encirclement ended in annihilation; Huang Wei captured',
+          commanders: [
+            { side: 'pla', nameZh: '刘伯承 · 陈毅 · 邓小平（总前委）', nameEn: 'Liu Bocheng · Chen Yi · Deng Xiaoping (General Front Committee)' },
+            { side: 'kmt', nameZh: '黄维（第12兵团司令官，被俘） · 胡琏（副司令官，突围脱险）', nameEn: 'Huang Wei (POW) · Hu Lian (escaped the pocket)' },
+          ],
+          units: [
+            { side: 'pla', zh: '中原野战军7个纵队 + 华野一部', en: '7 columns of the Central Plains Field Army + an EFA detachment' },
+            { side: 'kmt', zh: '第12兵团4个军11个师（含第18军）', en: '12th Corps: 4 armies, 11 divisions incl. the 18th Army' },
+          ],
           forces: [
             { side: 'kmt', n: 120000, quality: 'est', srcZh: '黄维第十二兵团约十二万', srcEn: 'Huang Wei\'s 12th Corps ~120,000.' },
             { side: 'pla', n: 250000, quality: 'est', srcZh: '中野、华野各一部约二十五万', srcEn: '~250,000 combined PLA troops.' },
+          ],
+          casualties: [
+            { side: 'kmt', n: 120000, quality: 'recorded', srcZh: '第12兵团约12万人覆灭（淮海战役第二阶段统计）', srcEn: '12th Corps, ~120,000, destroyed.' },
           ],
           descZh: '十二日合围，逐村蚕食——十二月十五日全歼，黄维被俘。八十五天淮海歼敌五十五万五千，陈毅说：「淮海战役的胜利，是人民群众用小车推出来的。」',
           descEn: 'Twelve days of village-by-village erosion annihilated the corps; Huaihai\'s 555,000 total was, as Chen Yi said, "pushed out on civilians\' wheelbarrows."' }],
@@ -2760,15 +3205,43 @@ window.WAR_DATA = [
           descZh: '喜峰口、山海关两路夜行军，先围张家口、新保安「围而不打」——傅作义五十万大军被钉死在千里防线上动弹不得。',
           descEn: 'By night marches through Xifengkou and Shanhaiguan the army pinned Fu Zuoyi\'s half-million along a thousand-li line — "encircle but don\'t strike."' }],
         battles: [{ side: 'pla', at: [115.44, 40.45], nameZh: '新保安之战', nameEn: 'The fight at Xinbao\'an', placeZh: '新保安（今河北怀来）', placeEn: 'Xinbao\'an, Hebei',
+          date0: [1948, 12, 21], date1: [1948, 12, 22],
+          resultZh: '一日破城：傅作义起家第35军覆没，郭景云自戕',
+          resultEn: 'One day took the town; Fu Zuoyi\'s founding 35th Corps was destroyed',
+          commanders: [
+            { side: 'pla', nameZh: '杨得志（华北第2兵团司令员） · 罗瑞卿（政委）', nameEn: 'Yang Dezhi (2nd North China Corps) · Luo Ruiqing (commissar)' },
+            { side: 'kmt', nameZh: '郭景云（第35军军长，自戕）', nameEn: 'Guo Jingyun (35th Corps commander, suicide)' },
+          ],
+          units: [
+            { side: 'pla', zh: '华北第2兵团（第3、4纵队等）', en: '2nd North China Corps (3rd and 4th Columns et al.)' },
+            { side: 'kmt', zh: '第35军（第101、267师）', en: '35th Corps (101st and 267th Divisions)' },
+          ],
+          casualties: [
+            { side: 'kmt', n: 16000, quality: 'est', srcZh: '第35军1.6万余人覆灭（平津战役统计口径）', srcEn: '~16,000 of the 35th Corps destroyed.' },
+          ],
           descZh: '十二月二十二日一日破城，傅作义起家三十五军全军覆没，军长郭景云自戕——平张线上「围而不打」的第一口咬落。',
           descEn: 'One day took the town and destroyed Fu\'s founding 35th Corps, its commander dead by his own hand — the first bite of the "encircle" order.' }],
       },
       {
         y: 1949.03,
         battles: [{ side: 'pla', at: [116.42, 33.98], nameZh: '陈官庄歼灭战', nameEn: 'The end at Chenguanzhuang', placeZh: '陈官庄（今河南永城）', placeEn: 'Chenguanzhuang, Henan',
+          date0: [1948, 12, 4], date1: [1949, 1, 10],
+          resultZh: '总攻四日全歼：杜聿明被俘、邱清泉毙命，淮海收官',
+          resultEn: 'A four-day general assault ended the campaign; Du captured, Qiu killed',
+          commanders: [
+            { side: 'pla', nameZh: '粟裕（华野）', nameEn: 'Su Yu (East China Field Army)' },
+            { side: 'kmt', nameZh: '杜聿明（徐州剿总副总司令，被俘） · 邱清泉（第2兵团司令官，毙命）', nameEn: 'Du Yuming (POW) · Qiu Qingquan (KIA)' },
+          ],
+          units: [
+            { side: 'pla', zh: '华野主力约10个纵队（总攻）', en: '~10 EFA columns in the final assault' },
+            { side: 'kmt', zh: '第2、13、16兵团残部', en: 'Remnants of the 2nd, 13th and 16th Corps' },
+          ],
           forces: [
             { side: 'kmt', n: 260000, quality: 'est', srcZh: '杜聿明集团约二十六万（徐州西撤各兵团）', srcEn: 'Du Yuming\'s group ~260,000.' },
             { side: 'pla', n: 300000, quality: 'est', srcZh: '华野主力围歼约三十万', srcEn: '~300,000 PLA besiegers.' },
+          ],
+          casualties: [
+            { side: 'kmt', n: 260000, quality: 'recorded', srcZh: '杜聿明集团26万余人就歼（淮海战役第三阶段统计）', srcEn: 'Du Yuming\'s group, 260,000+, destroyed.' },
           ],
           descZh: '风雪困四十日，空投粮弹不敷——一九四九年一月六日总攻，十日全歼，杜聿明被俘、邱清泉毙命。淮海战役收官：六十万胜八十万，古今中外战史罕见。',
           descEn: 'Forty days of snow-bound siege ended in a general assault; Du Yuming was captured and Qiu Qingquan killed — 600,000 had beaten 800,000.' }],
@@ -2776,9 +3249,24 @@ window.WAR_DATA = [
       {
         y: 1949.06,
         battles: [{ side: 'pla', at: [117.20, 39.13], nameZh: '天津攻坚战', nameEn: 'The storming of Tianjin', placeZh: '天津（今天津市区）', placeEn: 'Tianjin',
+          date0: [1949, 1, 14], date1: [1949, 1, 15],
+          resultZh: '29小时克城：陈长捷被俘，北平随后和平解放',
+          resultEn: 'The city fell in 29 hours; Beijing opened its gates days later',
+          commanders: [
+            { side: 'pla', nameZh: '刘亚楼（天津前线总指挥）', nameEn: 'Liu Yalou (Tianjin front commander)' },
+            { side: 'kmt', nameZh: '陈长捷（天津警备司令，被俘）', nameEn: 'Chen Changjie (garrison commander, POW)' },
+          ],
+          units: [
+            { side: 'pla', zh: '东北野战军5个纵队22个师', en: '5 columns and 22 divisions of the Northeast Field Army' },
+            { side: 'kmt', zh: '天津守军（警备司令部）', en: 'Tianjin garrison' },
+          ],
           forces: [
             { side: 'kmt', n: 130000, quality: 'est', srcZh: '陈长捷部约十三万', srcEn: 'Chen Changjie\'s garrison ~130,000.' },
             { side: 'pla', n: 340000, quality: 'est', srcZh: '东北野战军主力及配属约三十四万', srcEn: '~340,000 assault troops.' },
+          ],
+          casualties: [
+            { side: 'kmt', n: 130000, quality: 'recorded', srcZh: '守军13万全歼，陈长捷被俘（平津战役统计）', srcEn: 'Garrison of 130,000 destroyed; Chen captured.' },
+            { side: 'pla', n: 23000, quality: 'est', srcZh: '攻坚部队伤亡2.3万余（综合战史口径）', srcEn: 'Assault troops lost ~23,000.' },
           ],
           descZh: '东西对进拦腰斩断，二十九小时克城，陈长捷被俘——一月三十一日北平和平解放，傅作义受编。古都完好，「绥远方式」自此得名。三大战役四个月歼敌一百五十四万。',
           descEn: 'The city fell in twenty-nine hours; on January 31 Beijing opened its gates peacefully — the ancient capital intact. The three campaigns had destroyed 1.54 million troops in four months.' }],
@@ -2791,6 +3279,16 @@ window.WAR_DATA = [
           descZh: '西起湖口、东至江阴，一千余华里战线同日渡江——四月二十三日占领南京。',
           descEn: 'From Hukou to Jiangyin, a thousand li of river front crossed in a single day; Nanjing fell on April 23.' }],
         battles: [{ side: 'pla', at: [118.78, 32.06], nameZh: '占领南京', nameEn: 'The occupation of Nanjing', placeZh: '南京（今江苏南京）', placeEn: 'Nanjing',
+          date0: [1949, 4, 23],
+          resultZh: '4月23日进占总统府：南京国民政府22年统治落幕',
+          resultEn: 'The Presidential Palace taken on Apr 23; 22 years of Nationalist rule ended',
+          commanders: [
+            { side: 'pla', nameZh: '粟裕（第三野战军，渡江东集团）', nameEn: 'Su Yu (3rd Field Army, eastern crossing group)' },
+          ],
+          units: [
+            { side: 'pla', zh: '第三野战军第35军（先入城）', en: '3rd Field Army, 35th Corps (first into the city)' },
+            { side: 'kmt', zh: '南京卫戍部队（已南撤）', en: 'Nanjing garrison (already withdrawn south)' },
+          ],
           forces: [
             { side: 'pla', n: 1000000, quality: 'est', srcZh: '渡江部队约百万（第二、第三野战军主力）', srcEn: '~1,000,000 crossing troops.' },
             { side: 'kmt', n: 400000, quality: 'est', srcZh: '江防部队约四十万', srcEn: '~400,000 river-defense troops.' },

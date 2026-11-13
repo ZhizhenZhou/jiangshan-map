@@ -6399,6 +6399,94 @@ button.story-inline-person:hover {
   white-space: nowrap;
 }
 
+/* —— 战例档案（v2 数据层）：date0/1 + result + commanders + units + casualties。
+   与兵力条同框（war-fbars-slot / 故事卡 _warStoryForcesHtml），无字段的战斗不出块。 —— */
+.war-bmeta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+  padding: 7px 9px;
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.42);
+}
+.war-bmeta-head {
+  font-family: var(--sans-stack);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+.war-bmeta-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+.war-bmeta-date {
+  font-family: var(--sans-stack);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--text-main);
+  background: rgba(90, 74, 58, 0.12);
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+.war-bmeta-result {
+  font-family: var(--sans-stack);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #6e2f22;
+}
+.war-bmeta-row {
+  position: relative;
+  padding-left: 13px;
+  font-family: var(--sans-stack);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-main);
+}
+.war-bmeta-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--side-color, rgba(90, 74, 58, 0.55));
+}
+.war-bmeta-row.war-bmeta-unit::before {
+  border-radius: 1px;
+  transform: rotate(45deg);
+  background: transparent;
+  border: 1.4px solid var(--side-color, rgba(90, 74, 58, 0.55));
+}
+.war-bmeta-row.war-bmeta-cas {
+  color: #6e2f22;
+  font-weight: 600;
+}
+.war-bmeta-row.war-bmeta-cas::before {
+  border-radius: 1px;
+  transform: rotate(45deg);
+}
+.war-balloon-date {
+  font-family: var(--sans-stack);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #6e2f22;
+  margin-top: 1px;
+}
+.war-balloon-cas .war-bf-item {
+  font-weight: 700;
+  border-bottom: 1px dashed currentColor;
+  cursor: help;
+}
+
 .war-steps {
   position: relative; /* 使 .war-step 的 offsetTop 相对列表自身，自动滚动定位才正确 */
   display: flex;

@@ -1171,7 +1171,7 @@
       if (!profile || !profile.warKey || !ev || !Number.isInteger(ev.warStepIdx)) return '';
       const w = this._warData().find((item) => item.key === profile.warKey);
       const step = w && w.steps[ev.warStepIdx];
-      return step ? this._warForceBarsHtml(w, step) : '';
+      return step ? this._warForceBarsHtml(w, step) + this._warBattleMetaHtml(w, step) : '';
     }
 
     _warForceBarsHtml(w, s) {
@@ -1200,6 +1200,62 @@
         `<div class="war-fbars"><div class="war-fbars-head">${esc(
           this.locale === 'en' ? 'Recorded strength (with sources)' : '兵力对比（附史料出处）'
         )}</div>${rows}</div>`
+      );
+    }
+
+    // —— 战例档案（v2 数据层）：date0/1 + result + commanders + units + casualties。
+    // 只要有字段的战斗才出块；全部行带双方阵营色点，伤亡行悬浮出处（口径并记）。
+    _warFmtDateRange(d0, d1) {
+      const ok = (d) => Array.isArray(d) && d.length === 3 && d.every((n) => Number.isInteger(n) && n > 0);
+      const a = ok(d0) ? d0 : null;
+      const b = ok(d1) ? d1 : null;
+      if (!a) return '';
+      const pad = (n) => String(n).padStart(2, '0');
+      const full = (d) => `${d[0]}.${pad(d[1])}.${pad(d[2])}`;
+      if (!b) return full(a);
+      if (a[0] === b[0] && a[1] === b[1] && a[2] === b[2]) return full(a);
+      return `${full(a)} – ${full(b)}`;
+    }
+
+    _warBattleMetaHtml(w, s) {
+      const b = s && (s.battles || [])[0];
+      if (!b || !w) return '';
+      const zh = this.locale !== 'en';
+      const date = this._warFmtDateRange(b.date0, b.date1);
+      const result = this._warField(b, 'result');
+      const row = (item, cls) => {
+        const sd = this._warSide(w, item.side);
+        return (
+          `<div class="war-bmeta-row${cls || ''}"${sd ? ` style="--side-color:${sd.color}"` : ''}>` +
+          `${esc(zh ? (item.nameZh || item.zh) : (item.nameEn || item.en || item.nameZh || item.zh))}</div>`
+        );
+      };
+      const cmdr = (b.commanders || []).map((c) => row(c)).join('');
+      const units = (b.units || []).map((u) => row(u, ' war-bmeta-unit')).join('');
+      const cas = (b.casualties || [])
+        .map((c) => {
+          const sd = this._warSide(w, c.side);
+          const tip = [c.srcZh, c.srcEn].filter(Boolean).join(' / ').replace(/"/g, '&quot;');
+          return (
+            `<div class="war-bmeta-row war-bmeta-cas"${sd ? ` style="--side-color:${sd.color}"` : ''} title="${tip}">` +
+            `${esc(zh ? '伤亡' : 'Casualties')} ${esc(this._warFormatN(c.n, c.quality))}</div>`
+          );
+        })
+        .join('');
+      if (!date && !result && !cmdr && !units && !cas) return '';
+      return (
+        `<div class="war-bmeta">` +
+        `<div class="war-bmeta-head">${esc(zh ? '战例档案 · 悬停伤亡行见出处' : 'Battle record · hover casualties for sources')}</div>` +
+        (date || result
+          ? `<div class="war-bmeta-top">` +
+            (date ? `<span class="war-bmeta-date">${esc(date)}</span>` : '') +
+            (result ? `<span class="war-bmeta-result">${esc(result)}</span>` : '') +
+            `</div>`
+          : '') +
+        cmdr +
+        units +
+        cas +
+        `</div>`
       );
     }
 
@@ -1286,7 +1342,7 @@
               this._warField(step.moves && step.moves[0] ? step.moves[0] : {}, 'desc')
           )}${zoneNoteHtml}`;
       card.querySelector('.war-narr').innerHTML = narrHtml;
-      card.querySelector('.war-fbars-slot').innerHTML = idx >= 0 ? this._warForceBarsHtml(w, step) : '';
+      card.querySelector('.war-fbars-slot').innerHTML = idx >= 0 ? this._warForceBarsHtml(w, step) + this._warBattleMetaHtml(w, step) : '';
       card.querySelector('.war-stepcount').innerHTML = `${Math.max(0, idx + 1)}<i>/</i>${w.steps.length}`;
       const setDis = (act, dis) => {
         const b = card.querySelector(`[data-act="${act}"]`);
@@ -1718,11 +1774,22 @@
             return `<span class="war-bf-item"><i style="background:${sd.color}"></i>${esc(this._warField(sd, 'name'))} ${esc(this._warFormatN(f.n, f.quality))}</span>`;
           })
           .join('');
+        // v2 战例档案的气球紧凑版：精确日期 chip + 伤亡行（悬浮见出处）
+        const bdate = battle ? this._warFmtDateRange(battle.date0, battle.date1) : '';
+        const casHtml = ((battle && battle.casualties) || [])
+          .map((c) => {
+            const sd = this._warSide(w, c.side);
+            const tip = [c.srcZh, c.srcEn].filter(Boolean).join(' / ').replace(/"/g, '&quot;');
+            return `<span class="war-bf-item war-bf-cas"${sd ? ` style="color:${sd.color}"` : ''} title="${tip}">${esc(zh ? '伤亡' : 'Cas.')} ${esc(this._warFormatN(c.n, c.quality))}</span>`;
+          })
+          .join('');
         el.innerHTML =
           `<div class="ep-head"><span class="ep-year">${esc(this.formatYear(step.y))} · ${esc(title)}</span></div>` +
           (sideNote ? `<div class="war-balloon-side" style="color:${side.color}">${sideNote}</div>` : '') +
+          (bdate ? `<div class="war-balloon-date">${esc(bdate)}</div>` : '') +
           (place ? `<div class="war-balloon-place">${esc(place)}</div>` : '') +
           (desc ? `<div class="war-balloon-desc">${esc(desc)}</div>` : '') +
+          (casHtml ? `<div class="war-balloon-forces war-balloon-cas">${casHtml}</div>` : '') +
           (forces ? `<div class="war-balloon-forces">${forces}</div>` : '') +
           `<button type="button" class="ep-close" aria-label="${zh ? '关闭战报浮签' : 'Dismiss campaign callout'}">×</button>`;
         const closeBtn = el.querySelector('.ep-close');

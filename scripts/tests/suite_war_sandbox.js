@@ -196,6 +196,55 @@ async function runWarSandboxSuite(ctx) {
   // 总览=全貌：所有箭头与标记全渲染；秩序由名签分层 + 过站 muted 解决
   assert(warModule.includes("quoteZh: step.quoteZh || ''"), 'War hydrate must pass primary-source quotes through to the story card');
   assert(warModule.includes('window.WAR_STORY_CONTENT'), 'War hydrate must merge the story content layer');
+  assert(warModule.includes('_warBattleMetaHtml'), 'War module must render the battle-record meta block');
+  assert(warModule.includes('_warFmtDateRange'), 'War module must format precise battle dates');
+  assert(
+    warModule.includes('this._warForceBarsHtml(w, step) + this._warBattleMetaHtml(w, step)'),
+    'Story card and shell card must append the battle-record block after the force bars'
+  );
+  assert(styleCss.includes('.war-bmeta-head'), 'Battle-record meta block must be styled');
+
+  // 战例档案 v2（近现代四战役试点）：每场战斗必须带精确日期、结果行、指挥官与
+  // 番号；伤亡可缺（无可靠数字宁缺毋滥），但出现就必须双语署名出处——
+  // 可信数据红线进套件（用户前提：数据要可信）。
+  const MODERN_WARS = new Set(['xinhai', 'beifa', 'kangri', 'sanda']);
+  const validDate = (d) =>
+    Array.isArray(d) &&
+    d.length === 3 &&
+    d.every((n) => Number.isInteger(n) && n > 0) &&
+    d[1] <= 12 &&
+    d[2] <= 31;
+  for (const w of wars) {
+    if (!MODERN_WARS.has(w.key)) continue;
+    const modernSideKeys = new Set(w.sides.map((s) => s.key));
+    for (const [i, step] of w.steps.entries()) {
+      for (const [bi, battle] of (step.battles || []).entries()) {
+        const label = `${w.key}.steps[${i}].battles[${bi}] (${battle.nameZh})`;
+        assert(validDate(battle.date0), `${label} needs a precise date0 [y,m,d]`);
+        if (battle.date1) {
+          assert(validDate(battle.date1), `${label} has an invalid date1`);
+          const num = (d) => d[0] * 10000 + d[1] * 100 + d[2];
+          assert(num(battle.date1) >= num(battle.date0), `${label} date1 precedes date0`);
+        }
+        assert(battle.resultZh && battle.resultEn, `${label} needs a bilingual result line`);
+        assert(Array.isArray(battle.commanders) && battle.commanders.length, `${label} needs commanders`);
+        for (const c of battle.commanders) {
+          assert(modernSideKeys.has(c.side), `${label} commander side ${c.side} unknown`);
+          assert(c.nameZh && c.nameEn, `${label} commander must be bilingual`);
+        }
+        assert(Array.isArray(battle.units) && battle.units.length, `${label} needs unit designations`);
+        for (const u of battle.units) {
+          assert(modernSideKeys.has(u.side), `${label} unit side ${u.side} unknown`);
+          assert(u.zh && u.en, `${label} unit designation must be bilingual`);
+        }
+        for (const c of battle.casualties || []) {
+          assert(modernSideKeys.has(c.side), `${label} casualty side ${c.side} unknown`);
+          assert(Number.isFinite(c.n) && c.n > 0 && qualities.has(c.quality), `${label} casualty figure invalid`);
+          assert(c.srcZh && c.srcEn, `${label} casualty must cite a bilingual source`);
+        }
+      }
+    }
+  }
 
   const warKeys = new Set(wars.map((w) => w.key));
   const storyByWarKey = new Map();
