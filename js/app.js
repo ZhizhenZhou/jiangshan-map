@@ -4342,6 +4342,10 @@
         'qing:1851': { key: 'taiping', stopIdx: -1 },
         'qing:1864': { key: 'taiping', stopIdx: -1 },
         'qing:1894': { key: 'jiawu', stopIdx: -1 },
+        'qing:1911': { key: 'xinhai', stopIdx: -1 },
+        'roc:1926': { key: 'beifa', stopIdx: -1 },
+        'roc:1937': { key: 'kangri', stopIdx: -1 },
+        'roc:1948': { key: 'sanda', stopIdx: -1 },
         'tang:755': { key: 'anshi', stopIdx: -1 },
       };
       return map[`${dynasty.key}:${m.year}`] || null;

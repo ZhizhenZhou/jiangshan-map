@@ -16,11 +16,11 @@ async function runWarSandboxSuite(ctx) {
 
   const wars = sandbox.window.WAR_DATA;
   assert(Array.isArray(wars), 'war_data.js must expose window.WAR_DATA');
-  assert.strictEqual(wars.length, 22, 'War sandbox must ship exactly 22 curated campaigns');
+  assert.strictEqual(wars.length, 26, 'War sandbox must ship exactly 26 curated campaigns');
 
   const keys = wars.map((w) => w.key);
   assert.strictEqual(new Set(keys).size, keys.length, 'WAR_DATA keys must be unique');
-  for (const required of ['an-shi', 'sui-chen', 'mengsong', 'sanfan', 'yashan']) {
+  for (const required of ['an-shi', 'sui-chen', 'mengsong', 'sanfan', 'yashan', 'xinhai', 'beifa', 'kangri', 'sanda']) {
     assert(keys.includes(required), `WAR_DATA must include ${required}`);
   }
 

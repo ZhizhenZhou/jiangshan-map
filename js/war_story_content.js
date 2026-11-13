@@ -524,4 +524,115 @@ window.WAR_STORY_CONTENT = {
     },
   },
 
+  // —— 近现代（清末—建国）——
+
+  xinhai: {
+    steps: {
+      0: {
+        actZh: '一 · 屡败屡起', actEn: 'Act I · Risings and Ruins',
+        quoteZh: '林觉民《与妻书》：“吾至爱汝，即此爱汝一念，使吾勇于就死也。”',
+        quoteEn: "Lin Juemin, \'A Letter to My Wife\' (written on the eve of the rising): \'It is this deep love for you that gave me the courage to go to my death.\'",
+      },
+      1: {
+        actZh: '二 · 首义与光复', actEn: 'Act II · The Rising and the Provinces',
+      },
+      6: {
+        actZh: '三 · 共和之立', actEn: 'Act III · A Republic Is Born',
+        quoteZh: '《临时大总统就职宣言》：“国家之本，在于人民。”',
+        quoteEn: "Sun Yat-sen\'s inaugural declaration as Provisional President (Jan 1, 1912): \'The foundation of the state is the people.\'",
+        actors: [{ zh: '孙中山', en: 'Sun Yat-sen', key: 'sunzhongshan', camp: 'geming' }],
+      },
+      7: {
+        quoteZh: '《清帝逊位诏书》：“特率皇帝将统治权公诸全国，定为共和立宪国体。”',
+        quoteEn: "The Edict of Abdication of the Great Qing Emperor (Feb 12, 1912): \'The Emperor yields the rule of the whole country to the nation, establishing a republican constitutional state.\'",
+      },
+    },
+  },
+
+  beifa: {
+    steps: {
+      0: {
+        actZh: '一 · 誓师', actEn: 'Act I · The Oath at Canton',
+        quoteZh: '《国民革命歌》：“打倒列强，除军阀。”',
+        quoteEn: "The National Revolutionary Army\'s marching song (1926): \'Down with the foreign powers, down with the warlords.\'",
+        actors: [{ zh: '蒋介石', en: 'Chiang Kai-shek', key: 'jiangjieshi', camp: 'nra' }],
+      },
+      1: {
+        actZh: '二 · 饮马长江', actEn: 'Act II · To the Yangtze',
+      },
+      6: {
+        actZh: '三 · 再举与终局', actEn: 'Act III · The Second Push',
+      },
+      8: {
+        quoteZh: '张学良易帜通电：“仰承先大元帅遗志，力谋统一，贯彻到底。”',
+        quoteEn: "Zhang Xueliang\'s Flag Replacement telegram (Dec 29, 1928): \'Carrying out the late Marshal\'s legacy, we work for unification to the very end.\'",
+      },
+    },
+  },
+
+  kangri: {
+    steps: {
+      0: {
+        actZh: '一 · 局部抗战', actEn: 'Act I · The Early Resistance (1931–1937)',
+        quoteZh: '张副司令鱼电：“遇有日军寻衅，务须慎重，避免冲突。”',
+        quoteEn: "Marshal Zhang\'s September 6, 1931 telegram to the Northeastern Army: \'Should the Japanese army provoke, be cautious above all and avoid any clash.\'",
+      },
+      1: {
+        actZh: '二 · 全面抗战', actEn: 'Act II · The Full-Scale War',
+        quoteZh: '蒋介石庐山谈话：“如果战端一开，那就是地无分南北，年无分老幼，无论何人，皆有守土抗战之责任。”',
+        quoteEn: "Chiang Kai-shek\'s Lushan address (Jul 17, 1937): \'Once war is opened, there will be no north or south, no old or young — every person bears the duty of resisting to the end.\'",
+        actors: [{ zh: '蒋介石', en: 'Chiang Kai-shek', key: 'jiangjieshi', camp: 'china' }],
+      },
+      6: {
+        quoteZh: '毛泽东《论持久战》：“抗日战争是持久战，最后胜利是中国的。”',
+        quoteEn: "Mao Zedong, \'On Protracted War\' (May 1938): \'The War of Resistance is a protracted war, and the final victory will be China\'s.\'",
+        actors: [{ zh: '毛泽东', en: 'Mao Zedong', key: 'maozedong', camp: 'china' }],
+      },
+      7: {
+        actZh: '三 · 相持与反攻', actEn: 'Act III · Stalemate and Counteroffensive',
+      },
+      12: {
+        quoteZh: '《日本投降诏书》：“朕深鉴于世界大势及帝国之现状，欲以非常之措置收拾时局。”',
+        quoteEn: "Emperor Hirohito\'s surrender rescript (Aug 15, 1945): \'We are deeply concerned over the general situation of the world and the present state of Our Empire.\'",
+      },
+    },
+  },
+
+  sanda: {
+    steps: {
+      0: {
+        actZh: '一 · 辽沈', actEn: 'Act I · Liaoshen',
+      },
+      2: {
+        quoteZh: '毛泽东《关于辽沈战役的作战方针》：“确立攻占锦、榆、唐三点并全部控制该线的决心，确立打你们前所未有的大歼灭战的决心。”',
+        quoteEn: "Mao Zedong, \'Operational Principles for the Liaoshen Campaign\' (Sep 7, 1948): \'Be resolved to take Jinzhou, Yulai and Tangshan, control that line wholly, and to fight an unprecedented annihilating battle.\'",
+        actors: [{ zh: '毛泽东', en: 'Mao Zedong', key: 'maozedong', camp: 'pla' }],
+      },
+      5: {
+        actZh: '二 · 淮海', actEn: 'Act II · Huaihai',
+      },
+      6: {
+        quoteZh: '陈毅：“淮海战役的胜利，是人民群众用小车推出来的。”',
+        quoteEn: "Chen Yi\'s famous verdict on Huaihai: \'The victory of the Huaihai campaign was pushed out on the people\'s wheelbarrows.\'",
+        actors: [{ zh: '邓小平', en: 'Deng Xiaoping', key: 'dengxiaoping', camp: 'pla' }],
+      },
+      7: {
+        actZh: '三 · 平津与渡江', actEn: 'Act III · Pingjin and the Crossing',
+        quoteZh: '毛泽东《关于平津战役的作战方针》：“基本原则是围而不打，有些则是隔而不围。”',
+        quoteEn: "Mao Zedong, \'Operational Principles for the Pingjin Campaign\' (Dec 1948): \'The basic principle: encircle but do not strike; in some places, separate but do not encircle.\'",
+        actors: [{ zh: '毛泽东', en: 'Mao Zedong', key: 'maozedong', camp: 'pla' }],
+      },
+      10: {
+        quoteZh: '毛泽东《人民解放军百万大军横渡长江》：“人民解放军百万大军，从一千余华里的战线上，冲破敌阵，横渡长江。”',
+        quoteEn: "Mao Zedong\'s news dispatch \'A Million PLA Troops Cross the Yangtze\' (Apr 22, 1949): \'A million troops of the People\'s Liberation Army, on a front of a thousand li, broke through the enemy lines and crossed the Yangtze.\'",
+        actors: [{ zh: '毛泽东', en: 'Mao Zedong', key: 'maozedong', camp: 'pla' }],
+      },
+      11: {
+        quoteZh: '毛泽东开国大典宣告：“中华人民共和国中央人民政府，今天成立了。”',
+        quoteEn: "Mao Zedong\'s proclamation from Tiananmen (Oct 1, 1949): \'The Central People\'s Government of the People\'s Republic of China is founded this day.\'",
+        actors: [{ zh: '毛泽东', en: 'Mao Zedong', key: 'maozedong', camp: 'pla' }],
+      },
+    },
+  },
+
 };
