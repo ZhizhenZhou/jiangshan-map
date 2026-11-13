@@ -1073,7 +1073,7 @@
         if (!(s.battles || []).length) {
           const mv = (s.moves || [])[0] || null;
           const pts = mv ? this._warPointList(mv) : [];
-          const at = pts.length ? pts[pts.length - 1] : lastPt;
+          const at = pts.length ? pts[pts.length - 1] : (s.storyCoord || lastPt);
           if (at) {
             lastPt = at;
             const side = this._warSide(w, (mv && mv.side) || ((w.sides || [])[0] || {}).key);
@@ -1102,7 +1102,7 @@
             num.style.fill = side.color;
             const lbl = this._warStepTitle(w, s) || this._warField(s, 'title');
             if (lbl) {
-              lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur, ni: nodeIdx });
+              lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, ni: nodeIdx });
             }
             nodeIdx++;
           }

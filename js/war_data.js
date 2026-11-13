@@ -316,6 +316,7 @@ window.WAR_DATA = [
     steps: [
       {
         y: -261.71, titleZh: '上党降赵', titleEn: 'Shangdang defects to Zhao',
+        storyCoord: [113.35, 36.18],
         descZh: '秦攻韩野王，上党道绝；郡守冯亭举十七城献赵。赵王受地，秦赵直接对撞再无缓冲——长平之战自此埋下。',
         descEn: 'Qin cut off Han\'s Shangdang; its governor offered seventeen cities to Zhao. Zhao accepted — and the two giants now shared a border with no buffer left.',
       },
@@ -1715,6 +1716,7 @@ window.WAR_DATA = [
     steps: [
       {
         y: -207.95, titleZh: '定陶之败，章邯北攻赵', titleEn: 'After Dingtao, Qin turns on Zhao',
+        storyCoord: [115.55, 35.08],
         descZh: '章邯夜袭定陶，项梁战死——「将士皆栗」。章邯以为楚地不足忧，引兵北渡河击赵，王离长城军南下合围：赵王歇与张耳入巨鹿城，被围月余，陈馀壁其北，诸侯救兵莫敢击。',
         descEn: 'Xiang Liang died at Dingtao; Zhang Han turned north, and with Wang Li\'s Great Wall army besieged Julu — every relief army watched from behind its own walls.',
       },
