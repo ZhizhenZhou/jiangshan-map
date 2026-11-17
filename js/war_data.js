@@ -2645,14 +2645,45 @@ window.WAR_DATA = [
     ],
     zones: [
       {
-        y: 1932.5, side: 'japan',
-        rings: [[[119.0, 38.0], [126.0, 39.0], [131.0, 42.0], [135.0, 48.0], [128.0, 53.5], [120.5, 52.0], [116.0, 46.0], [115.5, 41.0]]],
-        noteZh: '东北沦陷十四载，伪满洲国成立', noteEn: 'The Northeast occupied; the puppet Manchukuo installed',
+        y: 1931.72, side: 'japan',
+        rings: [[[121.8, 41.2], [123.2, 40.9], [125.0, 41.6], [126.9, 42.0], [127.2, 43.6], [125.8, 44.4], [123.8, 43.6], [122.2, 42.2]]],
+        noteZh: '柳条湖的爆炸：关东军旬月占辽宁吉林——东北军奉行不抵抗', noteEn: 'The Liutiaohu blast: Kwantung Army takes Liaoning and Jilin within weeks',
+      },
+      {
+        y: 1933.4, side: 'japan',
+        rings: [[[119.5, 38.6], [121.5, 40.6], [123.0, 42.6], [126.0, 43.6], [129.0, 44.5], [133.0, 46.0], [134.5, 48.5], [131.0, 49.5], [126.0, 51.5], [121.0, 52.0], [118.0, 49.0], [116.5, 46.0], [117.0, 42.5], [118.0, 39.5]]],
+        noteZh: '热河继失、伪满立国：东北全境沦陷十四载', noteEn: 'Rehe falls and Manchukuo is installed: fourteen years of occupation',
+      },
+      {
+        y: 1937.82, side: 'japan',
+        rings: [
+          [[113.5, 35.0], [116.0, 35.5], [117.5, 35.0], [119.5, 34.5], [120.5, 35.5], [120.0, 37.5], [118.5, 39.5], [116.5, 40.8], [114.5, 40.5], [113.5, 38.5], [113.8, 36.2]],
+          [[119.5, 31.5], [121.0, 32.0], [121.8, 31.4], [120.5, 30.6], [119.5, 30.7]],
+        ],
+        noteZh: '平津沪宁相继陷落：两把尖刀插入关内', noteEn: 'Tianjin–Beijing and Shanghai–Nanjing fall: two blades inside the wall',
+      },
+      {
+        y: 1938.82, side: 'japan',
+        rings: [
+          [[113.6, 35.6], [116.8, 36.2], [119.8, 35.2], [121.6, 32.6], [120.3, 30.4], [117.6, 29.2], [114.5, 29.3], [112.8, 30.6], [112.0, 32.5], [112.8, 34.6]],
+          [[112.8, 23.0], [114.0, 23.2], [114.3, 22.6], [113.0, 22.3]],
+        ],
+        noteZh: '武汉广州陷落：战线定格——相持自此开始', noteEn: 'Wuhan and Guangzhou fall; the front freezes into stalemate',
       },
       {
         y: 1940.5, side: 'china',
         rings: [[[100.0, 25.0], [106.0, 23.0], [111.0, 27.0], [111.5, 33.0], [106.0, 36.5], [100.0, 37.0], [96.0, 33.0], [97.0, 28.0]]],
-        noteZh: '正面战场退守西南、西北大后方', noteEn: 'The front holds the southwestern and northwestern rear',
+        noteZh: '正面相持、敌后扩展：西南西北大后方撑住全局', noteEn: 'Stalemate on the front, expansion behind the lines: the southwest holds',
+      },
+      {
+        y: 1944.75, side: 'japan',
+        rings: [[[113.5, 35.3], [114.5, 34.5], [114.0, 32.5], [112.8, 30.5], [112.0, 28.5], [110.0, 26.0], [108.0, 24.5], [106.5, 25.3], [107.5, 26.5], [108.5, 28.5], [111.0, 31.5], [112.5, 33.8]]],
+        noteZh: '一号作战：51 万日军纵贯大陆交通线，146 城失守', noteEn: 'Operation Ichi-Go: 510,000 troops cut the continent; 146 cities lost',
+      },
+      {
+        y: 1945.55, side: 'china',
+        rings: [[[97.5, 25.5], [98.8, 25.6], [99.3, 24.6], [98.3, 24.0], [97.2, 24.3]]],
+        noteZh: '滇西收复、湘西反攻：战场的天平开始回摆——直到南京受降', noteEn: 'Yunnan retaken, Hunan counterattacked: the scales swing back to the surrender',
       },
     ],
     steps: [
