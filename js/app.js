@@ -4344,6 +4344,7 @@
         'qing:1894': { key: 'jiawu', stopIdx: -1 },
         'qing:1911': { key: 'xinhai', stopIdx: -1 },
         'roc:1926': { key: 'beifa', stopIdx: -1 },
+        'roc:1935': { key: 'changzheng', stopIdx: -1 },
         'roc:1937': { key: 'kangri', stopIdx: -1 },
         'roc:1947': { key: 'tingjin', stopIdx: -1 },
         'roc:1948': { key: 'sanda', stopIdx: -1 },

@@ -526,6 +526,37 @@ window.WAR_STORY_CONTENT = {
 
   // —— 近现代（清末—建国）——
 
+  changzheng: {
+    steps: {
+      0: {
+        actZh: '一 · 突围', actEn: 'Act I · The Breakout',
+      },
+      1: {
+        quoteZh: '湘江当地民谣：“三年不饮湘江水，十年不食湘江鱼。”',
+        quoteEn: "A folk verse from the Xiang River valley: \'For three years drink no Xiang water; for ten years eat no Xiang fish.\'",
+      },
+      2: {
+        actZh: '二 · 转折与神来之笔', actEn: 'Act II · The Turning Point',
+        quoteZh: '毛泽东：“遵义会议是一个关键，对中国革命的影响非常之大。”',
+        quoteEn: "Mao Zedong on the Zunyi Conference: \'It was a key point — its influence on the Chinese revolution was very great.\'",
+        actors: [{ zh: '邓小平', en: 'Deng Xiaoping', key: 'dengxiaoping', camp: 'pla' }],
+      },
+      3: {
+        quoteZh: '毛泽东（1960年对蒙哥马利谈用兵）：“四渡赤水才是我的得意之笔。”',
+        quoteEn: "Mao Zedong to Field Marshal Montgomery (1960): \'The four crossings of the Chishui — that was my masterpiece.\'",
+        actors: [{ zh: '毛泽东', en: 'Mao Zedong', key: 'maozedong', camp: 'pla' }],
+      },
+      7: {
+        actZh: '三 · 雪山草地与三军会师', actEn: 'Act III · Snow Mountains to the Final Join',
+      },
+      12: {
+        quoteZh: '毛泽东《七律·长征》：“红军不怕远征难，万水千山只等闲……更喜岷山千里雪，三军过后尽开颜。”',
+        quoteEn: "Mao Zedong, \'The Long March\' (seven-character lü poem, Oct 1935): \'The Red Army fears not the trials of the Long March, holding light ten thousand crags and torrents... Gladdest are they who cross the Minshan snows — the three armies, all smiling, march on.\'",
+        actors: [{ zh: '毛泽东', en: 'Mao Zedong', key: 'maozedong', camp: 'pla' }],
+      },
+    },
+  },
+
   xinhai: {
     steps: {
       0: {

@@ -16,11 +16,11 @@ async function runWarSandboxSuite(ctx) {
 
   const wars = sandbox.window.WAR_DATA;
   assert(Array.isArray(wars), 'war_data.js must expose window.WAR_DATA');
-  assert.strictEqual(wars.length, 27, 'War sandbox must ship exactly 27 curated campaigns');
+  assert.strictEqual(wars.length, 28, 'War sandbox must ship exactly 28 curated campaigns');
 
   const keys = wars.map((w) => w.key);
   assert.strictEqual(new Set(keys).size, keys.length, 'WAR_DATA keys must be unique');
-  for (const required of ['an-shi', 'sui-chen', 'mengsong', 'sanfan', 'yashan', 'xinhai', 'beifa', 'kangri', 'tingjin', 'sanda']) {
+  for (const required of ['an-shi', 'sui-chen', 'mengsong', 'sanfan', 'yashan', 'changzheng', 'xinhai', 'beifa', 'kangri', 'tingjin', 'sanda']) {
     assert(keys.includes(required), `WAR_DATA must include ${required}`);
   }
 
@@ -132,6 +132,9 @@ async function runWarSandboxSuite(ctx) {
   assert.strictEqual(activeAt(1279), 'yashan', 'Yashan must own its 1279 climax');
   // 近现代密接排列：kangri/tingjin 用小数尾窗收窄，年份归属不得互吞——
   // 各自必须保住本尊步年份（受降 1945.67 / 转出 1948.25），又不得吞下一场。
+  assert.strictEqual(activeAt(1934.91), 'changzheng', 'Changzheng must own the Xiang River year');
+  assert.strictEqual(activeAt(1936.83), 'changzheng', 'Changzheng must own its own 1936.83 join-up');
+  assert.strictEqual(activeAt(1937.58), 'kangri', 'Kangri must own 1937 — no tail-window theft by Changzheng');
   assert.strictEqual(activeAt(1945.67), 'kangri', 'Kangri must own its own surrender step year');
   assert.strictEqual(activeAt(1945.9), 'tingjin', 'Post-surrender 1945.9 falls in Tingjin pre-span window');
   assert.strictEqual(activeAt(1946), 'tingjin', 'Tingjin must own 1946 (civil-war opener)');
@@ -139,7 +142,7 @@ async function runWarSandboxSuite(ctx) {
   assert.strictEqual(activeAt(1948.25), 'tingjin', 'Tingjin must own its own 1948.25 exit');
   assert.strictEqual(activeAt(1948.71), 'sanda', 'Sanda must own its 1948.71 opener — no tail-window theft');
   assert.strictEqual(activeAt(1952), 'sanda', 'Sanda keeps the default +3 tail window');
-  for (const [key, wantTail] of [['kangri', 0.75], ['tingjin', 0.5]]) {
+  for (const [key, wantTail] of [['changzheng', 0.9], ['kangri', 0.75], ['tingjin', 0.5]]) {
     const w = wars.find((x) => x.key === key);
     assert(w && w.tail === wantTail, `${key} must keep tail:${wantTail} (adjacent-campaign ownership)`);
   }
@@ -262,7 +265,7 @@ async function runWarSandboxSuite(ctx) {
   // 战例档案 v2（近现代五战役试点）：每场战斗必须带精确日期、结果行、指挥官与
   // 番号；伤亡可缺（无可靠数字宁缺毋滥），但出现就必须双语署名出处——
   // 可信数据红线进套件（用户前提：数据要可信）。
-  const MODERN_WARS = new Set(['xinhai', 'beifa', 'kangri', 'tingjin', 'sanda']);
+  const MODERN_WARS = new Set(['changzheng', 'xinhai', 'beifa', 'kangri', 'tingjin', 'sanda']);
   const validDate = (d) =>
     Array.isArray(d) &&
     d.length === 3 &&
