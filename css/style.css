@@ -6473,6 +6473,17 @@ button.story-inline-person:hover {
   border-radius: 1px;
   transform: rotate(45deg);
 }
+.war-bmeta-row.war-bmeta-zone {
+  color: var(--text-secondary);
+}
+.war-bmeta-row.war-bmeta-zone::before {
+  content: '';
+  background: transparent;
+  border: 1.5px dashed var(--side-color, rgba(90, 74, 58, 0.55));
+  border-radius: 2px;
+  transform: none;
+  top: 0.42em;
+}
 .war-balloon-date {
   font-family: var(--sans-stack);
   font-size: 10.5px;

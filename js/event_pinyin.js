@@ -546,6 +546,7 @@ window.ATLAS_EVENT_PINYIN = {
       ["taierzhuangdajieyuwuhanhuizhan","kangzhanjinruxiangchijieduan","taierzhuangdajieyuwuhanhuizhankangzhanjinruxiangchijieduan","taierzhuang","wuhan"],
       ["kangrizhanzhengshengli","zhongguozhengshishouhuitaiwanquandaoyupenghuliedao","kangrizhanzhengshenglizhongguozhengshishouhuitaiwanquandaoyupenghuliedao","taibei","nanjing"],
       ["guominzhengfuchengrenwaimengguduligongtoujieguo","waimenggutuolizhongguobantu","guominzhengfuchengrenwaimengguduligongtoujieguowaimenggutuolizhongguobantu","kulun","wulanbatuo"],
+      ["liudengdajunqianliyuejindabieshan","jiekaizhanlvejingongxumu","liudengdajunqianliyuejindabieshanjiekaizhanlvejingongxumu","luxinan","dabieshan"],
       ["liaoshen","huaihai","pingjinsandazhanyizhankai","liaoshenhuaihaipingjinsandazhanyizhankai","jinzhou","xuzhou","beiping"],
       ["jiefangjunfaqidujiangzhanyigongkenanjing","guominzhengfutuiwangtaibei","jiefangjunfaqidujiangzhanyigongkenanjingguominzhengfutuiwangtaibei","nanjing"]
     ],

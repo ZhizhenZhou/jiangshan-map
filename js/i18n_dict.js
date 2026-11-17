@@ -1712,6 +1712,10 @@ window.EN_LOCALE = {
       "Nationalist Government recognizes the Outer Mongolian referendum, detaching Outer Mongolia",
       "Kulun (Ulaanbaatar)"
     ],
+    "roc:1947": [
+      "Liu–Deng's thousand-li thrust into the Dabie Mountains opens the strategic counteroffensive",
+      "Luzhou–Southwest · Dabie Mountains"
+    ],
     "xihan:-91": [
       "Witchcraft Crisis drives Prince Liu Ju to suicide; Sima Qian completes the Shiji chronicle",
       "Huxian · Chang'an"

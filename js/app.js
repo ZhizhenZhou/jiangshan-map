@@ -4345,6 +4345,7 @@
         'qing:1911': { key: 'xinhai', stopIdx: -1 },
         'roc:1926': { key: 'beifa', stopIdx: -1 },
         'roc:1937': { key: 'kangri', stopIdx: -1 },
+        'roc:1947': { key: 'tingjin', stopIdx: -1 },
         'roc:1948': { key: 'sanda', stopIdx: -1 },
         'tang:755': { key: 'anshi', stopIdx: -1 },
       };

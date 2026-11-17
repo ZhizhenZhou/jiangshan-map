@@ -85,7 +85,9 @@
     _activeWar(year = this.year) {
       if (!this._warLayerOn() || this.challenge) return null;
       for (const w of this._warData()) {
-        if (year >= w.span[0] - 1 && year <= w.span[1] + TAIL_YEARS) return w;
+        // 尾窗可被战役自定（w.tail，默认 TAIL_YEARS）：近现代战役密接排列时
+        // 用 tail 收窄，避免上一场的回放窗吞掉下一场的本尊年份（gate 歧义）。
+        if (year >= w.span[0] - 1 && year <= w.span[1] + (w.tail ?? TAIL_YEARS)) return w;
       }
       return null;
     }
@@ -1218,11 +1220,20 @@
     }
 
     _warBattleMetaHtml(w, s) {
-      const b = s && (s.battles || [])[0];
-      if (!b || !w) return '';
+      if (!w || !s) return '';
+      const b = (s.battles || [])[0] || null;
       const zh = this.locale !== 'en';
-      const date = this._warFmtDateRange(b.date0, b.date1);
-      const result = this._warField(b, 'result');
+      // 态势行（zone 说明）：按当前步年份解析激活的控制区，给地图上的
+      // 包围圈/战区环一个文字注脚（解除「莫名选框」问题的另一半）。
+      const zi = this._warZoneIndex(w, Number.isFinite(s.y) ? s.y : undefined);
+      const zone = zi >= 0 ? (w.zones || [])[zi] : null;
+      const zs = zone ? this._warSide(w, zone.side) : null;
+      const zoneRow = zone
+        ? `<div class="war-bmeta-row war-bmeta-zone"${zs ? ` style="--side-color:${zs.color}"` : ''}>` +
+          `${esc(zh ? zone.noteZh : (zone.noteEn || zone.noteZh))}</div>`
+        : '';
+      const date = b ? this._warFmtDateRange(b.date0, b.date1) : '';
+      const result = b ? this._warField(b, 'result') : '';
       const row = (item, cls) => {
         const sd = this._warSide(w, item.side);
         return (
@@ -1230,22 +1241,29 @@
           `${esc(zh ? (item.nameZh || item.zh) : (item.nameEn || item.en || item.nameZh || item.zh))}</div>`
         );
       };
-      const cmdr = (b.commanders || []).map((c) => row(c)).join('');
-      const units = (b.units || []).map((u) => row(u, ' war-bmeta-unit')).join('');
-      const cas = (b.casualties || [])
-        .map((c) => {
-          const sd = this._warSide(w, c.side);
-          const tip = [c.srcZh, c.srcEn].filter(Boolean).join(' / ').replace(/"/g, '&quot;');
-          return (
-            `<div class="war-bmeta-row war-bmeta-cas"${sd ? ` style="--side-color:${sd.color}"` : ''} title="${tip}">` +
-            `${esc(zh ? '伤亡' : 'Casualties')} ${esc(this._warFormatN(c.n, c.quality))}</div>`
-          );
-        })
-        .join('');
-      if (!date && !result && !cmdr && !units && !cas) return '';
+      const cmdr = b ? (b.commanders || []).map((c) => row(c)).join('') : '';
+      const units = b ? (b.units || []).map((u) => row(u, ' war-bmeta-unit')).join('') : '';
+      const cas = b
+        ? (b.casualties || [])
+            .map((c) => {
+              const sd = this._warSide(w, c.side);
+              const tip = [c.srcZh, c.srcEn].filter(Boolean).join(' / ').replace(/"/g, '&quot;');
+              return (
+                `<div class="war-bmeta-row war-bmeta-cas"${sd ? ` style="--side-color:${sd.color}"` : ''} title="${tip}">` +
+                `${esc(zh ? '伤亡' : 'Casualties')} ${esc(this._warFormatN(c.n, c.quality))}</div>`
+              );
+            })
+            .join('')
+        : '';
+      if (!date && !result && !cmdr && !units && !cas && !zoneRow) return '';
       return (
         `<div class="war-bmeta">` +
-        `<div class="war-bmeta-head">${esc(zh ? '战例档案 · 悬停伤亡行见出处' : 'Battle record · hover casualties for sources')}</div>` +
+        `<div class="war-bmeta-head">${esc(
+          b
+            ? (zh ? '战例档案 · 悬停伤亡行见出处' : 'Battle record · hover casualties for sources')
+            : (zh ? '态势说明' : 'Situation note')
+        )}</div>` +
+        (zoneRow || '') +
         (date || result
           ? `<div class="war-bmeta-top">` +
             (date ? `<span class="war-bmeta-date">${esc(date)}</span>` : '') +
@@ -1597,10 +1615,15 @@
       const shellWar = wRaw && this._warEngagedKey === wRaw.key ? wRaw : null;
       const w = storyWar ? storyWar.war : shellWar;
       const idx = storyWar ? storyWar.idx : w ? this._warStepIndex(w) : -1;
-      // 故事模式不渲染控制区多边形：当前疆域态势由 main 的政区图层表达，
-      // 粗虚线 zone 在精细地图上没有文字说明（旧沙盘的说明随 war-card 退役），
-      // 只会被读成莫名的选框。箭头与战役菱形不受影响。
-      const zi = storyWar ? -1 : w ? this._warZoneIndex(w) : -1;
+      // 控制区 zone（包围圈/战区环）跟随「当前步的年份」切换——故事模式按
+      // 当前故事步解析，独立壳按时间轴年份；总览（idx<0）不画，维持等权全貌。
+      // 原先故事模式硬抑制（zone 无说明会被读成莫名选框）已解除：说明行随
+      // 战例档案块（_warBattleMetaHtml 的 war-bmeta-zone 行）进故事卡。
+      const zi = storyWar
+        ? (storyWar.overview || storyWar.idx < 0
+            ? -1
+            : this._warZoneIndex(storyWar.war, storyWar.war.steps[storyWar.idx].y))
+        : (w ? this._warZoneIndex(w) : -1);
       // Only the standalone shell condenses the legend and renders war-card.
       const vf = this._id('viewport-frame');
       const warActive = Boolean(shellWar) && !this.activePerson && !this.activeTrace && !this.challenge;

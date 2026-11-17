@@ -16,11 +16,11 @@ async function runWarSandboxSuite(ctx) {
 
   const wars = sandbox.window.WAR_DATA;
   assert(Array.isArray(wars), 'war_data.js must expose window.WAR_DATA');
-  assert.strictEqual(wars.length, 26, 'War sandbox must ship exactly 26 curated campaigns');
+  assert.strictEqual(wars.length, 27, 'War sandbox must ship exactly 27 curated campaigns');
 
   const keys = wars.map((w) => w.key);
   assert.strictEqual(new Set(keys).size, keys.length, 'WAR_DATA keys must be unique');
-  for (const required of ['an-shi', 'sui-chen', 'mengsong', 'sanfan', 'yashan', 'xinhai', 'beifa', 'kangri', 'sanda']) {
+  for (const required of ['an-shi', 'sui-chen', 'mengsong', 'sanfan', 'yashan', 'xinhai', 'beifa', 'kangri', 'tingjin', 'sanda']) {
     assert(keys.includes(required), `WAR_DATA must include ${required}`);
   }
 
@@ -124,12 +124,25 @@ async function runWarSandboxSuite(ctx) {
   }
 
   const activeAt = (year) => {
-    const hit = wars.find((w) => year >= w.span[0] - 1 && year <= w.span[1] + 3);
+    const hit = wars.find((w) => year >= w.span[0] - 1 && year <= w.span[1] + (w.tail ?? 3));
     return hit ? hit.key : null;
   };
   assert.strictEqual(activeAt(1276), 'mengsong', 'Mongol-Song tail window must own 1276');
   assert.strictEqual(activeAt(1277), 'yashan', 'Yashan must take ownership from 1277');
   assert.strictEqual(activeAt(1279), 'yashan', 'Yashan must own its 1279 climax');
+  // 近现代密接排列：kangri/tingjin 用小数尾窗收窄，年份归属不得互吞——
+  // 各自必须保住本尊步年份（受降 1945.67 / 转出 1948.25），又不得吞下一场。
+  assert.strictEqual(activeAt(1945.67), 'kangri', 'Kangri must own its own surrender step year');
+  assert.strictEqual(activeAt(1945.9), 'tingjin', 'Post-surrender 1945.9 falls in Tingjin pre-span window');
+  assert.strictEqual(activeAt(1946), 'tingjin', 'Tingjin must own 1946 (civil-war opener)');
+  assert.strictEqual(activeAt(1947.72), 'tingjin', 'Tingjin must own the 1947 thrust');
+  assert.strictEqual(activeAt(1948.25), 'tingjin', 'Tingjin must own its own 1948.25 exit');
+  assert.strictEqual(activeAt(1948.71), 'sanda', 'Sanda must own its 1948.71 opener — no tail-window theft');
+  assert.strictEqual(activeAt(1952), 'sanda', 'Sanda keeps the default +3 tail window');
+  for (const [key, wantTail] of [['kangri', 0.75], ['tingjin', 0.5]]) {
+    const w = wars.find((x) => x.key === key);
+    assert(w && w.tail === wantTail, `${key} must keep tail:${wantTail} (adjacent-campaign ownership)`);
+  }
 
   const guanduWar = wars.find((w) => w.key === 'guandu');
   const guanduStory = (loreData.PERSON_PROFILES || []).find((p) => p.key === 'guandu');
@@ -203,11 +216,30 @@ async function runWarSandboxSuite(ctx) {
     'Story card and shell card must append the battle-record block after the force bars'
   );
   assert(styleCss.includes('.war-bmeta-head'), 'Battle-record meta block must be styled');
+  assert(
+    warModule.includes('this._warZoneIndex(storyWar.war, storyWar.war.steps[storyWar.idx].y)') &&
+      warModule.includes('storyWar.overview || storyWar.idx < 0'),
+    'Story mode must render zones keyed to the current step year (包围圈复活)'
+  );
+  assert(warModule.includes('war-bmeta-zone'), 'Battle-record block must carry the zone/situation note line');
+  assert(styleCss.includes('.war-bmeta-zone'), 'Zone note line must be styled');
+  for (const w of wars) {
+    if (!w.zones || !w.zones.length) continue;
+    for (const [zi, zone] of w.zones.entries()) {
+      if (Number.isFinite(zone.y) && zone.y >= 1946 && zone.y <= 1952) {
+        // 沙盘 zone 与底图快照共用年份语义：只校验激活年落在战役窗口内
+        assert(
+          zone.y >= w.span[0] - 1 && zone.y <= w.span[1] + 3,
+          `${w.key}.zones[${zi}].y=${zone.y} outside the campaign window`
+        );
+      }
+    }
+  }
 
-  // 战例档案 v2（近现代四战役试点）：每场战斗必须带精确日期、结果行、指挥官与
+  // 战例档案 v2（近现代五战役试点）：每场战斗必须带精确日期、结果行、指挥官与
   // 番号；伤亡可缺（无可靠数字宁缺毋滥），但出现就必须双语署名出处——
   // 可信数据红线进套件（用户前提：数据要可信）。
-  const MODERN_WARS = new Set(['xinhai', 'beifa', 'kangri', 'sanda']);
+  const MODERN_WARS = new Set(['xinhai', 'beifa', 'kangri', 'tingjin', 'sanda']);
   const validDate = (d) =>
     Array.isArray(d) &&
     d.length === 3 &&

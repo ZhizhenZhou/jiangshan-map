@@ -598,6 +598,36 @@ window.WAR_STORY_CONTENT = {
     },
   },
 
+  tingjin: {
+    steps: {
+      0: {
+        actZh: '一 · 序幕：内战爆发', actEn: 'Act I · The Civil War Opens',
+      },
+      2: {
+        actZh: '二 · 千里跃进', actEn: 'Act II · The Thousand-li Thrust',
+        quoteZh: '毛泽东《解放战争第二年的战略方针》：“举行全国性的反攻，即以主力打到外线去，将战争引向国民党区域。”',
+        quoteEn: "Mao Zedong, \'Strategic Policy for the Second Year of the Liberation War\' (Sep 1, 1947): \'Launch a nation-wide counteroffensive — strike with the main force to the exterior lines and carry the war into the Nationalist-held areas.\'",
+        actors: [{ zh: '毛泽东', en: 'Mao Zedong', key: 'maozedong', camp: 'pla' }],
+      },
+      3: {
+        quoteZh: '刘伯承（汝河突围命令）：“狭路相逢勇者胜。”',
+        quoteEn: "Liu Bocheng\'s order at the Ru River crossing (Aug 23, 1947): \'When brave men meet on a narrow road, the brave one wins.\'",
+        actors: [{ zh: '邓小平', en: 'Deng Xiaoping', key: 'dengxiaoping', camp: 'pla' }],
+      },
+      6: {
+        actZh: '三 · 围剿与坚持', actEn: 'Act III · Encirclement and Endurance',
+      },
+      7: {
+        actors: [{ zh: '邓小平', en: 'Deng Xiaoping', key: 'dengxiaoping', camp: 'pla' }],
+      },
+      9: {
+        quoteZh: '毛泽东《目前形势和我们的任务》：“这是一个历史的转折点。这是蒋介石的二十年反革命统治由发展到消灭的转折点。”',
+        quoteEn: "Mao Zedong, \'The Present Situation and Our Tasks\' (Dec 25, 1947): \'This is a historic turning point — the turning point at which Chiang Kai-shek\'s twenty-year counter-revolutionary rule passes from growth to extinction.\'",
+        actors: [{ zh: '毛泽东', en: 'Mao Zedong', key: 'maozedong', camp: 'pla' }],
+      },
+    },
+  },
+
   sanda: {
     steps: {
       0: {
