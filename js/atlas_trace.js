@@ -461,6 +461,8 @@
             prevStopCoord: sIdx > 0 ? profile.stops[sIdx - 1].coord : null,
             quoteZh: st.quoteZh || '',
             quoteEn: st.quoteEn || '',
+            hookZh: st.hookZh || '',
+            hookEn: st.hookEn || '',
             dynasty: dyn,
             siteZh: st.ancientZh,
             siteEn: st.ancientEn || this._enDict(st.ancientZh),
@@ -2487,9 +2489,15 @@
                 .join('')
             : `<span class="t-sub person-ev-copy">${storyLinkedCopy}</span>`;
 
+        const hookHtml =
+          profile.isStory && (isEn ? ev.hookEn : ev.hookZh)
+            ? `<span class="story-hook">${escHtml(isEn ? ev.hookEn || ev.hookZh : ev.hookZh)}</span>`
+            : '';
+
         li.innerHTML =
           `<span class="t-era person-era-col">${leftBadgeHtml}</span>` +
           `<span class="t-val">` +
+          `${hookHtml}` +
           `<span class="person-site-line"><span>${siteLabel}${mapBadge}</span>${traceBtn}</span>` +
           `${copyHtml}` +
           `${warForcesHtml}` +

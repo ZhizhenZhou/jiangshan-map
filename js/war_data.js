@@ -2241,6 +2241,8 @@ window.WAR_DATA = [
     steps: [
       {
         y: 1911.33,
+        hookZh: '挑战：一百三十人，攻一座总督署',
+        hookEn: "The challenge: 130 men against a viceroy's yamen",
         battles: [{ side: 'geming', at: [113.27, 23.13], nameZh: '黄花岗起义', nameEn: 'The Huanghuagang rising', placeZh: '广州（今广州越秀）', placeEn: 'Guangzhou',
           date0: [1911, 4, 27],
           resultZh: '起义失败：八十六人死难，七十二具忠骸合葬黄花岗',
@@ -2264,6 +2266,8 @@ window.WAR_DATA = [
       },
       {
         y: 1911.81,
+        hookZh: '一夜之间，两千年开始倒计时',
+        hookEn: "One night starts the countdown of two millennia",
         battles: [{ side: 'geming', at: [114.31, 30.54], nameZh: '武昌首义', nameEn: 'The Wuchang rising', placeZh: '武昌（今武汉武昌区）', placeEn: 'Wuchang, Wuhan',
           date0: [1911, 10, 10], date1: [1911, 10, 11],
           resultZh: '首义成功：翌日鄂军都督府成立，废除宣统年号',
@@ -2281,6 +2285,8 @@ window.WAR_DATA = [
       },
       {
         y: 1911.85,
+        hookZh: '多米诺：旬月之间，十四省倒戈',
+        hookEn: "Dominoes: fourteen provinces in weeks",
         titleZh: '十四省相继独立', titleEn: 'Fourteen provinces secede',
         storyCoord: [112.94, 28.23],
         descZh: '长沙、西安首先响应，九江、南昌、太原、昆明、上海、杭州、苏州、福州、广州旬月之间次第光复——至十一月中，十四省脱离清廷。清廷急起用袁世凯督北洋军南下「平乱」，革命与北洋，从此正面相对。',
@@ -2288,6 +2294,8 @@ window.WAR_DATA = [
       },
       {
         y: 1911.88,
+        hookZh: '乌合之众，当北洋劲旅',
+        hookEn: "Raw levies against Beiyang regulars",
         moves: [{ side: 'qingchao', from: [114.09, 32.13], to: [114.27, 30.60],
           titleZh: '北洋两镇沿京汉线南下',
           titleEn: 'Two Beiyang divisions march down the Beijing–Hankou line',
@@ -2314,6 +2322,8 @@ window.WAR_DATA = [
       },
       {
         y: 1911.92,
+        hookZh: '退无可退：凭江而守',
+        hookEn: "No retreat: holding the river line",
         moves: [{ side: 'qingchao', from: [114.27, 30.60], to: [114.22, 30.55],
           titleZh: '北军渡襄河，转攻汉阳',
           titleEn: 'The northerners cross the Han onto Hanyang',
@@ -2340,6 +2350,8 @@ window.WAR_DATA = [
       },
       {
         y: 1911.96,
+        hookZh: '东南落子：为共和定都铺路',
+        hookEn: "Securing the southeast for the republic",
         moves: [{ side: 'geming', from: [121.47, 31.23], to: [118.78, 32.06],
           path: [[121.47, 31.23], [120.62, 31.30], [119.45, 32.20], [118.78, 32.06]],
           titleZh: '江浙联军会攻南京',
@@ -2363,6 +2375,8 @@ window.WAR_DATA = [
       },
       {
         y: 1912.005,
+        hookZh: '诞生：亚洲第一个共和国',
+        hookEn: "Born: Asia's first republic",
         titleZh: '中华民国临时政府成立', titleEn: 'The Provisional Government of the Republic',
         storyCoord: [118.78, 32.06],
         descZh: '一九一二年一月一日，孙中山在南京就任临时大总统，改用公历，以是年为民国元年——亚洲第一个共和国宣告成立。但国库空虚、列强观望，孙中山就职当日即电袁世凯示意相让：革命党人手里，已无一兵一饷之续。',
@@ -2370,6 +2384,8 @@ window.WAR_DATA = [
       },
       {
         y: 1912.13,
+        hookZh: '终局：一百二十六天，帝制终结',
+        hookEn: "Endgame: the monarchy gone in 126 days",
         titleZh: '清帝退位，帝制终结', titleEn: 'The abdication ends the monarchy',
         storyCoord: [116.39, 39.90],
         descZh: '二月十二日，隆裕太后携六岁溥仪颁《清帝逊位诏书》——「将统治权公诸全国，定为共和立宪国体」。自公元前221年秦始皇称帝以来，2132年的帝制至此终结；次日孙中山辞职，袁世凯继任临时大总统，革命的中国与北洋的中国，在共和的旗帜下暂且同床。',
@@ -2403,6 +2419,8 @@ window.WAR_DATA = [
     steps: [
       {
         y: 1926.58,
+        hookZh: '挑战：十万当七十五万',
+        hookEn: "100,000 against 750,000",
         titleZh: '广州誓师', titleEn: 'The oath at Guangzhou',
         storyCoord: [113.26, 23.13],
         descZh: '两广既统一、黄埔军校三期养成，国民革命军八个军约十万人誓师北上，蒋介石任总司令；对面的吴佩孚、孙传芳、张作霖三系合计约七十五万。兵分三路：西路四、七、八军直取两湖吴佩孚，中路二、三、六军对江西孙传芳，东路一军防福建。',
@@ -2410,6 +2428,8 @@ window.WAR_DATA = [
       },
       {
         y: 1926.67,
+        hookZh: '天险两座，大刀队督战',
+        hookEn: "Two fortified bridges and firing squads",
         moves: [{ side: 'nra', from: [113.26, 23.13], to: [114.19, 29.78],
           path: [[113.26, 23.13], [113.65, 24.80], [112.94, 28.23], [113.13, 29.36], [114.19, 29.78]],
           titleZh: '第四、七军沿粤汉线北上',
@@ -2453,6 +2473,8 @@ window.WAR_DATA = [
       },
       {
         y: 1926.79,
+        hookZh: '四十日围城，首义纪念日破城',
+        hookEn: "A forty-day siege, broken on the anniversary",
         battles: [{ side: 'nra', at: [114.31, 30.54], nameZh: '武昌围城', nameEn: 'The siege of Wuchang', placeZh: '武昌（今武汉武昌区）', placeEn: 'Wuchang, Wuhan',
           date0: [1926, 9, 3], date1: [1926, 10, 10],
           resultZh: '围城四十日，10月10日缘梯登城克之，刘玉春、陈嘉谟被俘',
@@ -2474,6 +2496,8 @@ window.WAR_DATA = [
       },
       {
         y: 1926.92,
+        hookZh: '三失三得：江西绞肉机',
+        hookEn: "Thrice lost, thrice retaken: the Jiangxi grinder",
         moves: [{ side: 'nra', from: [112.94, 28.23], to: [115.89, 28.68],
           path: [[112.94, 28.23], [113.90, 27.90], [115.00, 28.20], [115.89, 28.68]],
           titleZh: '中路转兵江西',
@@ -2501,6 +2525,8 @@ window.WAR_DATA = [
       },
       {
         y: 1927.21,
+        hookZh: '八个月，两千余里',
+        hookEn: "Two thousand li in eight months",
         moves: [
           { side: 'nra', from: [119.30, 26.08], to: [121.47, 31.23],
             path: [[119.30, 26.08], [120.16, 30.28], [121.47, 31.23]],
@@ -2532,6 +2558,8 @@ window.WAR_DATA = [
       },
       {
         y: 1927.67,
+        hookZh: '六万夜渡，七日聚歼',
+        hookEn: "60,000 crossed by night; annihilated in seven days",
         battles: [{ side: 'nra', at: [119.10, 32.12], nameZh: '龙潭之役', nameEn: 'The battle of Longtan', placeZh: '龙潭（今南京栖霞区龙潭）', placeEn: 'Longtan, Nanjing',
           date0: [1927, 8, 25], date1: [1927, 8, 31],
           resultZh: '七日聚歼：孙传芳渡江6万余人尽墨，「北伐成败最大之关键」',
@@ -2557,6 +2585,8 @@ window.WAR_DATA = [
       },
       {
         y: 1928.42,
+        hookZh: '撞上列强：从日本军刀下绕行',
+        hookEn: "Detouring around Japanese bayonets",
         moves: [{ side: 'nra', from: [117.19, 34.26], to: [117.00, 36.65],
           path: [[117.19, 34.26], [116.90, 35.50], [117.00, 36.65]],
           titleZh: '二次北伐：四个集团军沿津浦线北上',
@@ -2581,6 +2611,8 @@ window.WAR_DATA = [
       },
       {
         y: 1928.50,
+        hookZh: '北洋十六年，至此落幕',
+        hookEn: "Sixteen years of Beiyang rule end here",
         moves: [{ side: 'nra', from: [117.00, 36.65], to: [116.39, 39.90],
           path: [[117.00, 36.65], [116.36, 37.44], [116.86, 38.30], [116.39, 39.90]],
           titleZh: '克复北京，北洋政府落幕',
@@ -2590,6 +2622,8 @@ window.WAR_DATA = [
       },
       {
         y: 1928.96,
+        hookZh: '易帜不易心：形式统一收官',
+        hookEn: "Flags changed, hearts not: unification in form",
         titleZh: '东北易帜', titleEn: 'Northeast Flag Replacement',
         storyCoord: [123.43, 41.81],
         descZh: '十二月二十九日，张学良通电全国「力谋统一，贯彻到底」——东北改悬青天白日旗。北伐以形式统一收官，南京国民政府号令全国；但军阀易帜而不易心，日本的刺刀已在沈阳城外。',
@@ -2624,6 +2658,8 @@ window.WAR_DATA = [
     steps: [
       {
         y: 1931.71,
+        hookZh: '一夜之间，三省沦陷',
+        hookEn: "One night; three provinces gone",
         battles: [{ side: 'japan', at: [123.43, 41.81], nameZh: '九一八事变', nameEn: 'The Mukden Incident', placeZh: '沈阳（今辽宁沈阳）', placeEn: 'Shenyang',
           date0: [1931, 9, 18],
           resultZh: '一夜占沈阳，四月而失三省，十四年占领自此始',
@@ -2641,6 +2677,8 @@ window.WAR_DATA = [
       },
       {
         y: 1937.58,
+        hookZh: '最后一桥：不再退让',
+        hookEn: "The last bridge: no more retreat",
         battles: [{ side: 'china', at: [116.20, 39.85], nameZh: '卢沟桥事变', nameEn: 'The Marco Polo Bridge Incident', placeZh: '卢沟桥（今北京丰台）', placeEn: 'Lugouqiao, Beijing',
           date0: [1937, 7, 7],
           resultZh: '守军还击，全面抗战自此爆发',
@@ -2658,6 +2696,8 @@ window.WAR_DATA = [
       },
       {
         y: 1937.75,
+        hookZh: '七十万逐次填进去的三个月',
+        hookEn: "Three months, 700,000 fed in piecemeal",
         moves: [{ side: 'japan', from: [123.00, 31.70], to: [121.47, 31.23],
           path: [[123.00, 31.70], [122.00, 31.30], [121.47, 31.23]],
           titleZh: '日军两度增兵，登陆吴淞、金山卫',
@@ -2689,6 +2729,8 @@ window.WAR_DATA = [
       },
       {
         y: 1937.79,
+        hookZh: '第一个歼灭战：打破不可战胜',
+        hookEn: "The first annihilation: breaking the myth",
         moves: [
           { side: 'japan', from: [113.30, 40.08], to: [112.74, 38.58],
             titleZh: '日军自大同南下，直扑忻口',
@@ -2738,6 +2780,8 @@ window.WAR_DATA = [
       },
       {
         y: 1937.96,
+        hookZh: '最黑暗一页，也是不投降的理由',
+        hookEn: "The darkest page; the reason to resist",
         battles: [{ side: 'japan', at: [118.78, 32.06], nameZh: '南京保卫战与大屠杀', nameEn: 'Nanjing and the massacre', placeZh: '南京（今江苏南京）', placeEn: 'Nanjing',
           date0: [1937, 12, 1], date1: [1937, 12, 13],
           resultZh: '12月13日城破，随后六周大屠杀',
@@ -2758,6 +2802,8 @@ window.WAR_DATA = [
       },
       {
         y: 1938.29,
+        hookZh: '杂牌军打出的首次大捷',
+        hookEn: "The first great victory, by second-line troops",
         moves: [{ side: 'japan', from: [117.00, 36.65], to: [117.73, 34.56],
           path: [[117.00, 36.65], [117.30, 35.60], [117.73, 34.56]],
           titleZh: '矶谷、板垣两路会猎台儿庄',
@@ -2790,6 +2836,8 @@ window.WAR_DATA = [
       },
       {
         y: 1938.79,
+        hookZh: '输了会战，赢了战局',
+        hookEn: "The battle lost, the war won",
         moves: [{ side: 'japan', from: [117.28, 31.86], to: [114.31, 30.59],
           path: [[117.28, 31.86], [117.05, 30.51], [115.90, 30.20], [114.31, 30.59]],
           titleZh: '日军海陆并进，合围武汉',
@@ -2821,6 +2869,8 @@ window.WAR_DATA = [
       },
       {
         y: 1940.67,
+        hookZh: '一百零五个团，同日破袭',
+        hookEn: "105 regiments strike on the same day",
         moves: [{ side: 'china', from: [112.86, 36.84], to: [113.90, 38.00],
           titleZh: '八路军百团破袭正太路',
           titleEn: 'The Hundred Regiments smash the Zhengtai railway',
@@ -2850,6 +2900,8 @@ window.WAR_DATA = [
       },
       {
         y: 1942.005,
+        hookZh: '天炉战法：珍珠港后盟军首捷',
+        hookEn: "The Allies' first victory after Pearl Harbor",
         battles: [{ side: 'china', at: [112.94, 28.23], nameZh: '第三次长沙会战', nameEn: 'The third battle of Changsha', placeZh: '长沙（今湖南长沙）', placeEn: 'Changsha, Hunan',
           date0: [1941, 12, 24], date1: [1942, 1, 16],
           resultZh: '天炉战法获捷：日军攻城不克、败退原防线',
@@ -2876,6 +2928,8 @@ window.WAR_DATA = [
       },
       {
         y: 1944.54,
+        hookZh: '最黑的溃退，最硬的孤城',
+        hookEn: "The darkest retreat; the loneliest siege",
         moves: [{ side: 'japan', from: [113.63, 34.75], to: [107.55, 25.83],
           path: [[113.63, 34.75], [113.85, 34.04], [114.31, 30.59], [112.94, 28.23], [110.29, 25.27], [107.55, 25.83]],
           titleZh: '日军「一号作战」纵贯大陆',
@@ -2903,6 +2957,8 @@ window.WAR_DATA = [
       },
       {
         y: 1944.71,
+        hookZh: '逐壕爆破：九十五日要塞攻坚',
+        hookEn: "Trench by trench: 95 days against a fortress",
         moves: [{ side: 'china', from: [99.16, 25.11], to: [98.50, 25.03],
           path: [[99.16, 25.11], [99.00, 25.30], [98.50, 25.03]],
           titleZh: '中国远征军强渡怒江',
@@ -2950,6 +3006,8 @@ window.WAR_DATA = [
       },
       {
         y: 1945.33,
+        hookZh: '最后一场大规模会战：这次日军退',
+        hookEn: "The last big battle: this time Japan retreats",
         battles: [{ side: 'china', at: [110.60, 27.10], nameZh: '湘西会战', nameEn: 'The battle of West Hunan', placeZh: '雪峰山（今湖南洞口·武冈）', placeEn: 'Xuefeng Mountains, Hunan',
           date0: [1945, 4, 9], date1: [1945, 6, 7],
           resultZh: '日军败退原出发线：正面战场对日最后一场大规模会战',
@@ -2975,6 +3033,8 @@ window.WAR_DATA = [
       },
       {
         y: 1945.67,
+        hookZh: '十四年，落定',
+        hookEn: "Fourteen years, settled",
         titleZh: '日本投降，南京受降', titleEn: 'Surrender: the ceremony at Nanjing',
         storyCoord: [118.78, 32.06],
         descZh: '八月十五日正午，裕仁广播《终战诏书》宣布无条件投降；九月二日密苏里号签字；九月九日上午九时，南京中央军校大礼堂，冈村宁次在降书上签字——十四年抗战至此落幕，台湾光复。八年间，中国军民伤亡三千五百万，是第二次世界大战付出代价最大的国家之一。',
@@ -3179,6 +3239,14 @@ window.WAR_DATA = [
             descZh: '豫南方向沿平汉线南下——封锁大别山西北出口，三面合围成网。',
             descEn: 'Columns from Xinyang came down the Beijing–Hankou line, sealing the northwest exits of the mountains.' },
         ],
+        ob: [
+          { side: 'kmt', zh: '总力战部署：14 个整编师 · 33 个整编旅 · 近 80 个团（11月27日部署完成，每路均在两个师以上）', en: 'Total-war deployment: 14 integrated divisions, 33 integrated brigades, ~80 regiments (set on Nov 27, each axis two-plus divisions)', srcZh: '白崇禧围攻部署兵力构成（《解放战争时期的鄂豫解放区》引党史资料）', srcEn: 'Composition of Bai\'s encirclement deployment.' },
+          { side: 'kmt', zh: '桂系骨干：张淦第3兵团——第7军（整7师）· 整48师，约 4.5 万人', en: 'Guangxi core: Zhang Gan\'s 3rd Corps — 7th Army (Int. 7th Div.) and Int. 48th Div., ~45,000', srcZh: '陈再道回忆录：「敌第三兵团司令官张淦，辖第七军、四十八军」', srcEn: 'Chen Zaidao\'s memoir on the 3rd Corps order of battle.' },
+          { side: 'kmt', zh: '北线攻击兵团（罗广文）：整编第10师 · 整编第11师，进抵光山、经扶', en: 'Northern assault group (Luo Guangwen): Int. 10th and 11th Divisions, at Guangshan and Jingfu', srcZh: '罗广文兵团自北线进抵光山、经扶（《解放战争时期的鄂豫解放区》引党史资料）', srcEn: 'Luo Guangwen\'s group reached the northern edge of the mountains.' },
+          { side: 'kmt', zh: '另有整25、28、46师及青年军一部；整20师沿平汉线阻截', en: 'Plus Int. 25th, 28th, 46th Divisions and a Youth Army division; Int. 20th Division blocked the Beijing–Hankou line', srcZh: '清剿部队编成（维基「华中剿匪总司令部」条目）', srcEn: 'Mopping-up force composition per the Huazhong HQ article.' },
+          { side: 'pla', zh: '内线：邓小平、李先念率第2、3、6纵化整为零坚持', en: 'Interior line: Deng Xiaoping and Li Xiannian keep the 2nd, 3rd and 6th Columns dispersed in the hills', srcZh: '刘邓分兵内外线部署（党史口径）', srcEn: 'The interior-exterior split of the Liu–Deng army.' },
+          { side: 'pla', zh: '外线：刘伯承率后方指挥部转出淮河以北（临泉）', en: 'Exterior line: Liu Bocheng takes the rear HQ north of the Huai (Linquan)', srcZh: '刘邓分兵内外线部署（党史口径）', srcEn: 'The rear HQ moved out to Linquan.' },
+        ],
       },
       {
         y: 1947.96,
@@ -3186,6 +3254,11 @@ window.WAR_DATA = [
         storyCoord: [115.30, 31.10],
         descZh: '十一月二十七日国防部九江指挥所成立，白崇禧统一指挥豫鄂皖赣湘五省军政——先后33个旅（入山初期尾追约23个旅）分进合击，辅以碉堡网、公路网、谍报网「三网」。刘伯承率后方机关转出淮西，邓小平、李先念留大别山：二、三、六纵化整为零，在内线与「清剿」周旋——大别山背得越重，全局越轻松。',
         descEn: 'On November 27 Chiang set up the Jiujiang Command under Bai Chongxi over five provinces — 33 brigades in succession (about 23 in pursuit at the entry) converging on the mountains behind a web of blockhouses, roads and informers. Liu took the rear HQ north of the Huai; Deng and Li Xiannian stayed in the hills, dissolving three columns into guerrilla bands to carry the burden for the whole front.',
+        ob: [
+          { side: 'pla', zh: '外线配合：陈粟、陈谢破击平汉、陇海路（12月13日起）——歼敌2万余，西平歼第5兵团部及整3师', en: 'Exterior support: Chen–Su and Chen–Xie wreck the Beijing–Hankou and Longhai railways from Dec 13 — 20,000+ destroyed, the 5th Corps HQ and Int. 3rd Division annihilated at Xiping', srcZh: '平汉陇海破击战战果（「大别山反清剿战役」条目）', srcEn: 'Railway-wrecking campaign results.' },
+          { side: 'kmt', zh: '国民党军被迫自大别山抽调 3 个师回援平汉线', en: 'Three divisions stripped from the Dabie Mountains to shore up the railway line', srcZh: '同上（回援调动）', srcEn: 'Divisions recalled from the mountains.' },
+          { side: 'kmt', zh: '蒋介石汉口「清剿」会议（12月29日）：行「筑寨并村」', en: 'Chiang\'s Hankou mopping-up conference (Dec 29): fortify villages, consolidate hamlets', srcZh: '同上（汉口会议）', srcEn: 'The Hankou conference directive.' },
+        ],
       },
       {
         y: 1948.15,
@@ -3242,6 +3315,8 @@ window.WAR_DATA = [
     steps: [
       {
         y: 1948.71,
+        hookZh: '百万大军，秘密南下',
+        hookEn: "A million men slip south in secret",
         moves: [{ side: 'pla', from: [124.35, 43.17], to: [121.40, 41.40],
           path: [[124.35, 43.17], [123.00, 42.00], [121.90, 41.90], [121.40, 41.40]],
           titleZh: '东北野战军百万大军秘密南下',
@@ -3251,6 +3326,8 @@ window.WAR_DATA = [
       },
       {
         y: 1948.73,
+        hookZh: '序幕：八昼夜破城',
+        hookEn: "Prologue: eight days to the walls",
         battles: [{ side: 'pla', at: [117.00, 36.65], nameZh: '济南战役', nameEn: 'The battle of Jinan', placeZh: '济南（今山东济南）', placeEn: 'Jinan, Shandong',
           date0: [1948, 9, 16], date1: [1948, 9, 24],
           resultZh: '八昼夜破城：王耀武被俘，华北华东解放区连成一片',
@@ -3276,6 +3353,8 @@ window.WAR_DATA = [
       },
       {
         y: 1948.83,
+        hookZh: '三十一小时关门',
+        hookEn: "Shutting the door in 31 hours",
         battles: [
           { side: 'pla', at: [121.13, 41.10], nameZh: '攻克锦州', nameEn: 'The storming of Jinzhou', placeZh: '锦州（今辽宁锦州）', placeEn: 'Jinzhou, Liaoning',
             date0: [1948, 10, 14], date1: [1948, 10, 15],
@@ -3321,6 +3400,8 @@ window.WAR_DATA = [
       },
       {
         y: 1948.85,
+        hookZh: '四十八小时聚歼十万',
+        hookEn: "100,000 destroyed in 48 hours",
         moves: [{ side: 'pla', from: [121.13, 41.10], to: [122.12, 41.69],
           titleZh: '攻锦主力回师辽西',
           titleEn: 'The Jinzhou force wheels west',
@@ -3349,6 +3430,8 @@ window.WAR_DATA = [
       },
       {
         y: 1948.92,
+        hookZh: '五十二天，东北易手',
+        hookEn: "The Northeast changes hands in fifty-two days",
         battles: [{ side: 'pla', at: [123.43, 41.81], nameZh: '沈阳解放', nameEn: 'The liberation of Shenyang', placeZh: '沈阳（今辽宁沈阳）', placeEn: 'Shenyang',
           date0: [1948, 11, 1], date1: [1948, 11, 2],
           resultZh: '11月2日沈阳、营口解放：辽沈收官，歼敌47.2万',
@@ -3374,6 +3457,8 @@ window.WAR_DATA = [
       },
       {
         y: 1948.94,
+        hookZh: '口袋底：十二日血战',
+        hookEn: "The bottom of the sack: twelve days of blood",
         moves: [{ side: 'pla', from: [118.35, 35.05], to: [117.94, 34.31],
           titleZh: '华野七路南下，围碾庄',
           titleEn: 'Seven columns converge on Nianzhuang',
@@ -3403,6 +3488,8 @@ window.WAR_DATA = [
       },
       {
         y: 1948.96,
+        hookZh: '十二万入瓮',
+        hookEn: "120,000 in the jar",
         moves: [{ side: 'kmt', from: [114.13, 32.80], to: [116.85, 33.63],
           path: [[114.13, 32.80], [115.50, 33.20], [116.85, 33.63]],
           titleZh: '黄维兵团千里驰援',
@@ -3433,6 +3520,8 @@ window.WAR_DATA = [
       },
       {
         y: 1948.98,
+        hookZh: '咬落第一口：三十五军覆没',
+        hookEn: "The first bite: the 35th Corps destroyed",
         moves: [{ side: 'pla', from: [123.43, 41.81], to: [115.44, 40.45],
           path: [[123.43, 41.81], [119.80, 40.60], [117.50, 40.30], [115.44, 40.45]],
           titleZh: '东北野战军八十万入关',
@@ -3459,6 +3548,8 @@ window.WAR_DATA = [
       },
       {
         y: 1949.03,
+        hookZh: '风雪四十日：六十万胜八十万',
+        hookEn: "Forty days of snow: 600,000 beat 800,000",
         battles: [{ side: 'pla', at: [116.42, 33.98], nameZh: '陈官庄歼灭战', nameEn: 'The end at Chenguanzhuang', placeZh: '陈官庄（今河南永城）', placeEn: 'Chenguanzhuang, Henan',
           date0: [1948, 12, 4], date1: [1949, 1, 10],
           resultZh: '总攻四日全歼：杜聿明被俘、邱清泉毙命，淮海收官',
@@ -3483,6 +3574,8 @@ window.WAR_DATA = [
       },
       {
         y: 1949.06,
+        hookZh: '二十九小时，与不战而下',
+        hookEn: "Twenty-nine hours — and a city opened, not stormed",
         battles: [{ side: 'pla', at: [117.20, 39.13], nameZh: '天津攻坚战', nameEn: 'The storming of Tianjin', placeZh: '天津（今天津市区）', placeEn: 'Tianjin',
           date0: [1949, 1, 14], date1: [1949, 1, 15],
           resultZh: '29小时克城：陈长捷被俘，北平随后和平解放',
@@ -3508,6 +3601,8 @@ window.WAR_DATA = [
       },
       {
         y: 1949.33,
+        hookZh: '一千华里，同日渡江',
+        hookEn: "A thousand li crossed in a single day",
         moves: [{ side: 'pla', from: [118.30, 32.30], to: [118.78, 32.06],
           titleZh: '百万雄师过大江',
           titleEn: 'A million cross the Yangtze',
@@ -3533,6 +3628,8 @@ window.WAR_DATA = [
       },
       {
         y: 1949.83,
+        hookZh: '百年兵燹，至此收场',
+        hookEn: "A century of wars ends here",
         titleZh: '开国大典', titleEn: 'The founding ceremony',
         storyCoord: [116.39, 39.90],
         descZh: '十月一日下午三时，天安门城楼上宣告中华人民共和国中央人民政府成立——从清末到建国的一百年兵燹，至此收场。武昌的枪声、卢沟桥的炮声、三大战役的雪与泥，都在这一刻落定为中国近代史的最后注脚。',

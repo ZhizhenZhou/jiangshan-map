@@ -223,6 +223,29 @@ async function runWarSandboxSuite(ctx) {
   );
   assert(warModule.includes('war-bmeta-zone'), 'Battle-record block must carry the zone/situation note line');
   assert(styleCss.includes('.war-bmeta-zone'), 'Zone note line must be styled');
+  assert(
+    warModule.includes("hookZh: step.hookZh || ''"),
+    'War hydrate must pass challenge hooks through to the story card'
+  );
+  assert(warModule.includes('const ob = (s.ob || [])'), 'Battle-record block must render step-level order-of-battle rows');
+  assert(styleCss.includes('.story-hook'), 'Challenge hook kicker must be styled');
+
+  // 挑战式引题（hook）：出现即必须双语；编成表（ob）出现即必须双语+署名出处。
+  for (const w of wars) {
+    if (!['xinhai', 'beifa', 'kangri', 'tingjin', 'sanda'].includes(w.key)) continue;
+    const hookSideKeys = new Set(w.sides.map((s) => s.key));
+    for (const [i, step] of w.steps.entries()) {
+      if (step.hookZh || step.hookEn) {
+        assert(step.hookZh && step.hookEn, `${w.key}.steps[${i}] hook must be bilingual`);
+        assert(step.hookZh.length >= 4 && step.hookZh.length <= 24, `${w.key}.steps[${i}] hook zh length outside [4, 24]`);
+      }
+      for (const u of step.ob || []) {
+        assert(hookSideKeys.has(u.side), `${w.key}.steps[${i}].ob side ${u.side} unknown`);
+        assert(u.zh && u.en, `${w.key}.steps[${i}].ob row must be bilingual`);
+        assert(u.srcZh && u.srcEn, `${w.key}.steps[${i}].ob row must cite a bilingual source`);
+      }
+    }
+  }
   for (const w of wars) {
     if (!w.zones || !w.zones.length) continue;
     for (const [zi, zone] of w.zones.entries()) {

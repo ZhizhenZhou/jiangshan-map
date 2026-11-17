@@ -6484,6 +6484,21 @@ button.story-inline-person:hover {
   transform: none;
   top: 0.42em;
 }
+
+/* —— 挑战式引题（hook）：故事卡每步标题上方的一行张力导语，非标题本体，
+   战斗名/站名精度不受影响；无 hook 字段的步骤（含古代战役）自动不渲染。 —— */
+.story-hook {
+  display: block;
+  font-family: var(--sans-stack);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #8a2f22;
+  margin: 0 0 3px;
+}
+.t-val .story-hook + .person-site-line {
+  margin-top: 0;
+}
 .war-balloon-date {
   font-family: var(--sans-stack);
   font-size: 10.5px;

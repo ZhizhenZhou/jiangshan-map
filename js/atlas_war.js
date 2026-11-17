@@ -261,6 +261,8 @@
             modernEn: step.storyModernEn || (battle && today && placeEn) || '',
             quoteZh: step.quoteZh || '',
             quoteEn: step.quoteEn || '',
+            hookZh: step.hookZh || '',
+            hookEn: step.hookEn || '',
             coord,
             fromCoord,
             via: pts.length > 2 ? pts.slice(1, -1) : null,
@@ -1255,13 +1257,26 @@
             })
             .join('')
         : '';
-      if (!date && !result && !cmdr && !units && !cas && !zoneRow) return '';
+      // 编成表（step 级 ob）：无战斗的态势步也能挂双方编成/部署行，悬浮出处。
+      const ob = (s.ob || [])
+        .map((u) => {
+          const sd = this._warSide(w, u.side);
+          const tip = [u.srcZh, u.srcEn].filter(Boolean).join(' / ').replace(/"/g, '&quot;');
+          return (
+            `<div class="war-bmeta-row war-bmeta-unit"${sd ? ` style="--side-color:${sd.color}"` : ''} title="${tip}">` +
+            `${esc(zh ? u.zh : (u.en || u.zh))}</div>`
+          );
+        })
+        .join('');
+      if (!date && !result && !cmdr && !units && !cas && !zoneRow && !ob) return '';
       return (
         `<div class="war-bmeta">` +
         `<div class="war-bmeta-head">${esc(
           b
             ? (zh ? '战例档案 · 悬停伤亡行见出处' : 'Battle record · hover casualties for sources')
-            : (zh ? '态势说明' : 'Situation note')
+            : (ob
+                ? (zh ? '双方编成 · 悬停行见出处' : 'Order of battle · hover rows for sources')
+                : (zh ? '态势说明' : 'Situation note'))
         )}</div>` +
         (zoneRow || '') +
         (date || result
@@ -1273,6 +1288,7 @@
         cmdr +
         units +
         cas +
+        ob +
         `</div>`
       );
     }
