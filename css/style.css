@@ -6221,7 +6221,12 @@ button.story-inline-person:hover {
 #war-balloon.is-hidden {
   display: block !important;
   opacity: 0;
+  transform: translateY(5px);
   pointer-events: none;
+}
+/* 揭幕入场（与箭头到达同一拍）：淡入 + 5px 上浮，替代硬弹 */
+#war-balloon {
+  transition: opacity 0.18s ease, transform 0.22s cubic-bezier(0.22, 0.9, 0.32, 1);
 }
 
 @keyframes warCardIn {
@@ -6565,6 +6570,53 @@ button.story-inline-person:hover {
   stroke: #f6f1e6;
   stroke-width: 2.6;
 }
+/* —— 步进节奏「预告→行进→到达定格」——
+ * 点击某一步时地图状态先就位：本步军标框以半透明预告态先行露面（先看到
+ * "要打哪儿、谁来打"），箭头生长是唯一的动作；箭头到位瞬间 JS 移除
+ * is-pending（加 is-arrived），军标定格为正式态——标注不再是"动画结束后
+ * 凭空冒出一堆"，出现与动作完成是同一拍。 */
+#grp-war .war-node .war-frame {
+  transition: opacity 0.18s ease, fill-opacity 0.18s ease;
+}
+#grp-war .war-node .war-desig,
+#grp-war .war-node .war-stepnum,
+#grp-war .war-node .war-ech,
+#grp-war .war-node .war-dot {
+  transition: opacity 0.18s ease;
+}
+#grp-war .war-node.is-pending .war-frame {
+  fill-opacity: 0.5;
+}
+#grp-war .war-node.is-pending .war-desig,
+#grp-war .war-node.is-pending .war-stepnum,
+#grp-war .war-node.is-pending .war-ech,
+#grp-war .war-node.is-pending .war-dot {
+  opacity: 0.38;
+}
+#grp-war .war-lbl {
+  transition: opacity 0.18s ease;
+}
+#grp-war .war-lbl.is-pending-lbl {
+  opacity: 0.38;
+}
+/* 前线帧/态势日期随步切换：柔和淡入代替硬切（ghost 退场动画在后声明，
+ * 同元素上覆盖此入场动画——is-ghost 规则次序靠后即胜出） */
+#grp-war .war-zone,
+#grp-war .war-zone-date {
+  animation: warZoneIn 0.26s ease-out;
+}
+@keyframes warZoneIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* 总览→选中步：军图整层 0.3s 开场淡入（JS 只在层切换时挂 war-layer-intro） */
+#grp-war.war-layer-intro .war-root {
+  animation: warLayerIn 0.3s ease-out;
+}
+@keyframes warLayerIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 #grp-war .war-terrain {
   pointer-events: all;
   cursor: help;
@@ -6845,7 +6897,6 @@ button.story-inline-person:hover {
   font-size: 12.2px;
   line-height: 1.42;
   pointer-events: auto;
-  transition: opacity 0.16s ease;
 }
 
 #war-balloon::before {

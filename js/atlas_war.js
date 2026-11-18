@@ -23,6 +23,11 @@
   // 行军绘制时长：与飞行同步时取 WAR_FLIGHT_MS；沙盘内逐步推进（相机不飞）
   // 用短档——100ms 起跑、900ms 走完，箭头带着线一气呵成，不再干等 632ms。
   const WAR_DRAW_MS = 900;
+  // 步进聚焦飞行（故事卡 下一站 / 沙盘卡 下一步，_animateCameraTo 默认档
+  // 650ms）期间的行军起跑延迟：箭头等相机飞行 ~70% 处再生长——用户先看到
+  // 地图到场，再看箭头行进，到位定格（全程可读，不再被飞行遮掉前半段）。
+  const WAR_STEP_FLIGHT_MS = 650;
+  const WAR_STEP_DRAW_DELAY = Math.round(WAR_STEP_FLIGHT_MS * 0.7);
   // 行军只在目标缩放下读得出来时才播：屏幕投影线长低于此值（全国视角整条
   // 线 ~20px，骑乘头恒定 ~19px）就整箭瞬时落位，不播"糊团"。
   const WAR_DRAW_MIN_PX = 90;
@@ -673,7 +678,21 @@
         this._warDrawPending = this._warDrawsLeft > 0;
         if (dirG) dirG.classList.add('is-arrived');
         if (rider) rider.remove();
-        if (!this._warDrawPending) this._revealWarBalloon();
+        if (!this._warDrawPending) {
+          // 到达定格（步进节奏「预告→行进→定格」）：本步军标框在渲染时以
+          // 半透明预告态先行露面（用户先看到"要打哪儿、谁来打"），箭头生长
+          // 到位的瞬间才定格为正式军标——标注不再是"动画结束后凭空冒出一堆"，
+          // 信息的最后一拍与动作完成是同一拍（浮签同拍揭幕）。
+          const grpNow = this.grpWar || (this.svg && this.svg.querySelector('#grp-war'));
+          if (grpNow) {
+            grpNow.querySelectorAll('.war-node.is-pending').forEach((n) => {
+              n.classList.remove('is-pending');
+              n.classList.add('is-arrived');
+            });
+            grpNow.querySelectorAll('.war-lbl.is-pending-lbl').forEach((n) => n.classList.remove('is-pending-lbl'));
+          }
+          this._revealWarBalloon();
+        }
       };
       const reduced = reducedMotion();
       if (reduced) {
@@ -801,7 +820,18 @@
         this._warLayerOn() ? 1 : 0,
       ].join('|');
       if (sig === this._warSvgSig) return;
+      const prevOverview = this._warWasOverview;
       this._warSvgSig = sig;
+      this._warWasOverview = overview;
+      // 步进聚焦飞行预告（selectPersonEvent/_gotoWarStep 置位时间戳）：本次渲染的
+      // 行军绘制改为飞行 70% 处起跑——相机先到场、箭头再行进、到位定格。
+      // 一次点击会连发多次 sync（jumpToYear → _renderPersonPinsOverlay），
+      // 中间帧也会完整重建箭头，所以用【时间戳新鲜度】判读（300ms 内算数），
+      // 不做一次性清除——清除时机永远猜不准哪一帧是最后一帧。
+      const flightFirst =
+        !reducedMotion() &&
+        Number.isFinite(this._warFlightPendingAt) &&
+        performance.now() - this._warFlightPendingAt < 300;
       // 战局变化即作废旧悬停签（内容只随 pointermove 重算，陈旧内容比没有更糟）
       if (this.hoverTip) {
         this.hoverTip.classList.add('is-hidden');
@@ -1030,7 +1060,13 @@
               p.style.visibility = 'visible';
               if (dir) dir.classList.add('is-arrived');
             } else {
-              const delay = reducedMotion() ? 0 : warFly ? Math.round(flightMs * 0.3) : 100;
+              const delay = reducedMotion()
+                ? 0
+                : warFly
+                  ? Math.round(flightMs * 0.3)
+                  : flightFirst
+                    ? WAR_STEP_DRAW_DELAY
+                    : 100;
               const ms = warFly ? flightMs : WAR_DRAW_MS;
               const startDraw = () => {
                 let rider = null;
@@ -1089,6 +1125,9 @@
       for (let i = 0; i <= battleEnd; i++) {
         const s = w.steps[i];
         const isCur = i === idx && !overview;
+        // 本步有行军箭头待画/在画 → 当前步军标先以预告态露面，到达定格
+        //（moves 循环先于 battles 循环，_warDrawsLeft 此刻已含本步全部待画箭头）
+        const stepPending = isCur && (this._warDrawsLeft || 0) > 0;
         (s.battles || []).forEach((b, bi) => {
           if (!b.at) return;
           const side = this._warSide(w, b.side);
@@ -1134,7 +1173,7 @@
           const node = this._svgNode(
             'g',
             {
-              class: `war-node${isCur ? ' is-cur' : ''}`,
+              class: `war-node${isCur ? ' is-cur' : ''}${stepPending ? ' is-pending' : ''}`,
               'data-x': sx.toFixed(1),
               'data-y': sy.toFixed(1),
               'data-war': w.key,
@@ -1183,7 +1222,7 @@
           }
           const lbl = this._warField(b, 'name') || this._warStepTitle(w, s);
           if (lbl) {
-            lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, ni: nodeIdx });
+            lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, pending: stepPending, ni: nodeIdx });
           }
           nodeIdx++;
           lastPt = b.at;
@@ -1201,7 +1240,7 @@
             const node = this._svgNode(
               'g',
               {
-                class: `war-node war-dotnode${isCur ? ' is-cur' : ''}`,
+                class: `war-node war-dotnode${isCur ? ' is-cur' : ''}${stepPending ? ' is-pending' : ''}`,
                 'data-x': sx.toFixed(1),
                 'data-y': sy.toFixed(1),
                 'data-war': w.key,
@@ -1223,7 +1262,7 @@
               num.style.fill = side.color;
               const lbl = this._warStepTitle(w, s) || this._warField(s, 'title');
               if (lbl) {
-                lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, ni: nodeIdx });
+                lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, pending: stepPending, ni: nodeIdx });
               }
             }
             nodeIdx++;
@@ -1237,7 +1276,7 @@
         const lg = this._svgNode(
           'g',
           {
-            class: `war-lbl${lb.muted ? ' is-past-lbl' : ''}`,
+            class: `war-lbl${lb.muted ? ' is-past-lbl' : ''}${lb.pending ? ' is-pending-lbl' : ''}`,
             'data-x': lb.x.toFixed(1),
             'data-y': lb.y.toFixed(1),
             'data-ni': String(lb.ni != null ? lb.ni : -1),
@@ -1255,6 +1294,18 @@
       this._rescaleSvgTypography();
       // 新符号由通用 rescale 定位，随后立即覆盖为屏幕恒定档
       this._warRescaleGlyphs();
+      // 总览→选中步是视觉语言的整层切换（细线编号点→完整军图）：军图层
+      // 0.3s 淡入做开场，避免"凭空糊一脸"；选中步之间的重绘内容相同
+      //（只有当前步在变）不重播，总览→总览/选中→总览也不播。
+      if (!overview && prevOverview) {
+        grp.classList.add('war-layer-intro');
+        if (this._warIntroTimer) clearTimeout(this._warIntroTimer);
+        this._warIntroTimer = setTimeout(() => {
+          this._warIntroTimer = null;
+          const g2 = this.grpWar || (this.svg && this.svg.querySelector('#grp-war'));
+          if (g2) g2.classList.remove('war-layer-intro');
+        }, 380);
+      }
     }
 
     // ---------------- render: campaign card ----------------
@@ -1603,8 +1654,15 @@
     _gotoWarStep(w, i) {
       if (!w || i < 0 || i >= (w.steps || []).length) return;
       const s = w.steps[i];
-      this._warSeekTo(s.y);
-      if (!reducedMotion()) this._warFocusStep(w, s);
+      if (!reducedMotion()) {
+        // 下一步会做 650ms 取景飞行（_warFocusStep）：置位行军延迟预告——
+        // 渲染端据此把箭头起跑推迟到飞行 ~70% 处（先到场、再行进、到位定格）
+        this._warFlightPendingAt = performance.now();
+        this._warSeekTo(s.y);
+        this._warFocusStep(w, s);
+      } else {
+        this._warSeekTo(s.y);
+      }
     }
 
     _warFocusStep(w, s) {

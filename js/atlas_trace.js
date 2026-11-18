@@ -1240,6 +1240,10 @@
       const clamped = Math.max(0, Math.min(events.length - 1, idx));
       this.activePersonEventIdx = clamped;
       const ev = events[clamped];
+      // 战争故事线的步进取景飞行（本函数尾部 panCamera 分支，650ms 档）：
+      // 先置位行军延迟预告（时间戳，渲染端按新鲜度判读）——渲染端把箭头
+      // 起跑推迟到飞行 ~70% 处，相机先到场、箭头再行进、到位定格。
+      if (panCamera) this._warFlightPendingAt = (window.performance || Date).now();
       this.closeMilestoneBalloon();
       this._inPersonSync = true;
       this._runWithDeferredTypography(() => {

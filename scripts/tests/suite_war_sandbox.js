@@ -257,6 +257,25 @@ async function runWarSandboxSuite(ctx) {
   assert(styleCss.includes('.war-frame') && styleCss.includes('.war-terrain-sym'), 'Military map layer must be styled');
   assert(styleCss.includes('.war-lg-row'), 'Legend panel rows must be styled');
 
+  // 步进节奏「预告→行进→到达定格」：当前步军标先以预告态露面（is-pending，
+  // 半透明），箭头生长到位瞬间 finish() 翻转为正式态——标注不与动作脱拍出现。
+  assert(
+    warModule.includes("${stepPending ? ' is-pending' : ''}") &&
+      warModule.includes("n.classList.add('is-arrived')"),
+    'Cur-step frames must render in pending preview state and lock in on arrow arrival'
+  );
+  assert(warModule.includes('is-pending-lbl'), 'Pending state must cover the cur-step battle label');
+  assert(
+    warModule.includes('WAR_STEP_DRAW_DELAY') &&
+      warModule.includes('_warFlightPendingAt = performance.now()') &&
+      warModule.includes('WAR_STEP_DRAW_DELAY'),
+    'March draw must wait for the step-focus camera flight (先到场、再行进、到位定格)'
+  );
+  assert(
+    styleCss.includes('.war-node.is-pending .war-frame') && styleCss.includes('warLayerIn'),
+    'Pending preview + overview-to-step layer intro must be styled'
+  );
+
   // 地形标注数据红线：kind 枚举、双语名称与军事含义
   const TERRAIN_KINDS = new Set(['pass', 'ford', 'bridge', 'marsh', 'snow', 'river', 'mountain']);
   for (const w of wars) {
