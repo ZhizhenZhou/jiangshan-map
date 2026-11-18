@@ -5965,6 +5965,14 @@ button.story-inline-person:hover {
   stroke-width: var(--war-w, 2.1px);
   pointer-events: none;
 }
+/* 总览简化行军线：细线、无底衬——总览只给「一条线+编号点」的骨架 */
+#grp-war .war-march.is-ov {
+  stroke-width: 2.3px;
+  opacity: 0.92;
+}
+#grp-war .war-dot-ov {
+  paint-order: stroke;
+}
 #grp-war .war-march.t0, #grp-war .war-march-casing.t0 { --war-w: 3.6px; }
 #grp-war .war-march.t1, #grp-war .war-march-casing.t1 { --war-w: 5.2px; }
 #grp-war .war-march.t2, #grp-war .war-march-casing.t2 { --war-w: 6.6px; }

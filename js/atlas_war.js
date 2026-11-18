@@ -893,8 +893,11 @@
         const title = this._svgNode('title', {}, tg);
         title.textContent = ttip;
         this._svgNode('path', { class: 'war-terrain-sym', d: WAR_TERRAIN_D[t.kind] || WAR_TERRAIN_D.mountain }, tg);
-        const nm = this._svgNode('text', { class: 'war-terrain-name', x: 9, y: 3.5 }, tg);
-        nm.textContent = this.locale !== 'en' ? (t.nameZh || t.nameEn) : (t.nameEn || t.nameZh);
+        // 名称仅选中步态显示（总览只留图标）——总览文字密度是可读性的第一杀手
+        if (!overview) {
+          const nm = this._svgNode('text', { class: 'war-terrain-name', x: 9, y: 3.5 }, tg);
+          nm.textContent = this.locale !== 'en' ? (t.nameZh || t.nameEn) : (t.nameEn || t.nameZh);
+        }
       }
 
       // --- march arrows: past as solid traces, current drawing progressively ---
@@ -929,6 +932,11 @@
           const side = this._warSide(w, mv.side);
           const info = this._warSegInfo(pts);
           if (!info) continue;
+          // 总览简化：细行军线（无底衬/楔形头/骑乘动画）——细节留给选中步
+          if (overview) {
+            this._svgNode('path', { d: info.d, class: 'war-march is-ov', stroke: side.color }, g);
+            continue;
+          }
           const tier = mv.force ? this._warForceTier(mv.force.n) : 0;
           const claimed = mv.force && mv.force.quality === 'claimed';
           // 箭头语义（调研文档 §4）：main 主攻（默认，粗实线）/ supporting
@@ -1087,6 +1095,39 @@
           // 真址渲染：同址避让在 _warRescaleGlyphs 里按屏幕距离逐帧处理
           //（旧版 0.3° 固定偏移在深 zoom 下把菱形甩离箭头尖端 130px）
           const [sx, sy] = this.projector.toScreen(b.at[0], b.at[1]);
+          // 总览简化：细行军线 + 编号小圆点 + 仅战役名签（番号框/地形名/楔形头
+          // 全部收起，细节留给选中步）——13 步全量同屏叠箭头是「完全看不懂」
+          // 的根源（军史图集总览 = 一条细线 + 编号点）
+          if (overview) {
+            const node = this._svgNode(
+              'g',
+              {
+                class: 'war-node ov',
+                'data-x': sx.toFixed(1),
+                'data-y': sy.toFixed(1),
+                'data-war': w.key,
+                'data-step': String(i),
+                'data-battle': String(bi),
+              },
+              g
+            );
+            this._svgNode('circle', { class: 'war-hit', r: 10, fill: '#000', 'fill-opacity': 0 }, node);
+            this._svgNode(
+              'circle',
+              { class: 'war-dot-ov', r: 7.5, fill: '#f6f1e6', stroke: side.color, 'stroke-width': 2 },
+              node
+            );
+            const on = this._svgNode('text', { class: 'war-stepnum', x: 0, y: 3.6, 'text-anchor': 'middle' }, node);
+            on.textContent = String(i + 1);
+            on.style.fill = '#26221b';
+            const lbl = this._warField(b, 'name') || this._warStepTitle(w, s);
+            if (lbl) {
+              lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: false, ni: nodeIdx });
+            }
+            nodeIdx++;
+            lastPt = b.at;
+            return;
+          }
           const tier = this._warForceTier(
             Math.max(0, ...(b.forces || []).filter((f) => f.quality !== 'claimed').map((f) => f.n))
           );
@@ -1172,16 +1213,18 @@
             this._warBattleAnchor = { x: sx, y: sy };
             this._svgNode('circle', { class: 'war-hit', r: 11, fill: '#000', 'fill-opacity': 0 }, node);
             this._svgNode('circle', { class: 'war-dot', r: 2.9, fill: side.color }, node);
-            const num = this._svgNode(
-              'text',
-              { class: 'war-stepnum', x: 0, y: 13, 'text-anchor': 'middle' },
-              node
-            );
-            num.textContent = String(i + 1);
-            num.style.fill = side.color;
-            const lbl = this._warStepTitle(w, s) || this._warField(s, 'title');
-            if (lbl) {
-              lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, ni: nodeIdx });
+            if (!overview) {
+              const num = this._svgNode(
+                'text',
+                { class: 'war-stepnum', x: 0, y: 13, 'text-anchor': 'middle' },
+                node
+              );
+              num.textContent = String(i + 1);
+              num.style.fill = side.color;
+              const lbl = this._warStepTitle(w, s) || this._warField(s, 'title');
+              if (lbl) {
+                lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, ni: nodeIdx });
+              }
             }
             nodeIdx++;
           }
