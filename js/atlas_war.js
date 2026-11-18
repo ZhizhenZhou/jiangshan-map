@@ -1110,24 +1110,36 @@
           this._svgNode('circle', { class: 'war-hit', r: 12, fill: '#000', 'fill-opacity': 0 }, node);
           // 当前步脉冲环（仅当前步渲染；样式沿用 .war-ring / warPulse）
           if (isCur) this._svgNode('circle', { class: 'war-ring', r: 14.5, stroke: side.color }, node);
-          // 军标式单位框（简化中式标图，调研文档 §2）：矩形框 = 阵营色描边 +
-          // 米色底，框内深色队号位放步序号；编制级别记号由兵力档映射
-          // （X师 / XX军 / XXX兵团，无兵力档不记号）
+          // 军标式单位框（调研文档 §2）：框内放【部队番号】——番号即身份，
+          // 同一番号沿轴线连续出现，部队走向可读；框色 = desigSide 阵营色
+          // （desigSide 缺省 = battle.side）；编制级别记号由兵力档映射。
+          const dSideObj = this._warSide(w, b.desigSide || b.side) || side;
+          const desig = this.locale !== 'en'
+            ? (b.desigZh || '')
+            : (b.desigEn || b.desigZh || '');
+          const fw = desig
+            ? Math.max(26, Math.min(96, [...desig].reduce((n, ch) => n + (/[\u2E80-\u9FFF\uF900-\uFAFF]/.test(ch) ? 9.4 : 5.4), 0) + 10))
+            : 22;
           this._svgNode('rect', {
             class: `war-frame t${tier}`,
-            x: -11, y: -7, width: 22, height: 14,
-            stroke: side.color, fill: '#f6f1e6', 'fill-opacity': 0.94, 'stroke-width': 2,
+            x: -fw / 2, y: -7.5, width: fw, height: 15,
+            stroke: dSideObj.color, fill: '#f6f1e6', 'fill-opacity': 0.94, 'stroke-width': 2,
           }, node);
-          const ech = this._svgNode('text', { class: 'war-ech', x: 0, y: -9.5, 'text-anchor': 'middle' }, node);
+          const ech = this._svgNode('text', { class: 'war-ech', x: 0, y: -10.5, 'text-anchor': 'middle' }, node);
           ech.textContent = ['', 'X', 'XX', 'XXX'][tier] || '';
-          // 步骤编号（框内队号位，中式标图队号深色）：屏幕恒定（父组 scale 补偿）
-          const num = this._svgNode(
-            'text',
-            { class: 'war-stepnum', x: 0, y: 4.2, 'text-anchor': 'middle' },
-            node
-          );
-          num.textContent = String(i + 1);
-          num.style.fill = '#26221b';
+          if (desig) {
+            // 框内番号（中式标图队号深色）+ 框下步序号（导航）
+            const dg = this._svgNode('text', { class: 'war-desig', x: 0, y: 4.4, 'text-anchor': 'middle' }, node);
+            dg.textContent = desig;
+            const num2 = this._svgNode('text', { class: 'war-stepnum', x: 0, y: 18.5, 'text-anchor': 'middle' }, node);
+            num2.textContent = String(i + 1);
+            num2.style.fill = dSideObj.color;
+          } else {
+            // 无番号（古代战役未回填）：退回框内步序号
+            const num = this._svgNode('text', { class: 'war-stepnum', x: 0, y: 4.4, 'text-anchor': 'middle' }, node);
+            num.textContent = String(i + 1);
+            num.style.fill = '#26221b';
+          }
           const lbl = this._warField(b, 'name') || this._warStepTitle(w, s);
           if (lbl) {
             lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, ni: nodeIdx });
@@ -1294,8 +1306,8 @@
       return (
         `<div class="war-lg-head">${esc(zh ? '军事图例' : 'Map legend')}</div>` +
         row(
-          `<rect x="-10" y="-7" width="20" height="14" fill="#f6f1e6" stroke="#9e2b25" stroke-width="2"/><text x="0" y="4" text-anchor="middle" font-size="9" fill="#26221b">7</text>`,
-          zh ? '战役节点 · 框色=阵营，数字=步序' : 'Battle node: frame = side, number = step'
+          `<rect x="-12" y="-7" width="24" height="14" fill="#f6f1e6" stroke="#9e2b25" stroke-width="2"/><text x="0" y="4" text-anchor="middle" font-size="8" fill="#26221b">红4团</text>`,
+          zh ? '战役节点 · 框内=部队番号（框色=阵营），框下=步序' : 'Battle node: frame holds the unit designation'
         ) +
         row(
           `<text x="0" y="-6" text-anchor="middle" font-size="9" fill="#3a3020">XXX</text><rect x="-10" y="-4" width="20" height="12" fill="#f6f1e6" stroke="#9e2b25" stroke-width="2"/>`,

@@ -307,6 +307,20 @@ async function runWarSandboxSuite(ctx) {
   // 番号；伤亡可缺（无可靠数字宁缺毋滥），但出现就必须双语署名出处——
   // 可信数据红线进套件（用户前提：数据要可信）。
   const MODERN_WARS = new Set(['changzheng', 'xinhai', 'beifa', 'kangri', 'tingjin', 'sanda']);
+  // 番号红线（近现代六场）：每场战斗必须有短番号——「看不出是什么部队」的
+  // 用户反馈固化为数据校验；desigSide 若有必须是合法 side。
+  for (const w of wars) {
+    if (!MODERN_WARS.has(w.key)) continue;
+    const desigSideKeys = new Set(w.sides.map((s) => s.key));
+    for (const [i, step] of w.steps.entries()) {
+      for (const [bi, battle] of (step.battles || []).entries()) {
+        assert(battle.desigZh && battle.desigEn, `${w.key}.steps[${i}].battles[${bi}] (${battle.nameZh}) needs a bilingual unit designation`);
+        if (battle.desigSide !== undefined) {
+          assert(desigSideKeys.has(battle.desigSide), `${w.key}.steps[${i}].battles[${bi}] desigSide ${battle.desigSide} unknown`);
+        }
+      }
+    }
+  }
   const validDate = (d) =>
     Array.isArray(d) &&
     d.length === 3 &&
