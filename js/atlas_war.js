@@ -44,6 +44,18 @@
   // 探出底衬。此表由 JS 创建 dir/骑乘头子路径时写进 transform 属性
   // （style.css 不再持有 --dir-s 拷贝），交接像素级无缝由构造保证。
   const WEDGE_SCALES = TIER_WIDTHS.map((w) => +(((w + 3.4) * 2.2) / 12.5).toFixed(3));
+  // 军事地形标注符号（简化中式标图）：隘口=对顶折线、渡口=桥板立柱、
+  // 沼泽=水草横纹、雪山=山形+雪帽、河流=波形。ctx: 单位为符号本地坐标，
+  // 随 _warRescaleGlyphs 屏幕恒定（同楔形头）。
+  const WAR_TERRAIN_D = {
+    pass: 'M-7-5L-2.5 0L-7 5M7-5L2.5 0L7 5',
+    ford: 'M-6-4V4M-2-4V4M2-4V4M6-4V4M-8 0H8',
+    bridge: 'M-7-2H7M-5-2V5M5-2V5M-3-5V-2M3-5V-2',
+    marsh: 'M-8-3q3-3 6 0t6 0M-8 1q3-3 6 0t6 0M-8 5q3-3 6 0t6 0',
+    snow: 'M-8 5L0-7L8 5M-3.5-1.5L0-5L3.5-1.5M-2-4L0-6L2-4',
+    mountain: 'M-8 5L0-7L8 5',
+    river: 'M-9 0q4-5 9 0t9 0',
+  };
   const WAR_ICONS = {
     // 传输栏五键镜像对称：|◀ ◀  ▶ ▶|（回起始/上一步 ←→ 下一步/到结束）
     rewind: '<svg class="wico" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><rect x="1.9" y="3" width="1.8" height="10" fill="currentColor"/><path d="M14.1 3v10L7.1 8z" fill="currentColor"/></svg>',
@@ -519,7 +531,7 @@
       // --- 战役菱形：真址 + 屏幕恒定聚簇错开 ---
       const nodes = [...grp.querySelectorAll('g.war-node')];
       const placed = []; // 已占位的屏幕位置（用户单位存储，比较时乘 k）
-      const MINPX = 26;
+      const MINPX = 32; // 单位框宽 22px，留足邻框间距
       const dirs = [[0.81, 0.6], [-0.81, 0.6], [0.74, -0.82], [-0.74, -0.82]];
       let curOff = [0, 0];
       for (const n of nodes) {
@@ -622,6 +634,16 @@
           if (x === null || y === null) return;
           const rot = n.getAttribute('data-rot') || '0';
           n.setAttribute('transform', `translate(${x},${y}) rotate(${rot}) scale(${s})`);
+        });
+
+      // --- 军事地形标注：真址 + 屏幕恒定（同楔形头，不参与避让） ---
+      grp
+        .querySelectorAll('g.war-terrain[data-x]')
+        .forEach((n) => {
+          const x = n.getAttribute('data-x');
+          const y = n.getAttribute('data-y');
+          if (x === null || y === null) return;
+          n.setAttribute('transform', `translate(${x},${y}) scale(${s})`);
         });
     }
 
@@ -797,9 +819,12 @@
       const g = this._svgNode('g', { class: 'war-root' }, grp);
 
       // --- control zone ("front line movement", 示意复原) ---
+      // kind:'front'（FLOT 前线帧）：描边为主、填充极淡，环质心印态势日期
+      // ——对齐军史图集「带日期的多条前线线」叙事骨架（调研文档 §3）。
       if (zi >= 0 && (w.zones || [])[zi]) {
         const z = w.zones[zi];
         const side = this._warSide(w, z.side);
+        const front = z.kind === 'front';
         for (const ring of z.rings || []) {
           let d = '';
           ring.forEach((pt, i) => {
@@ -809,9 +834,25 @@
           d += 'Z';
           this._svgNode(
             'path',
-            { d, class: 'war-zone', stroke: side.color, fill: side.color },
+            { d, class: `war-zone${front ? ' war-zone-front' : ''}`, stroke: side.color, fill: side.color },
             g
           );
+        }
+        if (front && (z.rings || [])[0]) {
+          const ring0 = z.rings[0];
+          let cx = 0, cy = 0;
+          ring0.forEach((pt) => {
+            const [sx, sy] = this.projector.toScreen(pt[0], pt[1]);
+            cx += sx; cy += sy;
+          });
+          cx /= ring0.length; cy /= ring0.length;
+          const m = Math.max(1, Math.min(12, Math.round((z.y % 1) * 12) || 1));
+          const dt = this._svgNode(
+            'text',
+            { class: 'war-zone-date', x: cx.toFixed(1), y: cy.toFixed(1), 'text-anchor': 'middle' },
+            g
+          );
+          dt.textContent = `${Math.trunc(z.y)}.${String(m).padStart(2, '0')}`;
         }
         if (this._warZoneGhost && this._warZoneGhost.key === w.key && this._warZoneGhost.zi !== zi) {
           for (const ghostD of this._warZoneGhost.ds) {
@@ -836,6 +877,24 @@
               .join('') + 'Z'
           ),
         };
+      }
+
+      // --- military terrain annotations（军事地形标注层，调研文档 §1）---
+      // 隘口/渡口/桥/沼泽/雪山/河流：真址符号 + 名称，title 悬停带军事含义；
+      // 屏幕恒定由 _warRescaleGlyphs 的 war-terrain 块处理。
+      for (const t of w.terrain || []) {
+        const [sx, sy] = this.projector.toScreen(t.at[0], t.at[1]);
+        const tg = this._svgNode(
+          'g',
+          { class: `war-terrain kt-${t.kind}`, 'data-x': sx.toFixed(1), 'data-y': sy.toFixed(1) },
+          g
+        );
+        const ttip = [t.noteZh, t.noteEn].filter(Boolean).join(' / ').replace(/"/g, '&quot;');
+        const title = this._svgNode('title', {}, tg);
+        title.textContent = ttip;
+        this._svgNode('path', { class: 'war-terrain-sym', d: WAR_TERRAIN_D[t.kind] || WAR_TERRAIN_D.mountain }, tg);
+        const nm = this._svgNode('text', { class: 'war-terrain-name', x: 9, y: 3.5 }, tg);
+        nm.textContent = this.locale !== 'en' ? (t.nameZh || t.nameEn) : (t.nameEn || t.nameZh);
       }
 
       // --- march arrows: past as solid traces, current drawing progressively ---
@@ -872,14 +931,17 @@
           if (!info) continue;
           const tier = mv.force ? this._warForceTier(mv.force.n) : 0;
           const claimed = mv.force && mv.force.quality === 'claimed';
+          // 箭头语义（调研文档 §4）：main 主攻（默认，粗实线）/ supporting
+          // 助攻（细）/ feint 佯动（虚线）/ retreat 退却（细+虚线）
+          const axCls = ['supporting', 'feint', 'retreat'].includes(mv.axis) ? ` ax-${mv.axis}` : '';
           // 浅色底衬把彩色箭头从繁杂地形里托出来（宣纸制图惯例）
           // 总览（overview）：全部箭头等权高亮——不带 is-cur/is-past 任何状态类
           const casing = this._svgNode(
             'path',
-            { d: info.d, class: `war-march-casing t${tier}${overview ? '' : isCur ? ' is-cur' : ' is-past'}` },
+            { d: info.d, class: `war-march-casing t${tier}${overview ? '' : isCur ? ' is-cur' : ' is-past'}${axCls}` },
             g
           );
-          const cls = `war-march t${tier}${overview ? '' : isCur ? ' is-cur' : ' is-past'}${claimed ? ' is-claimed' : ''}`;
+          const cls = `war-march t${tier}${overview ? '' : isCur ? ' is-cur' : ' is-past'}${claimed ? ' is-claimed' : ''}${axCls}`;
           const p = this._svgNode(
             'path',
             { d: info.d, class: cls, stroke: side.color },
@@ -910,7 +972,7 @@
               dir = this._svgNode(
                 'g',
                 {
-                  class: `war-dir t${tier}${isCur ? ' is-cur' : ''}`,
+                  class: `war-dir t${tier}${isCur ? ' is-cur' : ''}${axCls}`,
                   'data-x': end.endX.toFixed(1),
                   'data-y': end.endY.toFixed(1),
                   'data-rot': end.endAngleDeg.toFixed(1),
@@ -1045,26 +1107,27 @@
           this._warBattleAnchor = { x: sx, y: sy };
           // 透明命中盘：编号文字 pointer-events:none 会把小目标点的点击
           // 穿透到地图（官方钉有 26px 最近拾取兜底，这里用命中盘同效）
-          this._svgNode('circle', { class: 'war-hit', r: 11, fill: '#000', 'fill-opacity': 0 }, node);
-          this._svgNode('circle', { class: 'war-ring', r: 8.5, stroke: side.color }, node);
-          const core = this._svgNode(
-            'g',
-            { class: `war-core t${tier}` },
-            node
-          );
-          this._svgNode(
-            'polygon',
-            { class: 'war-diamond', points: '0,-4.6 4.6,0 0,4.6 -4.6,0', fill: side.color },
-            core
-          );
-          // 步骤编号（官方编号钉同款语义）：菱形下方，屏幕恒定（父组 scale 补偿）
+          this._svgNode('circle', { class: 'war-hit', r: 12, fill: '#000', 'fill-opacity': 0 }, node);
+          // 当前步脉冲环（仅当前步渲染；样式沿用 .war-ring / warPulse）
+          if (isCur) this._svgNode('circle', { class: 'war-ring', r: 14.5, stroke: side.color }, node);
+          // 军标式单位框（简化中式标图，调研文档 §2）：矩形框 = 阵营色描边 +
+          // 米色底，框内深色队号位放步序号；编制级别记号由兵力档映射
+          // （X师 / XX军 / XXX兵团，无兵力档不记号）
+          this._svgNode('rect', {
+            class: `war-frame t${tier}`,
+            x: -11, y: -7, width: 22, height: 14,
+            stroke: side.color, fill: '#f6f1e6', 'fill-opacity': 0.94, 'stroke-width': 2,
+          }, node);
+          const ech = this._svgNode('text', { class: 'war-ech', x: 0, y: -9.5, 'text-anchor': 'middle' }, node);
+          ech.textContent = ['', 'X', 'XX', 'XXX'][tier] || '';
+          // 步骤编号（框内队号位，中式标图队号深色）：屏幕恒定（父组 scale 补偿）
           const num = this._svgNode(
             'text',
-            { class: 'war-stepnum', x: 0, y: 15, 'text-anchor': 'middle' },
+            { class: 'war-stepnum', x: 0, y: 4.2, 'text-anchor': 'middle' },
             node
           );
           num.textContent = String(i + 1);
-          num.style.fill = side.color;
+          num.style.fill = '#26221b';
           const lbl = this._warField(b, 'name') || this._warStepTitle(w, s);
           if (lbl) {
             lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, ni: nodeIdx });
@@ -1219,6 +1282,46 @@
       if (!b) return full(a);
       if (a[0] === b[0] && a[1] === b[1] && a[2] === b[2]) return full(a);
       return `${full(a)} – ${full(b)}`;
+    }
+
+    // 军事图例面板（调研文档 §5：图例置图底是正规军图铁律）。列出单位框/
+    // 编制记号/箭头语义/前线帧/地形符号的含义；符号用与地图同款的小 SVG。
+    _warLegendHtml() {
+      const zh = this.locale !== 'en';
+      const sw = (inner) => `<svg class="war-lg-sym" viewBox="-14 -14 28 28" aria-hidden="true">${inner}</svg>`;
+      const row = (svg, txt) => `<div class="war-lg-row">${sw(svg)}<span>${esc(txt)}</span></div>`;
+      const t = (k) => sw(`<path class="war-lg-terrain" d="${WAR_TERRAIN_D[k] || WAR_TERRAIN_D.mountain}"/>`);
+      return (
+        `<div class="war-lg-head">${esc(zh ? '军事图例' : 'Map legend')}</div>` +
+        row(
+          `<rect x="-10" y="-7" width="20" height="14" fill="#f6f1e6" stroke="#9e2b25" stroke-width="2"/><text x="0" y="4" text-anchor="middle" font-size="9" fill="#26221b">7</text>`,
+          zh ? '战役节点 · 框色=阵营，数字=步序' : 'Battle node: frame = side, number = step'
+        ) +
+        row(
+          `<text x="0" y="-6" text-anchor="middle" font-size="9" fill="#3a3020">XXX</text><rect x="-10" y="-4" width="20" height="12" fill="#f6f1e6" stroke="#9e2b25" stroke-width="2"/>`,
+          zh ? '框上记号 = 兵力规模（XXX兵团 / XX军 / X师）' : 'Marks above frame = strength class'
+        ) +
+        row(
+          `<path d="M-12 0H10" stroke="#9e2b25" stroke-width="4" fill="none"/><path d="M12.5 0L4 -4.5L4 4.5Z" fill="#9e2b25"/>`,
+          zh ? '主攻轴线（粗实线，宽度≈兵力）' : 'Main attack axis (wide, width ≈ strength)'
+        ) +
+        row(
+          `<path d="M-12 0H10" stroke="#46647a" stroke-width="2.4" fill="none" stroke-dasharray="6 4"/>`,
+          zh ? '佯动/虚线箭头 · 助攻（细线）' : 'Feint (dashed) / supporting attack (thin)'
+        ) +
+        row(
+          `<path d="M-12 0Q-4-8 4-2T12 0" stroke="#9e2b25" stroke-width="2.6" fill="none"/><circle cx="4" cy="-2" r="1.6" fill="#f6f1e6" stroke="#6e2f22"/>`,
+          zh ? '前线帧 · 环上日期 = 态势时间' : 'Front frame: date on the ring = situation time'
+        ) +
+        row(t('ford'), zh ? '渡口 / 桥梁（全军过河的咽喉）' : 'Ford / bridge (river-crossing choke point)') +
+        row(t('pass'), zh ? '隘口（部队唯一能过的山口）' : 'Pass (the only way through)') +
+        row(t('marsh'), zh ? '沼泽 / 草地（机械化天敌）' : 'Marsh / grasslands (grave of vehicles)') +
+        row(t('snow'), zh ? '大雪山（高海拔翻越点）' : 'Snow mountain (high crossing)') +
+        row(
+          `<rect x="-11" y="-8" width="22" height="16" fill="#9e2b25" fill-opacity="0.18" stroke="#9e2b25" stroke-dasharray="5 3"/><text x="0" y="3" text-anchor="middle" font-size="8" fill="#6e2f22">1938</text>`,
+          zh ? '控制区 / 围剿圈（色=阵营）' : 'Control area / encirclement (color = side)'
+        )
+      );
     }
 
     _warBattleMetaHtml(w, s) {
@@ -1677,6 +1780,34 @@
           if (this.locale === 'zh-tw') this._applyZhHantDom(gate);
         } else if (!showGate) {
           this._warGateSig = null;
+        }
+      }
+      // 态势日期戳（调研文档 §3）：西点图集「Situation 30 June 1863」式图题
+      // 的沙盘版——图上常驻印当前步的年月；总览/无战役时隐藏。
+      const dateEl = this._id('war-date');
+      if (dateEl) {
+        const dsrc = storyWar
+          ? (!storyWar.overview && storyWar.idx >= 0 ? storyWar.war.steps[storyWar.idx] : null)
+          : (shellWar && idx >= 0 ? shellWar.steps[idx] : null);
+        if (dsrc && Number.isFinite(dsrc.y)) {
+          const mo = Math.max(1, Math.min(12, Math.round((dsrc.y % 1) * 12) || 1));
+          dateEl.textContent = `${this.locale !== 'en' ? '态势' : 'Situation'} · ${Math.trunc(dsrc.y)}年${mo}月`;
+          dateEl.classList.remove('is-hidden');
+        } else {
+          dateEl.classList.add('is-hidden');
+        }
+      }
+      // 军事图例面板（调研文档 §5）：军标框/编制记号/地形符号/箭头语义/前线帧
+      // 的说明——无图例的军图不算正规军图；随沙盘显隐。
+      const legendEl = this._id('war-legend');
+      if (legendEl) {
+        const showLegend = Boolean(w) && !this.challenge && this._warLayerOn() && window.innerWidth > 900;
+        legendEl.classList.toggle('is-hidden', !showLegend);
+        const legendSig = showLegend ? this.locale : null;
+        if (showLegend && legendSig !== this._warLegendSig) {
+          this._warLegendSig = legendSig;
+          legendEl.innerHTML = this._warLegendHtml();
+          if (this.locale === 'zh-tw') this._applyZhHantDom(legendEl);
         }
       }
       // 激活进场飞行预判：与下方激活块同一谓词（勿两处维护）——飞行发生在

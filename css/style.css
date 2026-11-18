@@ -6513,6 +6513,162 @@ button.story-inline-person:hover {
   cursor: help;
 }
 
+/* —— 军事地图层（调研文档路线 A+C）：军标式单位框 / 编制记号 / 地形符号 /
+   FLOT 前线帧 / 箭头语义 / 态势日期戳 / 军事图例面板 —— */
+#grp-war .war-frame {
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+#grp-war .war-node.is-cur .war-frame {
+  stroke-width: 3;
+}
+#grp-war .war-node.is-cur .war-frame {
+  fill-opacity: 1;
+}
+#grp-war .war-ech {
+  font-family: var(--sans-stack);
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  fill: #3a3020;
+  paint-order: stroke;
+  stroke: #f6f1e6;
+  stroke-width: 2.4;
+}
+#grp-war .war-zone-front {
+  fill-opacity: 0.07;
+  stroke-opacity: 0.92;
+  stroke-width: 2.6;
+  stroke-dasharray: none;
+}
+#grp-war .war-zone-date {
+  font-family: var(--sans-stack);
+  font-size: 10px;
+  font-weight: 700;
+  fill: #6e2f22;
+  paint-order: stroke;
+  stroke: #f6f1e6;
+  stroke-width: 2.6;
+}
+#grp-war .war-terrain {
+  pointer-events: all;
+  cursor: help;
+}
+#grp-war .war-terrain-sym {
+  fill: none;
+  stroke: #55432c;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.92;
+}
+#grp-war .war-terrain-name {
+  font-family: var(--sans-stack);
+  font-size: 8.5px;
+  font-weight: 600;
+  fill: #55432c;
+  paint-order: stroke;
+  stroke: #f6f1e6;
+  stroke-width: 2.4;
+}
+#grp-war .war-march.ax-supporting {
+  stroke-width: calc(var(--war-w, 3.6px) * 0.62);
+}
+#grp-war .war-march-casing.ax-supporting {
+  stroke-width: calc(var(--war-w, 3.6px) * 0.62 + 3.4px);
+}
+#grp-war .war-march.ax-feint,
+#grp-war .war-march-casing.ax-feint {
+  stroke-dasharray: 7 5;
+}
+#grp-war .war-march.ax-retreat {
+  stroke-width: calc(var(--war-w, 3.6px) * 0.5);
+  stroke-dasharray: 2 4;
+}
+#grp-war .war-march-casing.ax-retreat {
+  stroke-width: calc(var(--war-w, 3.6px) * 0.5 + 2.4px);
+}
+#grp-war .war-dir.ax-supporting .war-chevron,
+#grp-war .war-dir.ax-supporting .war-chevron-under {
+  transform: scale(0.72);
+}
+#war-date {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  z-index: 5;
+  font-family: var(--sans-stack);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #6e2f22;
+  background: rgba(246, 241, 230, 0.9);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 3px 10px;
+  pointer-events: none;
+}
+#war-date.is-hidden {
+  display: none;
+}
+#war-legend {
+  position: absolute;
+  left: 14px;
+  bottom: 96px;
+  z-index: 5;
+  max-width: 300px;
+  font-family: var(--sans-stack);
+  background: rgba(246, 241, 230, 0.94);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: 0 2px 10px rgba(63, 48, 29, 0.14);
+  pointer-events: none;
+}
+#war-legend.is-hidden {
+  display: none;
+}
+.war-lg-head {
+  font-family: var(--sans-stack);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #3a3020;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--hairline);
+  padding-bottom: 4px;
+}
+.war-lg-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+.war-lg-row span {
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--text-main);
+}
+.war-lg-sym {
+  flex: 0 0 30px;
+  width: 30px;
+  height: 24px;
+  overflow: visible;
+}
+.war-lg-terrain {
+  fill: none;
+  stroke: #55432c;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (max-width: 900px) {
+  #war-legend,
+  #war-date {
+    display: none;
+  }
+}
+
 .war-steps {
   position: relative; /* 使 .war-step 的 offsetTop 相对列表自身，自动滚动定位才正确 */
   display: flex;

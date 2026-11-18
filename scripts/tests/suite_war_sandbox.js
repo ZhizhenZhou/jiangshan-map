@@ -70,6 +70,12 @@ async function runWarSandboxSuite(ctx) {
 
       for (const [mi, move] of (step.moves || []).entries()) {
         assert(sideKeys.has(move.side), `${w.key}.steps[${i}].moves[${mi}] references unknown side ${move.side}`);
+        if (move.axis !== undefined) {
+          assert(
+            ['main', 'supporting', 'feint', 'retreat'].includes(move.axis),
+            `${w.key}.steps[${i}].moves[${mi}] has invalid axis ${move.axis}`
+          );
+        }
         for (const field of ['titleZh', 'titleEn', 'descZh', 'descEn']) {
           assert(move[field], `${w.key}.steps[${i}].moves[${mi}].${field} is required`);
         }
@@ -101,6 +107,12 @@ async function runWarSandboxSuite(ctx) {
     for (const [zi, zone] of (w.zones || []).entries()) {
       assert(sideKeys.has(zone.side), `${w.key}.zones[${zi}] references unknown side ${zone.side}`);
       assert(Number.isFinite(zone.y), `${w.key}.zones[${zi}].y is required`);
+      if (zone.kind !== undefined) {
+        assert(
+          ['area', 'front'].includes(zone.kind),
+          `${w.key}.zones[${zi}] has invalid kind ${zone.kind}`
+        );
+      }
       assert(zone.noteZh && zone.noteEn, `${w.key}.zones[${zi}] needs bilingual notes`);
       assert(Array.isArray(zone.rings) && zone.rings.length, `${w.key}.zones[${zi}] needs rings`);
       let pointCount = 0;
@@ -170,7 +182,7 @@ async function runWarSandboxSuite(ctx) {
     assert.strictEqual(side.color.toLowerCase(), camp.color.toLowerCase(), `An-Shi ${side.key} color must match storyline`);
   }
 
-  for (const id of ['chk-war', 'lbl-war', 'grp-war', 'war-card', 'war-balloon', 'war-gate']) {
+  for (const id of ['chk-war', 'lbl-war', 'grp-war', 'war-card', 'war-balloon', 'war-gate', 'war-date', 'war-legend']) {
     assert(indexHtml.includes(`id="${id}"`), `index.html missing #${id}`);
   }
   assert(styleCss.includes('War Sandbox Overlay'), 'style.css must contain the war sandbox styles');
@@ -226,6 +238,35 @@ async function runWarSandboxSuite(ctx) {
   );
   assert(warModule.includes('war-bmeta-zone'), 'Battle-record block must carry the zone/situation note line');
   assert(styleCss.includes('.war-bmeta-zone'), 'Zone note line must be styled');
+
+  // 军事地图层（调研文档路线 A+C）：军标式单位框 / 地形符号 / FLOT 前线帧 /
+  // 箭头语义 / 态势日期戳 / 军事图例面板。
+  assert(warModule.includes("class: `war-frame t${tier}`"), 'Battle nodes must render as military unit frames');
+  assert(warModule.includes('war-ech'), 'Unit frames must carry echelon marks');
+  assert(warModule.includes('WAR_TERRAIN_D'), 'Terrain symbol catalogue must exist');
+  assert(warModule.includes('war-terrain'), 'Terrain annotation layer must render');
+  assert(warModule.includes('war-zone-front') && warModule.includes('war-zone-date'), 'FLOT front frames must render with date stamps');
+  assert(
+    warModule.includes("['supporting', 'feint', 'retreat'].includes(mv.axis)") &&
+      styleCss.includes('.war-march.ax-supporting') &&
+      styleCss.includes('.war-march.ax-feint'),
+    'Arrow semantics (supporting/feint/retreat) must be wired from data to styles'
+  );
+  assert(warModule.includes('_warLegendHtml') && warModule.includes("this._id('war-legend')"), 'Military legend panel must be wired');
+  assert(warModule.includes("this._id('war-date')"), 'Situation date stamp must be wired');
+  assert(styleCss.includes('.war-frame') && styleCss.includes('.war-terrain-sym'), 'Military map layer must be styled');
+  assert(styleCss.includes('.war-lg-row'), 'Legend panel rows must be styled');
+
+  // 地形标注数据红线：kind 枚举、双语名称与军事含义
+  const TERRAIN_KINDS = new Set(['pass', 'ford', 'bridge', 'marsh', 'snow', 'river', 'mountain']);
+  for (const w of wars) {
+    for (const [ti, t] of (w.terrain || []).entries()) {
+      assert(TERRAIN_KINDS.has(t.kind), `${w.key}.terrain[${ti}] has invalid kind ${t.kind}`);
+      coord(t.at, `${w.key}.terrain[${ti}].at`);
+      assert(t.nameZh && t.nameEn, `${w.key}.terrain[${ti}] must be bilingual`);
+      assert(t.noteZh && t.noteEn, `${w.key}.terrain[${ti}] must carry a bilingual military-meaning note`);
+    }
+  }
   assert(
     warModule.includes("hookZh: step.hookZh || ''"),
     'War hydrate must pass challenge hooks through to the story card'
