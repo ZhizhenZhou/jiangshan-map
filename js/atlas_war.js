@@ -21,13 +21,15 @@
   // 的 duration 参数）——箭头与地图一个节奏。650 是全 app 默认，战争用慢档。
   const WAR_FLIGHT_MS = 1150;
   // 行军绘制时长：与飞行同步时取 WAR_FLIGHT_MS；沙盘内逐步推进（相机不飞）
-  // 用短档——100ms 起跑、900ms 走完，箭头带着线一气呵成，不再干等 632ms。
-  const WAR_DRAW_MS = 900;
+  // 用 1.5s 档——逐帧实测 900ms 的行军只占过渡零头（相机飞行反唱主角），
+  // 参考视频里行军是每步主拍（粗箭头+人数滑行数秒），加长让"部队在走"
+  // 成为看得见的主角。
+  const WAR_DRAW_MS = 1500;
   // 步进聚焦飞行（故事卡 下一站 / 沙盘卡 下一步，_animateCameraTo 默认档
   // 650ms）期间的行军起跑延迟：箭头等相机飞行 ~70% 处再生长——用户先看到
   // 地图到场，再看箭头行进，到位定格（全程可读，不再被飞行遮掉前半段）。
   const WAR_STEP_FLIGHT_MS = 650;
-  const WAR_STEP_DRAW_DELAY = Math.round(WAR_STEP_FLIGHT_MS * 0.7);
+  const WAR_STEP_DRAW_DELAY = Math.round(WAR_STEP_FLIGHT_MS * 0.5);
   // 行军只在目标缩放下读得出来时才播：屏幕投影线长低于此值（全国视角整条
   // 线 ~20px，骑乘头恒定 ~19px）就整箭瞬时落位，不播"糊团"。
   const WAR_DRAW_MIN_PX = 90;
@@ -793,7 +795,7 @@
               // 兵力数字独立于骑乘头定位：不随切线角旋转（数字保持水平可读），
               // scale(1/kScreen) 让字号/上浮量屏幕恒定
               riderNum.setAttribute('transform',
-                `translate(${pt.x.toFixed(2)},${(pt.y - 13 / kScreen).toFixed(2)}) scale(${(1 / kScreen).toFixed(4)})`);
+                `translate(${pt.x.toFixed(2)},${(pt.y - 15 / kScreen).toFixed(2)}) scale(${(1 / kScreen).toFixed(4)})`);
             }
           } catch (e) {
             /* rider positioning is cosmetic */
@@ -846,7 +848,7 @@
       const flightFirst =
         !reducedMotion() &&
         Number.isFinite(this._warFlightPendingAt) &&
-        performance.now() - this._warFlightPendingAt < 300;
+        performance.now() - this._warFlightPendingAt < 900;
       // 战局变化即作废旧悬停签（内容只随 pointermove 重算，陈旧内容比没有更糟）
       if (this.hoverTip) {
         this.hoverTip.classList.add('is-hidden');
@@ -1217,7 +1219,7 @@
           // 穿透到地图（官方钉有 26px 最近拾取兜底，这里用命中盘同效）
           this._svgNode('circle', { class: 'war-hit', r: 12, fill: '#000', 'fill-opacity': 0 }, node);
           // 当前步脉冲环（仅当前步渲染；样式沿用 .war-ring / warPulse）
-          if (isCur) this._svgNode('circle', { class: 'war-ring', r: 14.5, stroke: side.color }, node);
+          if (isCur) this._svgNode('circle', { class: 'war-ring', r: 16, stroke: side.color }, node);
           // 军标式单位框（调研文档 §2）：框内放【部队番号】——番号即身份，
           // 同一番号沿轴线连续出现，部队走向可读；框色 = desigSide 阵营色
           // （desigSide 缺省 = battle.side）；编制级别记号由兵力档映射。
@@ -1226,25 +1228,25 @@
             ? (b.desigZh || '')
             : (b.desigEn || b.desigZh || '');
           const fw = desig
-            ? Math.max(26, Math.min(96, [...desig].reduce((n, ch) => n + (/[\u2E80-\u9FFF\uF900-\uFAFF]/.test(ch) ? 9.4 : 5.4), 0) + 10))
-            : 22;
+            ? Math.max(30, Math.min(110, [...desig].reduce((n, ch) => n + (/[\u2E80-\u9FFF\uF900-\uFAFF]/.test(ch) ? 10.8 : 6.2), 0) + 12))
+            : 24;
           this._svgNode('rect', {
             class: `war-frame t${tier}`,
-            x: -fw / 2, y: -7.5, width: fw, height: 15,
+            x: -fw / 2, y: -8.5, width: fw, height: 17,
             stroke: dSideObj.color, fill: '#f6f1e6', 'fill-opacity': 0.94, 'stroke-width': 2,
           }, node);
-          const ech = this._svgNode('text', { class: 'war-ech', x: 0, y: -10.5, 'text-anchor': 'middle' }, node);
+          const ech = this._svgNode('text', { class: 'war-ech', x: 0, y: -12, 'text-anchor': 'middle' }, node);
           ech.textContent = ['', 'X', 'XX', 'XXX'][tier] || '';
           if (desig) {
             // 框内番号（中式标图队号深色）+ 框下步序号（导航）
-            const dg = this._svgNode('text', { class: 'war-desig', x: 0, y: 4.4, 'text-anchor': 'middle' }, node);
+            const dg = this._svgNode('text', { class: 'war-desig', x: 0, y: 4.9, 'text-anchor': 'middle' }, node);
             dg.textContent = desig;
-            const num2 = this._svgNode('text', { class: 'war-stepnum', x: 0, y: 18.5, 'text-anchor': 'middle' }, node);
+            const num2 = this._svgNode('text', { class: 'war-stepnum', x: 0, y: 21, 'text-anchor': 'middle' }, node);
             num2.textContent = String(i + 1);
             num2.style.fill = dSideObj.color;
           } else {
             // 无番号（古代战役未回填）：退回框内步序号
-            const num = this._svgNode('text', { class: 'war-stepnum', x: 0, y: 4.4, 'text-anchor': 'middle' }, node);
+            const num = this._svgNode('text', { class: 'war-stepnum', x: 0, y: 4.9, 'text-anchor': 'middle' }, node);
             num.textContent = String(i + 1);
             num.style.fill = '#26221b';
           }

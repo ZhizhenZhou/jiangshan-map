@@ -284,8 +284,9 @@ async function runWarSandboxSuite(ctx) {
   assert(
     styleCss.includes('.war-node.is-pending .war-frame') &&
       styleCss.includes('.war-rider-num text') &&
+      styleCss.includes('warDockIn') &&
       styleCss.includes('warLayerIn'),
-    'Objective-ring preview + rider number + layer intro must be styled'
+    'Objective-ring preview + rider number + dock animation + layer intro must be styled'
   );
 
   // 地形标注数据红线：kind 枚举、双语名称与军事含义
