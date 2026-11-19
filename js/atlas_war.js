@@ -361,6 +361,16 @@
       return out;
     }
 
+    // 军标框宽度：骑乘框与停靠框必须同构（停靠瞬间无缝换体）
+    _warFrameWidth(desig, echIn) {
+      if (!desig) return 24;
+      const base = [...desig].reduce(
+        (n, ch) => n + (/[\u2E80-\u9FFF\uF900-\uFAFF]/.test(ch) ? 10.8 : 6.2),
+        0
+      ) + 12;
+      return Math.max(30, Math.min(110, base)) + (echIn ? 14 : 0);
+    }
+
     // 骑乘令牌的紧凑兵力数字：行军态「箭头+人数」不带质量后缀——
     // 号称/约数语义留在兵力条与战例档案（移动中的标签要短）
     _warRiderNumText(n) {
@@ -508,6 +518,12 @@
       this._warDrawRafs = [];
       (this._warDrawTimers || []).forEach((h) => clearTimeout(h));
       this._warDrawTimers = [];
+      if (this._warDockTimer) {
+        clearTimeout(this._warDockTimer);
+        this._warDockTimer = null;
+      }
+      this._warFrameGlides = 0;
+      this._warDocked = false;
       this._warDrawPending = false;
       this._warDrawsLeft = 0;
     }
@@ -682,11 +698,26 @@
     // _warPathEnd 同口径），相机缩放时按 kScreen 反向缩放保持屏幕尺寸恒定；
     // 画完后移除骑乘头，静态楔形在终点接管（同为 kScreen 全补偿，交接
     // 不跳变——见 _warRescaleGlyphs）。
-    _startWarDraw(casing, p, dirG, rider, tier, drawMs, riderNum) {
+    _startWarDraw(casing, p, dirG, rider, tier, drawMs, riderNum, riderMeta, riderFrame) {
       const showFull = () => {
         for (const q of [casing, p]) {
           if (q) q.style.visibility = 'visible';
         }
+      };
+      const dock = () => {
+        // 停靠拍：骑乘番号框滑到战位后，本步战役框才【首次】现身（驻止态），
+        // 名签同步出现——部队沿线走过来、停下变成矩形（「箭头=部队」状态机）
+        if (this._warDocked || this._warDrawPending || (this._warFrameGlides || 0) > 0) return;
+        this._warDocked = true;
+        const grpNow = this.grpWar || (this.svg && this.svg.querySelector('#grp-war'));
+        if (grpNow) {
+          grpNow.querySelectorAll('.war-node.is-pending').forEach((n) => {
+            n.classList.remove('is-pending');
+            n.classList.add('is-arrived');
+          });
+          grpNow.querySelectorAll('.war-lbl.is-pending-lbl').forEach((n) => n.classList.remove('is-pending-lbl'));
+        }
+        this._revealWarBalloon();
       };
       const finish = () => {
         // 箭头走完：静态楔形接管；多轴步等全部箭头落位后才揭幕浮签
@@ -696,20 +727,26 @@
         if (dirG) dirG.classList.add('is-arrived');
         if (rider) rider.remove();
         if (riderNum) riderNum.remove();
-        if (!this._warDrawPending) {
-          // 停靠（「箭头=部队」状态机的落位拍）：行军令牌（箭头+人数）滑到
-          // 终点此刻退场，本步战役番号框才【首次】现身（驻止态）——部队
-          // 沿线走过来、停下变成矩形，身份不再先于部队出现在目的地。
-          const grpNow = this.grpWar || (this.svg && this.svg.querySelector('#grp-war'));
-          if (grpNow) {
-            grpNow.querySelectorAll('.war-node.is-pending').forEach((n) => {
-              n.classList.remove('is-pending');
-              n.classList.add('is-arrived');
-            });
-            grpNow.querySelectorAll('.war-lbl.is-pending-lbl').forEach((n) => n.classList.remove('is-pending-lbl'));
-          }
-          this._revealWarBalloon();
+        // 停靠滑行：番号框从箭头终点滑到战位再定格（"部队走到位"的可见一拍，
+        // 位置不再与箭头终点脱钩）。滑行计数与 pending 双条件汇聚，只停靠一次。
+        if (riderFrame && riderMeta && riderMeta.nodeXY) {
+          this._warFrameGlides = (this._warFrameGlides || 0) + 1;
+          try {
+            const kr = this._warKScreen();
+            riderFrame.style.transition = 'transform 0.32s cubic-bezier(0.3, 0.6, 0.3, 1)';
+            riderFrame.setAttribute('transform',
+              `translate(${riderMeta.nodeXY[0].toFixed(1)},${riderMeta.nodeXY[1].toFixed(1)}) scale(${(1 / (kr || 1)).toFixed(4)})`);
+          } catch (e) { /* 滑行失败就地停靠 */ }
+          this._warDockTimer = setTimeout(() => {
+            this._warDockTimer = null;
+            this._warFrameGlides = Math.max(0, (this._warFrameGlides || 0) - 1);
+            if (riderFrame && riderFrame.parentNode) riderFrame.remove();
+            dock();
+          }, 340);
+        } else if (riderFrame && riderFrame.parentNode) {
+          riderFrame.remove();
         }
+        dock();
       };
       const reduced = reducedMotion();
       if (reduced) {
@@ -802,6 +839,11 @@
               // scale(1/kScreen) 让字号/上浮量屏幕恒定
               riderNum.setAttribute('transform',
                 `translate(${pt.x.toFixed(2)},${(pt.y - 15 / kScreen).toFixed(2)}) scale(${(1 / kScreen).toFixed(4)})`);
+            }
+            if (riderFrame) {
+              // 骑乘番号框同样水平可读：箭尖上方 26px（框下人数随行）
+              riderFrame.setAttribute('transform',
+                `translate(${pt.x.toFixed(2)},${(pt.y - 26 / kScreen).toFixed(2)}) scale(${(1 / kScreen).toFixed(4)})`);
             }
           } catch (e) {
             /* rider positioning is cosmetic */
@@ -1091,21 +1133,71 @@
                     ? WAR_STEP_DRAW_DELAY
                     : 100;
               const ms = warFly ? flightMs : WAR_DRAW_MS;
+              // 骑乘番号框：番号框本身就是部队——从行军【起点】出现、骑在箭尖上
+              // 随行（用户实测"行军时看不出是谁在走，番号到位才冒出来"），
+              // 走完后滑行停靠到战位（finish 里 glide → is-arrived）。
+              // 只有主轴（首支箭）携带框，副轴保留人数骑签。
+              let riderMeta = null;
+              const rb = isCur && (s.battles || [])[0];
+              if (rb && mv === (s.moves || [])[0]) {
+                const rDesig = this.locale !== 'en'
+                  ? (rb.desigZh || '')
+                  : (rb.desigEn || rb.desigZh || '');
+                const rEch = ['', 'X', 'XX', 'XXX'][tier] || '';
+                const rSide = this._warSide(w, rb.desigSide || rb.side) || side;
+                const rAt = rb.at ? this.projector.toScreen(rb.at[0], rb.at[1]) : null;
+                riderMeta = {
+                  desig: rDesig,
+                  stepnum: String(i + 1),
+                  ech: rEch,
+                  frameW: this._warFrameWidth(rDesig, !!rEch && !!rDesig),
+                  color: rSide.color,
+                  nodeXY: rAt,
+                  strength: mv.force && Number.isFinite(mv.force.n) ? this._warRiderNumText(mv.force.n) : '',
+                };
+              }
               const startDraw = () => {
                 let rider = null;
                 let riderNum = null;
+                let riderFrame = null;
                 if (!reducedMotion() && info.endX !== null) {
                 rider = this._svgNode('g', { class: 'war-rider' }, g);
                 rider.style.color = side.color;
                 this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge-under', transform: 'scale(1.14)' }, rider);
                 this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
-                  // 行军令牌（调研：「箭头=部队」——行军态的部队符号是箭头+人数，
-                  // 数字骑在箭头尖上方随行；到位后令牌停靠为番号框=驻止态）
-                  if (mv.force && Number.isFinite(mv.force.n)) {
+                  // 行军令牌（调研：「箭头=部队」——行军态的部队符号是箭头+人数）
+                  if (!riderMeta && mv.force && Number.isFinite(mv.force.n)) {
                     riderNum = this._svgNode('g', { class: 'war-rider-num' }, g);
                     const nt = this._svgNode('text', { x: 0, y: 0, 'text-anchor': 'middle' }, riderNum);
                     nt.textContent = this._warRiderNumText(mv.force.n);
                     nt.style.fill = side.color;
+                  }
+                  // 骑乘番号框（与停靠态同构：编制记号+番号，人数挂在框下随行）
+                  if (riderMeta) {
+                    riderFrame = this._svgNode('g', { class: 'war-rider-frame' }, g);
+                    const fr = this._svgNode('rect', {
+                      class: 'war-frame',
+                      x: -riderMeta.frameW / 2, y: -8.5, width: riderMeta.frameW, height: 17,
+                      stroke: riderMeta.color, fill: '#f6f1e6', 'fill-opacity': 0.96, 'stroke-width': 2,
+                    }, riderFrame);
+                    fr.style.transition = 'none';
+                    if (riderMeta.desig) {
+                      if (riderMeta.ech) {
+                        const re = this._svgNode('text', { class: 'war-ech', x: -riderMeta.frameW / 2 + 8, y: 3.6, 'text-anchor': 'middle' }, riderFrame);
+                        re.textContent = riderMeta.ech;
+                      }
+                      const rd = this._svgNode('text', { class: 'war-desig', x: riderMeta.ech ? 8 : 0, y: 4.9, 'text-anchor': 'middle' }, riderFrame);
+                      rd.textContent = riderMeta.desig;
+                    } else {
+                      const rn2 = this._svgNode('text', { class: 'war-stepnum', x: 0, y: 4.9, 'text-anchor': 'middle' }, riderFrame);
+                      rn2.textContent = riderMeta.stepnum;
+                      rn2.style.fill = '#26221b';
+                    }
+                    if (riderMeta.strength) {
+                      const rs = this._svgNode('text', { class: 'war-rider-strength', x: 0, y: 22, 'text-anchor': 'middle' }, riderFrame);
+                      rs.textContent = riderMeta.strength;
+                      rs.style.fill = riderMeta.color;
+                    }
                   }
                   // 创建即钉在路径起点（首帧 rAF 会重写精确姿态）：无 transform
                   // 的骑乘头会闪到 SVG 原点
@@ -1122,11 +1214,15 @@
                       riderNum.setAttribute('transform',
                         `translate(${p0.x.toFixed(1)},${p0.y.toFixed(1)}) scale(${(1 / (kr || 1)).toFixed(4)})`);
                     }
+                    if (riderFrame) {
+                      riderFrame.setAttribute('transform',
+                        `translate(${p0.x.toFixed(1)},${(p0.y - 22 / (kr || 1)).toFixed(1)}) scale(${(1 / (kr || 1)).toFixed(4)})`);
+                    }
                   } catch (e) {
                     /* 起点姿态是装饰性的 */
                   }
                 }
-                this._startWarDraw(casing, p, dir, rider, tier, ms, riderNum);
+                this._startWarDraw(casing, p, dir, rider, tier, ms, riderNum, riderMeta, riderFrame);
               };
               this._warDrawsLeft = (this._warDrawsLeft || 0) + 1;
               this._warDrawPending = true; // 浮签等全部箭头落位再揭幕
@@ -1245,9 +1341,7 @@
           // 步序号从番号框下撤掉（导航序号在总览编号点与故事卡里）。
           const echTxt = ['', 'X', 'XX', 'XXX'][tier] || '';
           const echIn = !!echTxt && !!desig;
-          const fw = desig
-            ? Math.max(30, Math.min(110, [...desig].reduce((n, ch) => n + (/[\u2E80-\u9FFF\uF900-\uFAFF]/.test(ch) ? 10.8 : 6.2), 0) + 12) + (echIn ? 14 : 0))
-            : 24;
+          const fw = this._warFrameWidth(desig, echIn);
           this._svgNode('rect', {
             class: `war-frame t${tier}`,
             x: -fw / 2, y: -8.5, width: fw, height: 17,

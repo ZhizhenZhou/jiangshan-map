@@ -272,6 +272,11 @@ async function runWarSandboxSuite(ctx) {
     'Marching token must carry the strength number (行军态=箭头+人数)'
   );
   assert(
+    warModule.includes('war-rider-frame') && warModule.includes('_warFrameWidth') &&
+      warModule.includes('riderMeta.nodeXY'),
+    'The designation frame itself must ride the arrow from the march start and glide-dock to the battle site'
+  );
+  assert(
     warModule.includes('WAR_STEP_DRAW_DELAY') &&
       warModule.includes('_warFlightPendingAt = performance.now()') &&
       warModule.includes('WAR_STEP_DRAW_DELAY'),

@@ -6642,6 +6642,20 @@ button.story-inline-person:hover {
   stroke-linejoin: round;
   pointer-events: none;
 }
+/* 骑乘番号框（行军态的部队本体）：箭尖上方水平随行，滑行停靠到战位 */
+#grp-war .war-rider-frame {
+  pointer-events: none;
+}
+#grp-war .war-rider-strength {
+  font-family: var(--sans-stack);
+  font-size: 9.5px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #f6f1e6;
+  stroke-width: 2.6px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
 /* 前线帧/态势日期随步切换：柔和淡入代替硬切（ghost 退场动画在后声明，
  * 同元素上覆盖此入场动画——is-ghost 规则次序靠后即胜出） */
 #grp-war .war-zone,
