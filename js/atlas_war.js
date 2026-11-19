@@ -750,41 +750,11 @@
           if (lbl) lbl.classList.remove('is-pending-lbl');
         }
       };
-      // 弧长预计算：measure 路径采样求战位最近弧长；离路径太远的战位（arc=∞）
-      // 退化为结束时爆发。measure 在下方创建——这里只登记，stepFn 首帧补算。
+      // 战位标记：不做一次性弧长预算（200 次 getPointAtLength 在飞行中同步跑，
+      // 实测相机切换卡顿源之一）——战位接近检测随【增量采样】逐帧做：
+      // 箭尖走到哪儿，采样到哪儿，发现战位 60 单位内即爆发。
       const marksReady = Array.isArray(battleMarks) ? battleMarks : [];
-      marksReady.forEach((m) => { m.revealed = false; m.arc = Infinity; m.arcsDone = false; });
-      const computeArcs = (measure) => {
-        if (!measure || !marksReady.length) return;
-        let Lu0 = 0;
-        try { Lu0 = measure.getTotalLength(); } catch (e) { Lu0 = 0; }
-        if (!(Lu0 > 2)) return;
-        const N = Math.max(24, Math.min(200, Math.round(Lu0 / 3)));
-        let best = null;
-        for (let i = 0; i <= N; i++) {
-          const a = (Lu0 * i) / N;
-          let pt;
-          try { pt = measure.getPointAtLength(a); } catch (e) { continue; }
-          for (const m of marksReady) {
-            const d = Math.hypot(pt.x - m.x, pt.y - m.y);
-            if (d < 60 && (!best || d < best.d)) best = { m, d, a };
-          }
-        }
-        // 逐点登记：同一轮采样里每个 mark 记录各自最近弧长
-        const per = new Map();
-        for (let i = 0; i <= N; i++) {
-          const a = (Lu0 * i) / N;
-          let pt;
-          try { pt = measure.getPointAtLength(a); } catch (e) { continue; }
-          for (const m of marksReady) {
-            const d = Math.hypot(pt.x - m.x, pt.y - m.y);
-            if (d < 60 && (!per.has(m) || d < per.get(m).d)) per.set(m, { d, a });
-          }
-        }
-        per.forEach((v, m) => { m.arc = v.a; });
-        marksReady.forEach((m) => { m.arcsDone = true; });
-        void best;
-      };
+      marksReady.forEach((m) => { m.revealed = false; });
       const dock = () => {
         // 兜底停靠：所有箭头落位后，仍未触发的战位（arc=∞/离路径太远）此刻
         // 爆发现身——保证每一步的战役必然出场。纯行军步（无战役标记）的
@@ -871,8 +841,25 @@
         measure = this._svgNode('path', { d: origD }, casing.parentNode);
         measure.style.visibility = 'hidden';
       }
-      computeArcs(measure);
       const samplePt = (arc) => (measure || p).getPointAtLength(arc);
+      // 增量采样缓存：{arc,x,y} 沿弧长单调递增；sampleStep 取弧长/240 与
+      // 屏幕 2.5px 折算的较大者——总点数 ≤241，每帧只补新点
+      const samples = [];
+      let sampledTo = -1;
+      const sampleStep = Math.max(Lu / 240, 2.5 / (this._warKScreen() || 1));
+      const pushSample = (arc) => {
+        if (samples.length && arc <= sampledTo) return;
+        let pt;
+        try { pt = samplePt(arc); } catch (e) { return; }
+        samples.push({ arc, x: pt.x, y: pt.y });
+        sampledTo = arc;
+        if (marksReady.length) {
+          for (const m of marksReady) {
+            if (m.revealed) continue;
+            if (Math.hypot(pt.x - m.x, pt.y - m.y) < 60) revealBattle(m);
+          }
+        }
+      };
       const stepFn = (now) => {
         let kScreen = 1;
         try {
@@ -884,27 +871,22 @@
         const k = Math.max(0, Math.min(1, (now - t0) / drawMs));
         const eased = ease(k);
         const headLen = Lu * eased;
-        if (marksReady.length && marksReady.some((m) => !m.revealed && m.arcsDone)) {
-          for (const m of marksReady) {
-            if (!m.revealed && m.arcsDone && m.arc <= headLen) revealBattle(m);
-          }
+        // 增量补采样：采样点沿弧长只采一次入缓存，每帧只补新点（多箭头并发
+        // 时旧实现每帧全量 getPointAtLength 上千次 = 相机切换卡顿源之二）；
+        // 战位接近检测随新点增量做——箭尖走到战位 60 单位内即爆发。
+        while (samples.length === 0) pushSample(0);
+        let guard = 0;
+        while (sampledTo < headLen && samples.length < 241 && guard++ < 260) {
+          pushSample(Math.min(sampledTo + sampleStep, headLen));
         }
         if (origD && measure) {
           try {
-            const step = Math.max(Lu / 400, 2.5 / kScreen);
-            const n = Math.max(1, Math.ceil(headLen / step));
-            let d = null;
-            if (n <= 1) {
-              const pt = samplePt(headLen);
-              const pt0 = samplePt(0);
-              d = `M${pt0.x.toFixed(2)} ${pt0.y.toFixed(2)}L${pt.x.toFixed(2)} ${pt.y.toFixed(2)}`;
-            } else {
-              d = '';
-              for (let i = 0; i <= n; i++) {
-                const pt = samplePt((headLen * i) / n);
-                d += (i ? 'L' : 'M') + pt.x.toFixed(2) + ' ' + pt.y.toFixed(2);
-              }
+            let d = '';
+            for (const smp of samples) {
+              d += (d ? 'L' : 'M') + smp.x.toFixed(2) + ' ' + smp.y.toFixed(2);
             }
+            const tipPt = samplePt(headLen);
+            d += 'L' + tipPt.x.toFixed(2) + ' ' + tipPt.y.toFixed(2);
             for (const q of [casing, p]) {
               // 首帧带露头 d 显形（创建时为隐藏，避免延迟期整线裸奔）
               q.style.visibility = 'visible';
@@ -1603,7 +1585,7 @@
               const cn = grpNow.querySelector('.war-node.is-cur');
               if (cn) this._spawnWarBurst(cn, '#bd2d22', true);
             }
-          }, hasBattles ? 380 : 420);
+          }, hasBattles ? 700 : 760);
         }
       }
       // 总览→选中步是视觉语言的整层切换（细线编号点→完整军图）：军图层

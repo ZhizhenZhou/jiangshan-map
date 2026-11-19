@@ -278,9 +278,9 @@ async function runWarSandboxSuite(ctx) {
   // 因果爆发（调研 §6：接触是有位置有时刻的离散事件）：箭头经过战位的瞬间/
   // 敌军到达时，战位双环闪光 + 番号框 + 名签同时现身——战役不再与箭头脱拍
   assert(
-    warModule.includes('revealBattle') && warModule.includes('computeArcs') &&
+    warModule.includes('revealBattle') && warModule.includes('pushSample') &&
       warModule.includes('_spawnWarBurst'),
-    'Battles must burst causally when the arrow tip passes the site (arc trigger) or enemies arrive'
+    'Battles must burst causally as the arrow tip samples past the site, or when enemies arrive'
   );
   assert(
     styleCss.includes('warBurst') && styleCss.includes('.war-node.is-pending .war-ring'),

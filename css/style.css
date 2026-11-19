@@ -560,13 +560,21 @@ h2 {
 }
 
 /* Pause infinite SVG pulse animations while camera or timeline is actively moving.
-   Text strokes/halos stay intact so labels never flash during zoom or pan. */
-#atlas-svg.is-camera-moving,
-#atlas-svg.is-camera-moving *,
-#atlas-svg.is-scrubbing,
-#atlas-svg.is-scrubbing * {
-  animation: none !important;
-  transition: none !important;
+   Text strokes/halos stay intact so labels never flash during zoom or pan.
+   作用域只命中已知的无限脉冲元素——原 `*` 通配让飞行起止各做一次全子树
+   样式重算（实测相机切换卡顿源之三）。一次性动画（warBurst/warDockIn/
+   warZoneIn/warLayerIn）不冻结——爆发拍与相机并行。 */
+#atlas-svg.is-camera-moving .war-node.is-cur .war-ring,
+#atlas-svg.is-camera-moving .milestone-pin.is-current .ev-ring,
+#atlas-svg.is-camera-moving .jn-pulse,
+#atlas-svg.is-camera-moving .settlement-node .cap-breath-ring,
+#atlas-svg.is-camera-moving .settlement-node .cap-hint-inner,
+#atlas-svg.is-scrubbing .war-node.is-cur .war-ring,
+#atlas-svg.is-scrubbing .milestone-pin.is-current .ev-ring,
+#atlas-svg.is-scrubbing .jn-pulse,
+#atlas-svg.is-scrubbing .settlement-node .cap-breath-ring,
+#atlas-svg.is-scrubbing .settlement-node .cap-hint-inner {
+  animation-play-state: paused !important;
 }
 
 #atlas-svg.is-camera-moving .cap-breath-ring,
