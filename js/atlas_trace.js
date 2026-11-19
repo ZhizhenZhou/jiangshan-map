@@ -1253,6 +1253,24 @@
       this._inPersonSync = false;
       this._renderPersonChronicleCard(true);
       if (panCamera) {
+        // 战争故事线的战役步：动作区取景（战役点+邻近路径段+箭头端点）——
+        // 相机框交战动作区而非整条行军腿（对进箭头/爆发全程在画面里可读）。
+        // null（非战争故事/无战役步）走通用取景。
+        if (
+          typeof this._warActionFit === 'function' &&
+          this.activePerson.profile && this.activePerson.profile.warKey &&
+          Number.isInteger(ev.warStepIdx)
+        ) {
+          const war = (this._warData ? this._warData() : []).find(
+            (x) => x.key === this.activePerson.profile.warKey
+          );
+          const wStep = war && war.steps ? war.steps[ev.warStepIdx] : null;
+          const warFit = wStep ? this._warActionFit(war, wStep) : null;
+          if (warFit) {
+            this._animateCameraTo(warFit);
+            return;
+          }
+        }
         if (this.activePerson.isMulti) {
           const multiLegs = this._getMultiStepLegs(this.activePerson, clamped, ev);
           if (multiLegs.length) {

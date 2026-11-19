@@ -272,9 +272,23 @@ async function runWarSandboxSuite(ctx) {
     'Marching token must carry the strength number (行军态=箭头+人数)'
   );
   assert(
-    warModule.includes('war-rider-frame') && warModule.includes('_warFrameWidth') &&
-      warModule.includes('riderMeta.nodeXY'),
-    'The designation frame itself must ride the arrow from the march start and glide-dock to the battle site'
+    warModule.includes('war-rider-frame') && warModule.includes('_warFrameWidth'),
+    'The designation frame itself must ride the arrow from the march start'
+  );
+  // 因果爆发（调研 §6：接触是有位置有时刻的离散事件）：箭头经过战位的瞬间/
+  // 敌军到达时，战位双环闪光 + 番号框 + 名签同时现身——战役不再与箭头脱拍
+  assert(
+    warModule.includes('revealBattle') && warModule.includes('computeArcs') &&
+      warModule.includes('_spawnWarBurst'),
+    'Battles must burst causally when the arrow tip passes the site (arc trigger) or enemies arrive'
+  );
+  assert(
+    styleCss.includes('warBurst') && styleCss.includes('.war-node.is-pending .war-ring'),
+    'Burst keyframes and full pending hiding (no preview ring) must be styled'
+  );
+  assert(
+    warModule.includes("_warBeatTimer") ,
+    'Battle-only steps must have a timed causal beat (no silent steps)'
   );
   assert(
     warModule.includes('WAR_STEP_DRAW_DELAY') &&

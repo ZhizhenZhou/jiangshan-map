@@ -6601,8 +6601,46 @@ button.story-inline-person:hover {
 #grp-war .war-node.is-pending .war-desig,
 #grp-war .war-node.is-pending .war-stepnum,
 #grp-war .war-node.is-pending .war-ech,
-#grp-war .war-node.is-pending .war-dot {
+#grp-war .war-node.is-pending .war-dot,
+#grp-war .war-node.is-pending .war-ring {
   opacity: 0;
+}
+/* 爆发拍（因果触发：箭头经过战位/敌军到达）：双环一次性扩散后移除；
+ * 叙事步单环柔和（is-soft）。环心=节点原点，scale 从原点扩散即居中 */
+#grp-war .war-burst {
+  pointer-events: none;
+}
+#grp-war .war-burst-ring {
+  fill: none;
+  stroke-width: 2.6;
+  animation: warBurst 0.65s ease-out forwards;
+}
+#grp-war .war-burst-ring.d2 {
+  animation-delay: 0.12s;
+}
+#grp-war .war-burst.is-soft .war-burst-ring {
+  stroke-width: 1.5;
+  animation: warBurstSoft 0.85s ease-out forwards;
+}
+@keyframes warBurst {
+  from {
+    transform: scale(0.45);
+    opacity: 1;
+  }
+  to {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+@keyframes warBurstSoft {
+  from {
+    transform: scale(0.5);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
 }
 /* 停靠拍：番号框首次现身 = 从 1.25 缩落到 1（部队"落地驻止"的重量感），
  * transform-box: fill-box 让 rect/text 各自绕自身中心缩放（父组 transform

@@ -513,6 +513,26 @@
         : null;
     }
 
+    // 战役爆发/叙事起始拍：双环一次性扩散（战位，side 色）或单环柔和（叙事点）
+    _spawnWarBurst(node, color, soft) {
+      if (!node || !node.parentNode) return;
+      const bg = this._svgNode('g', { class: `war-burst${soft ? ' is-soft' : ''}` }, node);
+      for (let k = 0; k < (soft ? 1 : 2); k++) {
+        const ring = this._svgNode(
+          'circle',
+          { class: `war-burst-ring${k ? ' d2' : ''}`, r: 16, stroke: color, fill: 'none' },
+          bg
+        );
+        ring.style.color = color;
+      }
+      const timer = setTimeout(() => {
+        this._warBurstTimers = (this._warBurstTimers || []).filter((t) => t !== timer);
+        if (bg.parentNode) bg.remove();
+      }, 1000);
+      this._warBurstTimers = this._warBurstTimers || [];
+      this._warBurstTimers.push(timer);
+    }
+
     _cancelWarDraws() {
       (this._warDrawRafs || []).forEach((h) => cancelAnimationFrame(h));
       this._warDrawRafs = [];
@@ -522,6 +542,12 @@
         clearTimeout(this._warDockTimer);
         this._warDockTimer = null;
       }
+      if (this._warBeatTimer) {
+        clearTimeout(this._warBeatTimer);
+        this._warBeatTimer = null;
+      }
+      (this._warBurstTimers || []).forEach((t) => clearTimeout(t));
+      this._warBurstTimers = [];
       this._warFrameGlides = 0;
       this._warDocked = false;
       this._warDrawPending = false;
@@ -698,16 +724,72 @@
     // _warPathEnd 同口径），相机缩放时按 kScreen 反向缩放保持屏幕尺寸恒定；
     // 画完后移除骑乘头，静态楔形在终点接管（同为 kScreen 全补偿，交接
     // 不跳变——见 _warRescaleGlyphs）。
-    _startWarDraw(casing, p, dirG, rider, tier, drawMs, riderNum, riderMeta, riderFrame) {
+    _startWarDraw(casing, p, dirG, rider, tier, drawMs, riderNum, riderMeta, riderFrame, battleMarks, finishMarks) {
       const showFull = () => {
         for (const q of [casing, p]) {
           if (q) q.style.visibility = 'visible';
         }
       };
+      // 战役爆发（因果拍）：箭头经过战位的瞬间，双环闪光 + 番号框 + 名签
+      // 同一时刻同一位置出现——箭到哪儿，哪儿开打。多战役按弧长逐个触发。
+      const revealBattle = (mark) => {
+        if (!mark || mark.revealed) return;
+        mark.revealed = true;
+        const grpNow = this.grpWar || (this.svg && this.svg.querySelector('#grp-war'));
+        if (!grpNow) return;
+        const node = grpNow.querySelector(
+          `.war-node.is-cur[data-step="${mark.step}"][data-battle="${mark.bi}"]`
+        );
+        if (node) {
+          node.classList.remove('is-pending');
+          node.classList.add('is-arrived');
+          this._spawnWarBurst(node, mark.color, false);
+        }
+        if (node && node.dataset.ni != null) {
+          const lbl = grpNow.querySelector(`.war-lbl[data-ni="${node.dataset.ni}"]`);
+          if (lbl) lbl.classList.remove('is-pending-lbl');
+        }
+      };
+      // 弧长预计算：measure 路径采样求战位最近弧长；离路径太远的战位（arc=∞）
+      // 退化为结束时爆发。measure 在下方创建——这里只登记，stepFn 首帧补算。
+      const marksReady = Array.isArray(battleMarks) ? battleMarks : [];
+      marksReady.forEach((m) => { m.revealed = false; m.arc = Infinity; m.arcsDone = false; });
+      const computeArcs = (measure) => {
+        if (!measure || !marksReady.length) return;
+        let Lu0 = 0;
+        try { Lu0 = measure.getTotalLength(); } catch (e) { Lu0 = 0; }
+        if (!(Lu0 > 2)) return;
+        const N = Math.max(24, Math.min(200, Math.round(Lu0 / 3)));
+        let best = null;
+        for (let i = 0; i <= N; i++) {
+          const a = (Lu0 * i) / N;
+          let pt;
+          try { pt = measure.getPointAtLength(a); } catch (e) { continue; }
+          for (const m of marksReady) {
+            const d = Math.hypot(pt.x - m.x, pt.y - m.y);
+            if (d < 60 && (!best || d < best.d)) best = { m, d, a };
+          }
+        }
+        // 逐点登记：同一轮采样里每个 mark 记录各自最近弧长
+        const per = new Map();
+        for (let i = 0; i <= N; i++) {
+          const a = (Lu0 * i) / N;
+          let pt;
+          try { pt = measure.getPointAtLength(a); } catch (e) { continue; }
+          for (const m of marksReady) {
+            const d = Math.hypot(pt.x - m.x, pt.y - m.y);
+            if (d < 60 && (!per.has(m) || d < per.get(m).d)) per.set(m, { d, a });
+          }
+        }
+        per.forEach((v, m) => { m.arc = v.a; });
+        marksReady.forEach((m) => { m.arcsDone = true; });
+        void best;
+      };
       const dock = () => {
-        // 停靠拍：骑乘番号框滑到战位后，本步战役框才【首次】现身（驻止态），
-        // 名签同步出现——部队沿线走过来、停下变成矩形（「箭头=部队」状态机）
-        if (this._warDocked || this._warDrawPending || (this._warFrameGlides || 0) > 0) return;
+        // 兜底停靠：所有箭头落位后，仍未触发的战位（arc=∞/离路径太远）此刻
+        // 爆发现身——保证每一步的战役必然出场。纯行军步（无战役标记）的
+        // 到达拍 = 当前节点单环柔和闪光。
+        if (this._warDocked || this._warDrawPending) return;
         this._warDocked = true;
         const grpNow = this.grpWar || (this.svg && this.svg.querySelector('#grp-war'));
         if (grpNow) {
@@ -716,35 +798,40 @@
             n.classList.add('is-arrived');
           });
           grpNow.querySelectorAll('.war-lbl.is-pending-lbl').forEach((n) => n.classList.remove('is-pending-lbl'));
+          if (!(battleMarks && battleMarks.length) && !(finishMarks && finishMarks.length)) {
+            const cn = grpNow.querySelector('.war-node.is-cur');
+            if (cn) this._spawnWarBurst(cn, p.getAttribute('stroke') || '#bd2d22', true);
+          }
         }
         this._revealWarBalloon();
       };
       const finish = () => {
-        // 箭头走完：静态楔形接管；多轴步等全部箭头落位后才揭幕浮签
-        //（旧实现第一个 finisher 清 pending，兄弟轴还在画浮签就跳出来）
+        // 箭头走完：静态楔形接管；敌军箭头到达 = 该战位爆发（对进合围的
+        // 因果拍——南北两路都到位，血门合拢）。
         this._warDrawsLeft = Math.max(0, (this._warDrawsLeft || 0) - 1);
         this._warDrawPending = this._warDrawsLeft > 0;
         if (dirG) dirG.classList.add('is-arrived');
         if (rider) rider.remove();
         if (riderNum) riderNum.remove();
-        // 停靠滑行：番号框从箭头终点滑到战位再定格（"部队走到位"的可见一拍，
-        // 位置不再与箭头终点脱钩）。滑行计数与 pending 双条件汇聚，只停靠一次。
-        if (riderFrame && riderMeta && riderMeta.nodeXY) {
-          this._warFrameGlides = (this._warFrameGlides || 0) + 1;
-          try {
-            const kr = this._warKScreen();
-            riderFrame.style.transition = 'transform 0.32s cubic-bezier(0.3, 0.6, 0.3, 1)';
-            riderFrame.setAttribute('transform',
-              `translate(${riderMeta.nodeXY[0].toFixed(1)},${riderMeta.nodeXY[1].toFixed(1)}) scale(${(1 / (kr || 1)).toFixed(4)})`);
-          } catch (e) { /* 滑行失败就地停靠 */ }
+        if (finishMarks && finishMarks.length) {
+          finishMarks.forEach((m) => {
+            m.finishLeft = Math.max(0, (m.finishLeft || 0) - 1);
+            if (m.finishLeft === 0) revealBattle(m);
+          });
+        }
+        if (battleMarks && battleMarks.length) {
+          // 瞬时落位路径（远景/退化）整线即到：未触发的战位此刻全部爆发
+          battleMarks.forEach((m) => revealBattle(m));
+        }
+        // 骑乘番号框淡出退场（不滑行不漂移——战役框已在经过战位时现身）
+        if (riderFrame && riderFrame.parentNode) {
+          riderFrame.style.transition = 'opacity .3s ease';
+          riderFrame.style.opacity = '0';
           this._warDockTimer = setTimeout(() => {
             this._warDockTimer = null;
-            this._warFrameGlides = Math.max(0, (this._warFrameGlides || 0) - 1);
             if (riderFrame && riderFrame.parentNode) riderFrame.remove();
             dock();
-          }, 340);
-        } else if (riderFrame && riderFrame.parentNode) {
-          riderFrame.remove();
+          }, 330);
         }
         dock();
       };
@@ -784,6 +871,7 @@
         measure = this._svgNode('path', { d: origD }, casing.parentNode);
         measure.style.visibility = 'hidden';
       }
+      computeArcs(measure);
       const samplePt = (arc) => (measure || p).getPointAtLength(arc);
       const stepFn = (now) => {
         let kScreen = 1;
@@ -796,6 +884,11 @@
         const k = Math.max(0, Math.min(1, (now - t0) / drawMs));
         const eased = ease(k);
         const headLen = Lu * eased;
+        if (marksReady.length && marksReady.some((m) => !m.revealed && m.arcsDone)) {
+          for (const m of marksReady) {
+            if (!m.revealed && m.arcsDone && m.arc <= headLen) revealBattle(m);
+          }
+        }
         if (origD && measure) {
           try {
             const step = Math.max(Lu / 400, 2.5 / kScreen);
@@ -1021,12 +1114,43 @@
       for (let i = 0; i <= idx; i++) {
         const s = w.steps[i];
         const isCur = i === idx && !overview;
+        // 本步战位标记（因果爆发的触发目标）：只有当前步需要，历史步不挂
+        const stepMarks = isCur
+          ? (s.battles || []).map((b, bi) => {
+              const scr = b.at ? this.projector.toScreen(b.at[0], b.at[1]) : null;
+              const mSide = this._warSide(w, b.desigSide || b.side) || (w.sides || [])[0] || {};
+              return scr ? { step: i, bi, x: scr[0], y: scr[1], color: mSide.color, finishLeft: 0 } : null;
+            }).filter(Boolean)
+          : [];
+        let mainAssigned = false;
         for (const mv of s.moves || []) {
           const pts = this._warPointList(mv);
           if (pts.length < 2) continue;
           const side = this._warSide(w, mv.side);
           const info = this._warSegInfo(pts);
           if (!info) continue;
+          // 归属：主箭头（首支 pla 侧箭头）用弧长触发；其余箭头 to 落在战位
+          // 60 用户单位内 → 到达触发（finishLeft = 同一战位的箭头数，全到位才爆发）
+          let arcMarks = null;
+          let finishMarks = null;
+          if (isCur && stepMarks.length) {
+            const friendlySideKey = ((s.battles || [])[0] || {}).desigSide || ((s.battles || [])[0] || {}).side;
+            const isMain = !mainAssigned && mv.side === friendlySideKey;
+            const endPt = pts[pts.length - 1];
+            if (isMain) {
+              mainAssigned = true;
+              arcMarks = stepMarks;
+            } else {
+              const hit = stepMarks.filter((m) => {
+                const scr = this.projector.toScreen(endPt[0], endPt[1]);
+                return Math.hypot(scr[0] - m.x, scr[1] - m.y) < 60;
+              });
+              if (hit.length) {
+                finishMarks = hit;
+                hit.forEach((m) => { m.finishLeft += 1; });
+              }
+            }
+          }
           // 总览简化：细行军线（无底衬/楔形头/骑乘动画）——细节留给选中步
           if (overview) {
             this._svgNode('path', { d: info.d, class: 'war-march is-ov', stroke: side.color }, g);
@@ -1139,7 +1263,8 @@
               // 只有主轴（首支箭）携带框，副轴保留人数骑签。
               let riderMeta = null;
               const rb = isCur && (s.battles || [])[0];
-              if (rb && mv === (s.moves || [])[0]) {
+              const friendlySideKey = rb ? (rb.desigSide || rb.side) : null;
+              if (rb && mv === (s.moves || [])[0] && mv.side === friendlySideKey) {
                 const rDesig = this.locale !== 'en'
                   ? (rb.desigZh || '')
                   : (rb.desigEn || rb.desigZh || '');
@@ -1222,7 +1347,7 @@
                     /* 起点姿态是装饰性的 */
                   }
                 }
-                this._startWarDraw(casing, p, dir, rider, tier, ms, riderNum, riderMeta, riderFrame);
+                this._startWarDraw(casing, p, dir, rider, tier, ms, riderNum, riderMeta, riderFrame, arcMarks, finishMarks);
               };
               this._warDrawsLeft = (this._warDrawsLeft || 0) + 1;
               this._warDrawPending = true; // 浮签等全部箭头落位再揭幕
@@ -1257,9 +1382,10 @@
       for (let i = 0; i <= battleEnd; i++) {
         const s = w.steps[i];
         const isCur = i === idx && !overview;
-        // 本步有行军箭头待画/在画 → 当前步军标先以预告态露面，到达定格
-        //（moves 循环先于 battles 循环，_warDrawsLeft 此刻已含本步全部待画箭头）
-        const stepPending = isCur && (this._warDrawsLeft || 0) > 0;
+        // 本步有行军箭头待画/在画，或有战役等待因果爆发 → 当前步军标先隐
+        //（moves 循环先于 battles 循环，_warDrawsLeft 此刻已含本步全部待画箭头；
+        // 无行军的战役步由渲染后节拍定时爆发）
+        const stepPending = isCur && ((this._warDrawsLeft || 0) > 0 || (s.battles || []).length > 0);
         (s.battles || []).forEach((b, bi) => {
           if (!b.at) return;
           const side = this._warSide(w, b.side);
@@ -1279,6 +1405,7 @@
                 'data-war': w.key,
                 'data-step': String(i),
                 'data-battle': String(bi),
+                'data-ni': String(nodeIdx),
               },
               g
             );
@@ -1317,6 +1444,7 @@
               'data-war': w.key,
               'data-step': String(i),
               'data-battle': String(bi),
+              'data-ni': String(nodeIdx),
             },
             g
           );
@@ -1393,6 +1521,7 @@
                 'data-y': sy.toFixed(1),
                 'data-war': w.key,
                 'data-step': String(i),
+                'data-ni': String(nodeIdx),
               },
               g
             );
@@ -1443,6 +1572,40 @@
       this._rescaleSvgTypography();
       // 新符号由通用 rescale 定位，随后立即覆盖为屏幕恒定档
       this._warRescaleGlyphs();
+      // 渲染后节拍兜底：无行军的战役步（湘江之战——行军画在上一步）在
+      // 相机起飞 ~380ms 后战位爆发；纯叙事步（遵义会议/懋功的达维桥）在
+      // ~420ms 单环柔和闪光——每一步都有可见的起始拍，重渲染即作废。
+      if (idx >= 0 && !overview && (this._warDrawsLeft || 0) === 0) {
+        const hasBattles = (w.steps[idx].battles || []).length > 0;
+        if (hasBattles || w.steps[idx].hookZh || w.steps[idx].titleZh) {
+          if (this._warBeatTimer) clearTimeout(this._warBeatTimer);
+          this._warBeatTimer = setTimeout(() => {
+            this._warBeatTimer = null;
+            const grpNow = this.grpWar || (this.svg && this.svg.querySelector('#grp-war'));
+            if (!grpNow) return;
+            // 多战役步（攻锦州两战同刻）：全部爆发，不漏最后一个
+            const pendNodes = [...grpNow.querySelectorAll('.war-node.is-cur.is-pending')];
+            if (hasBattles && pendNodes.length) {
+              for (const cn of pendNodes) {
+                const fr = cn.querySelector('.war-frame');
+                const color = (fr && fr.getAttribute('stroke')) || '#bd2d22';
+                cn.classList.remove('is-pending');
+                cn.classList.add('is-arrived');
+                this._spawnWarBurst(cn, color, false);
+                if (cn.dataset.ni != null) {
+                  const lbl = grpNow.querySelector(`.war-lbl[data-ni="${cn.dataset.ni}"]`);
+                  if (lbl) lbl.classList.remove('is-pending-lbl');
+                }
+              }
+              this._warDocked = true;
+              this._revealWarBalloon();
+            } else {
+              const cn = grpNow.querySelector('.war-node.is-cur');
+              if (cn) this._spawnWarBurst(cn, '#bd2d22', true);
+            }
+          }, hasBattles ? 380 : 420);
+        }
+      }
       // 总览→选中步是视觉语言的整层切换（细线编号点→完整军图）：军图层
       // 0.3s 淡入做开场，避免"凭空糊一脸"；选中步之间的重绘内容相同
       //（只有当前步在变）不重播，总览→总览/选中→总览也不播。
@@ -1814,11 +1977,35 @@
       }
     }
 
-    _warFocusStep(w, s) {
+    // 动作区点集（战役步，度坐标）：战役点是叙事焦点——只收【战役点 + 邻近
+    // 路径段 + 箭头端点】，不收整条行军腿。旧取景把于都→湘江整腿框进画面
+    //（全国级幅面），湘江对进箭头缩成蚂蚁（用户实测"根本看不出来"）。
+    // 近战区半径 1.6°：娄山关 zigzag/湘江夹击/泸定桥东岸增援全部入框，
+    // 远端出发段出框。无战役步返回 null（退回全点取景）。
+    _warActionPtsDeg(s) {
+      const battles = (s.battles || []).filter((b) => b.at);
+      if (!battles.length || !this.projector) return null;
+      const R = 1.6 * DEG;
+      const scr = (pt) => this.projector.toScreen(pt[0], pt[1]);
+      const bScr = battles.map((b) => scr(b.at));
+      if (bScr.some((p) => !p)) return null;
       const pts = [];
-      (s.moves || []).forEach((mv) => this._warPointList(mv).forEach((p) => pts.push(p)));
-      (s.battles || []).forEach((b) => b.at && pts.push(b.at));
-      if (!pts.length || !this.projector) return;
+      (s.moves || []).forEach((mv) => {
+        const list = this._warPointList(mv);
+        if (list.length) pts.push(list[list.length - 1]);
+        list.forEach((p) => {
+          const sp = scr(p);
+          if (bScr.some((bp) => Math.hypot(bp[0] - sp[0], bp[1] - sp[1]) < R)) pts.push(p);
+        });
+      });
+      return pts.length ? pts : null;
+    }
+
+    // 度标定 AABB 适配（pad 12%、最小 1.8°、最大 30°）：中心向到达端偏移
+    // 25%（行动终点是叙事焦点）。旧版裸数字 430 单位 ≈ 32°，是"战场纵深
+    // 小"事故的源头。
+    _warFitBox(pts) {
+      if (!pts || !pts.length || !this.projector) return null;
       const scr = pts.map((p) => this.projector.toScreen(p[0], p[1]));
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
       scr.forEach(([sx, sy]) => {
@@ -1827,13 +2014,9 @@
         if (sx > maxX) maxX = sx;
         if (sy > maxY) maxY = sy;
       });
-      // 取景中心向到达端偏移 25%：行动终点是叙事焦点
-      //（修"相机对准巨钉/标签，当前箭头被切出画外"）
       const tip = scr[scr.length - 1];
       let cx = (minX + maxX) / 2 * 0.75 + tip[0] * 0.25;
       let cy = (minY + maxY) / 2 * 0.75 + tip[1] * 0.25;
-      // 手动聚焦：度标定的 AABB 适配（pad 12%、最小 1.8°、最大 30°）。
-      // 旧版裸数字 430 单位 ≈ 32°，是"战场纵深小"事故的源头。
       const padW = (maxX - minX) * FIT_PAD;
       const padH = (maxY - minY) * FIT_PAD;
       let bw = Math.max(maxX - minX + padW * 2, STEP_MIN_DEG * DEG);
@@ -1841,15 +2024,26 @@
       bw = Math.min(bw, STEP_MAX_DEG * DEG);
       if (bw / bh > CANVAS_AR) bh = bw / CANVAS_AR;
       else bw = bh * CANVAS_AR;
-      this._animateCameraTo(
-        {
-          x: cx - bw / 2,
-          y: cy - bh / 2,
-          w: bw,
-          h: bh,
-        },
-        { duration: WAR_FLIGHT_MS }
-      );
+      return { x: cx - bw / 2, y: cy - bh / 2, w: bw, h: bh };
+    }
+
+    // 故事模式战役步取景入口：null = 非战争故事/无战役（调用方走通用取景）
+    _warActionFit(w, s) {
+      void w;
+      const pts = this._warActionPtsDeg(s);
+      return pts ? this._warFitBox(pts) : null;
+    }
+
+    _warFocusStep(w, s) {
+      let pts = this._warActionPtsDeg(s);
+      if (!pts || !pts.length) {
+        pts = [];
+        (s.moves || []).forEach((mv) => this._warPointList(mv).forEach((p) => pts.push(p)));
+        (s.battles || []).forEach((b) => b.at && pts.push(b.at));
+      }
+      const box = this._warFitBox(pts);
+      if (!box) return;
+      this._animateCameraTo(box, { duration: WAR_FLIGHT_MS });
     }
 
     // 战场全境适配：全场步骤所有坐标点的 AABB，pad 12%、最小 2.3°、最大 53°。
