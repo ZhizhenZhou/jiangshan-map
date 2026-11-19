@@ -359,6 +359,15 @@
       return out;
     }
 
+    // 骑乘令牌的紧凑兵力数字：行军态「箭头+人数」不带质量后缀——
+    // 号称/约数语义留在兵力条与战例档案（移动中的标签要短）
+    _warRiderNumText(n) {
+      if (!Number.isFinite(n)) return '';
+      return this.locale !== 'en'
+        ? (n >= 10000 ? `${Number((n / 10000).toFixed(1))}万` : `${n}`)
+        : (n >= 10000 ? `${Math.round(n / 1000)}k` : `${n}`);
+    }
+
     _warStepForces(w, s) {
       const list = [];
       (s.moves || []).forEach((mv) => {
@@ -665,7 +674,7 @@
     // _warPathEnd 同口径），相机缩放时按 kScreen 反向缩放保持屏幕尺寸恒定；
     // 画完后移除骑乘头，静态楔形在终点接管（同为 kScreen 全补偿，交接
     // 不跳变——见 _warRescaleGlyphs）。
-    _startWarDraw(casing, p, dirG, rider, tier, drawMs) {
+    _startWarDraw(casing, p, dirG, rider, tier, drawMs, riderNum) {
       const showFull = () => {
         for (const q of [casing, p]) {
           if (q) q.style.visibility = 'visible';
@@ -678,11 +687,11 @@
         this._warDrawPending = this._warDrawsLeft > 0;
         if (dirG) dirG.classList.add('is-arrived');
         if (rider) rider.remove();
+        if (riderNum) riderNum.remove();
         if (!this._warDrawPending) {
-          // 到达定格（步进节奏「预告→行进→定格」）：本步军标框在渲染时以
-          // 半透明预告态先行露面（用户先看到"要打哪儿、谁来打"），箭头生长
-          // 到位的瞬间才定格为正式军标——标注不再是"动画结束后凭空冒出一堆"，
-          // 信息的最后一拍与动作完成是同一拍（浮签同拍揭幕）。
+          // 停靠（「箭头=部队」状态机的落位拍）：行军令牌（箭头+人数）滑到
+          // 终点此刻退场，本步战役番号框才【首次】现身（驻止态）——部队
+          // 沿线走过来、停下变成矩形，身份不再先于部队出现在目的地。
           const grpNow = this.grpWar || (this.svg && this.svg.querySelector('#grp-war'));
           if (grpNow) {
             grpNow.querySelectorAll('.war-node.is-pending').forEach((n) => {
@@ -780,6 +789,12 @@
             const wedgeS = (WEDGE_SCALES[tier] || 1) / kScreen;
             rider.setAttribute('transform',
               `translate(${pt.x.toFixed(2)},${pt.y.toFixed(2)}) rotate(${ang.toFixed(1)}) scale(${wedgeS.toFixed(3)})`);
+            if (riderNum) {
+              // 兵力数字独立于骑乘头定位：不随切线角旋转（数字保持水平可读），
+              // scale(1/kScreen) 让字号/上浮量屏幕恒定
+              riderNum.setAttribute('transform',
+                `translate(${pt.x.toFixed(2)},${(pt.y - 13 / kScreen).toFixed(2)}) scale(${(1 / kScreen).toFixed(4)})`);
+            }
           } catch (e) {
             /* rider positioning is cosmetic */
           }
@@ -1070,11 +1085,20 @@
               const ms = warFly ? flightMs : WAR_DRAW_MS;
               const startDraw = () => {
                 let rider = null;
+                let riderNum = null;
                 if (!reducedMotion() && info.endX !== null) {
                 rider = this._svgNode('g', { class: 'war-rider' }, g);
                 rider.style.color = side.color;
                 this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge-under', transform: 'scale(1.14)' }, rider);
                 this._svgNode('path', { d: WEDGE_D, class: 'war-rider-wedge' }, rider);
+                  // 行军令牌（调研：「箭头=部队」——行军态的部队符号是箭头+人数，
+                  // 数字骑在箭头尖上方随行；到位后令牌停靠为番号框=驻止态）
+                  if (mv.force && Number.isFinite(mv.force.n)) {
+                    riderNum = this._svgNode('g', { class: 'war-rider-num' }, g);
+                    const nt = this._svgNode('text', { x: 0, y: 0, 'text-anchor': 'middle' }, riderNum);
+                    nt.textContent = this._warRiderNumText(mv.force.n);
+                    nt.style.fill = side.color;
+                  }
                   // 创建即钉在路径起点（首帧 rAF 会重写精确姿态）：无 transform
                   // 的骑乘头会闪到 SVG 原点
                   try {
@@ -1086,11 +1110,15 @@
                     const s0 = (WEDGE_SCALES[tier] || 1) / (kr || 1);
                     rider.setAttribute('transform',
                       `translate(${p0.x.toFixed(1)},${p0.y.toFixed(1)}) rotate(${a0.toFixed(1)}) scale(${s0.toFixed(3)})`);
+                    if (riderNum) {
+                      riderNum.setAttribute('transform',
+                        `translate(${p0.x.toFixed(1)},${p0.y.toFixed(1)}) scale(${(1 / (kr || 1)).toFixed(4)})`);
+                    }
                   } catch (e) {
                     /* 起点姿态是装饰性的 */
                   }
                 }
-                this._startWarDraw(casing, p, dir, rider, tier, ms);
+                this._startWarDraw(casing, p, dir, rider, tier, ms, riderNum);
               };
               this._warDrawsLeft = (this._warDrawsLeft || 0) + 1;
               this._warDrawPending = true; // 浮签等全部箭头落位再揭幕
@@ -1904,7 +1932,19 @@
           : (shellWar && idx >= 0 ? shellWar.steps[idx] : null);
         if (dsrc && Number.isFinite(dsrc.y)) {
           const mo = Math.max(1, Math.min(12, Math.round((dsrc.y % 1) * 12) || 1));
-          dateEl.textContent = `${this.locale !== 'en' ? '态势' : 'Situation'} · ${Math.trunc(dsrc.y)}年${mo}月`;
+          const stamp = `${this.locale !== 'en' ? '态势' : 'Situation'} · ${Math.trunc(dsrc.y)}年${mo}月`;
+          // 态势重置强调（调研：阶段过渡 = 时间戳重置 + 「Situation at X」是
+          // 承重惯例）：换步印章变化时脉冲一次，告诉观众地图已重新锚定
+          if (dateEl.textContent !== stamp) {
+            dateEl.textContent = stamp;
+            dateEl.classList.remove('is-pulse');
+            void dateEl.offsetWidth; // 重启动画
+            dateEl.classList.add('is-pulse');
+            if (this._warDatePulseTimer) clearTimeout(this._warDatePulseTimer);
+            this._warDatePulseTimer = setTimeout(() => {
+              dateEl.classList.remove('is-pulse');
+            }, 1400);
+          }
           dateEl.classList.remove('is-hidden');
         } else {
           dateEl.classList.add('is-hidden');

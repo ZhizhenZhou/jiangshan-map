@@ -257,14 +257,20 @@ async function runWarSandboxSuite(ctx) {
   assert(styleCss.includes('.war-frame') && styleCss.includes('.war-terrain-sym'), 'Military map layer must be styled');
   assert(styleCss.includes('.war-lg-row'), 'Legend panel rows must be styled');
 
-  // 步进节奏「预告→行进→到达定格」：当前步军标先以预告态露面（is-pending，
-  // 半透明），箭头生长到位瞬间 finish() 翻转为正式态——标注不与动作脱拍出现。
+  // 步进节奏「预告→行进→停靠」（「箭头=部队」状态机，调研后重构）：
+  // 行军令牌（箭头+人数）沿线滑动携带身份；目的地在本步行军期间只挂
+  // 空心目标环（is-pending 隐藏番号框），箭头到位瞬间 finish() 翻转
+  // is-arrived，番号框【首次现身】=停靠为驻止态——部队框不先于部队出现。
   assert(
     warModule.includes("${stepPending ? ' is-pending' : ''}") &&
       warModule.includes("n.classList.add('is-arrived')"),
-    'Cur-step frames must render in pending preview state and lock in on arrow arrival'
+    'Cur-step frames must stay hidden while marching (is-pending) and dock on arrival (is-arrived)'
   );
   assert(warModule.includes('is-pending-lbl'), 'Pending state must cover the cur-step battle label');
+  assert(
+    warModule.includes('_warRiderNumText') && warModule.includes('war-rider-num'),
+    'Marching token must carry the strength number (行军态=箭头+人数)'
+  );
   assert(
     warModule.includes('WAR_STEP_DRAW_DELAY') &&
       warModule.includes('_warFlightPendingAt = performance.now()') &&
@@ -272,8 +278,14 @@ async function runWarSandboxSuite(ctx) {
     'March draw must wait for the step-focus camera flight (先到场、再行进、到位定格)'
   );
   assert(
-    styleCss.includes('.war-node.is-pending .war-frame') && styleCss.includes('warLayerIn'),
-    'Pending preview + overview-to-step layer intro must be styled'
+    warModule.includes('is-pulse') && styleCss.includes('warDatePulse'),
+    'Situation stamp must pulse on step change (时间戳态势重置)'
+  );
+  assert(
+    styleCss.includes('.war-node.is-pending .war-frame') &&
+      styleCss.includes('.war-rider-num text') &&
+      styleCss.includes('warLayerIn'),
+    'Objective-ring preview + rider number + layer intro must be styled'
   );
 
   // 地形标注数据红线：kind 枚举、双语名称与军事含义

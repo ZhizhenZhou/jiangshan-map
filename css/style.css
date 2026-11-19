@@ -6570,34 +6570,44 @@ button.story-inline-person:hover {
   stroke: #f6f1e6;
   stroke-width: 2.6;
 }
-/* —— 步进节奏「预告→行进→到达定格」——
- * 点击某一步时地图状态先就位：本步军标框以半透明预告态先行露面（先看到
- * "要打哪儿、谁来打"），箭头生长是唯一的动作；箭头到位瞬间 JS 移除
- * is-pending（加 is-arrived），军标定格为正式态——标注不再是"动画结束后
- * 凭空冒出一堆"，出现与动作完成是同一拍。 */
+/* —— 步进节奏「预告→行进→停靠」（「箭头=部队」状态机，调研 f1996a4 后续）——
+ * 本步有行军在画时（is-pending）：目的地只挂空心目标环（计划预告的轻标记），
+ * 番号框/番号文字/编制记号/步号全隐——部队框不在部队到达前出现在目的地，
+ * 身份由行军令牌（箭头+人数，war-rider-num）沿线携带。箭头到位瞬间 JS
+ * 移除 is-pending（加 is-arrived）：番号框【首次现身】=停靠为驻止态，
+ * 名签同步出现——标注是到站事件，不是渲染常量。 */
 #grp-war .war-node .war-frame {
-  transition: opacity 0.18s ease, fill-opacity 0.18s ease;
+  transition: opacity 0.2s ease;
 }
 #grp-war .war-node .war-desig,
 #grp-war .war-node .war-stepnum,
 #grp-war .war-node .war-ech,
 #grp-war .war-node .war-dot {
-  transition: opacity 0.18s ease;
+  transition: opacity 0.2s ease;
 }
-#grp-war .war-node.is-pending .war-frame {
-  fill-opacity: 0.5;
-}
+#grp-war .war-node.is-pending .war-frame,
 #grp-war .war-node.is-pending .war-desig,
 #grp-war .war-node.is-pending .war-stepnum,
 #grp-war .war-node.is-pending .war-ech,
 #grp-war .war-node.is-pending .war-dot {
-  opacity: 0.38;
+  opacity: 0;
 }
 #grp-war .war-lbl {
-  transition: opacity 0.18s ease;
+  transition: opacity 0.22s ease;
 }
 #grp-war .war-lbl.is-pending-lbl {
-  opacity: 0.38;
+  opacity: 0;
+}
+/* 行军令牌的兵力数字（独立于骑乘头定位，scale(1/kScreen) 保证字号/上浮量屏幕恒定） */
+#grp-war .war-rider-num text {
+  font-family: var(--sans-stack);
+  font-size: 8.6px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #f6f1e6;
+  stroke-width: 2.6px;
+  stroke-linejoin: round;
+  pointer-events: none;
 }
 /* 前线帧/态势日期随步切换：柔和淡入代替硬切（ghost 退场动画在后声明，
  * 同元素上覆盖此入场动画——is-ghost 规则次序靠后即胜出） */
@@ -6677,6 +6687,25 @@ button.story-inline-person:hover {
 }
 #war-date.is-hidden {
   display: none;
+}
+/* 态势重置脉冲（调研：阶段过渡 = 时间戳重置，印章是承重惯例）：
+ * 换步印章内容变化时 JS 挂 is-pulse，1.4s 后自动摘除 */
+#war-date.is-pulse {
+  animation: warDatePulse 1.4s ease-out;
+}
+@keyframes warDatePulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.4;
+  }
+  22% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 #war-legend {
   position: absolute;
