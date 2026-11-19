@@ -6083,6 +6083,11 @@ button.story-inline-person:hover {
   font-weight: 600;
   opacity: 0.78;
 }
+/* 注记（框下战役名）：比常规名签小半号、非加粗——信息层级低于军标框 */
+#grp-war .war-lbl.is-caption .war-lbl-text {
+  font-size: 12px;
+  font-weight: 600;
+}
 #grp-war .war-lbl.is-crowded {
   opacity: 0;
 }
@@ -6545,10 +6550,15 @@ button.story-inline-person:hover {
   font-size: 8.5px;
   font-weight: 700;
   letter-spacing: 0.14em;
-  fill: #3a3020;
+  fill: #6e2f22;
   paint-order: stroke;
   stroke: #f6f1e6;
   stroke-width: 2.4;
+}
+/* 无番号框（古代战役）的编制记号：紧贴框上 + 弱化——标记属于框，不独立成行 */
+#grp-war .war-ech.is-above {
+  font-size: 7.5px;
+  fill: #8a7a66;
 }
 #grp-war .war-desig {
   font-family: var(--sans-stack);
@@ -6599,6 +6609,7 @@ button.story-inline-person:hover {
  * 是 kScreen 补偿，不能动） */
 #grp-war .war-node.is-arrived .war-frame,
 #grp-war .war-node.is-arrived .war-desig,
+#grp-war .war-node.is-arrived .war-ech,
 #grp-war .war-node.is-arrived .war-stepnum {
   animation: warDockIn 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.15);
   transform-box: fill-box;

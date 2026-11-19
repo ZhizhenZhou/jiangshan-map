@@ -594,13 +594,19 @@
         if (host) {
           const ht = /translate\(([\d.-]+),([\d.-]+)\)/.exec(host.getAttribute('transform') || '');
           if (ht) {
-            ox = +ht[1] - tx0;
-            oy = +ht[2] - ty0;
+            // 跟随节点的【避让位移量】而非节点绝对位——名签/注记保留自身相对
+            // 节点的偏移（战役注记在框下 27、点旁名签在右 11）。旧实现假设
+            // 名签锚点=节点位置，把框下注记拽回节点旁叠在框上（实测 y 完全重叠）
+            ox = +ht[1] - (+host.dataset.x || 0);
+            oy = +ht[2] - (+host.dataset.y || 0);
           }
         }
+        // 注记偏移（框下 27px）按屏幕恒定折算：translate 是用户单位，直接写
+        // 27 会被相机放大 k 倍；capOff*s 在任何缩放下都是 27 屏幕px
+        const capOff = n.classList.contains('is-caption') ? 27 : 0;
         n.setAttribute(
           'transform',
-          `translate(${(tx0 + ox).toFixed(1)},${(ty0 + oy).toFixed(1)}) scale(${s})`
+          `translate(${(tx0 + ox).toFixed(1)},${(ty0 + oy + capOff / k).toFixed(1)}) scale(${s})`
         );
         // 屏幕碰撞盒：child 点 p → 屏幕 px = (T + p)（scale=1/k 与 ×k 相抵）
         let hide = false;
@@ -608,7 +614,7 @@
           const bb = n.getBBox();
           if (bb.width > 0 && bb.height > 0) {
             const bx = (tx0 + ox) * k + bb.x;
-            const by = (ty0 + oy) * k + bb.y;
+            const by = (ty0 + oy + capOff / k) * k + bb.y;
             const bw = bb.width;
             const bh = bb.height;
             hide = boxes.some(
@@ -1197,8 +1203,14 @@
             lastPt = b.at;
             return;
           }
+          // 兵力档：battle.forces 优先，空则兜底本步行军兵力（现代战役的兵力
+          // 记录挂在 move 上——不兜底编制记号永远缺席，实测娄山关/湘江均 tier0）
           const tier = this._warForceTier(
-            Math.max(0, ...(b.forces || []).filter((f) => f.quality !== 'claimed').map((f) => f.n))
+            Math.max(
+              0,
+              ...(b.forces || []).filter((f) => f.quality !== 'claimed').map((f) => f.n),
+              ...(s.moves || []).map((mv) => (mv.force && mv.force.quality !== 'claimed' ? mv.force.n : 0))
+            )
           );
           const node = this._svgNode(
             'g',
@@ -1227,32 +1239,44 @@
           const desig = this.locale !== 'en'
             ? (b.desigZh || '')
             : (b.desigEn || b.desigZh || '');
+          // 军标框排版（层级重设计）：框=身份——编制记号收进框内左侧、番号居中
+          // （阵营信息只留在框描边与箭头上）；战役名是【注记】不是阵营信息，
+          // 移到框下居中、深墨色小一号——番号与战役名不再连读成一行红字。
+          // 步序号从番号框下撤掉（导航序号在总览编号点与故事卡里）。
+          const echTxt = ['', 'X', 'XX', 'XXX'][tier] || '';
+          const echIn = !!echTxt && !!desig;
           const fw = desig
-            ? Math.max(30, Math.min(110, [...desig].reduce((n, ch) => n + (/[\u2E80-\u9FFF\uF900-\uFAFF]/.test(ch) ? 10.8 : 6.2), 0) + 12))
+            ? Math.max(30, Math.min(110, [...desig].reduce((n, ch) => n + (/[\u2E80-\u9FFF\uF900-\uFAFF]/.test(ch) ? 10.8 : 6.2), 0) + 12) + (echIn ? 14 : 0))
             : 24;
           this._svgNode('rect', {
             class: `war-frame t${tier}`,
             x: -fw / 2, y: -8.5, width: fw, height: 17,
             stroke: dSideObj.color, fill: '#f6f1e6', 'fill-opacity': 0.94, 'stroke-width': 2,
           }, node);
-          const ech = this._svgNode('text', { class: 'war-ech', x: 0, y: -12, 'text-anchor': 'middle' }, node);
-          ech.textContent = ['', 'X', 'XX', 'XXX'][tier] || '';
+          if (echTxt) {
+            const ech = echIn
+              ? this._svgNode('text', { class: 'war-ech', x: -fw / 2 + 8, y: 3.6, 'text-anchor': 'middle' }, node)
+              : this._svgNode('text', { class: 'war-ech is-above', x: 0, y: -12.5, 'text-anchor': 'middle' }, node);
+            ech.textContent = echTxt;
+          }
           if (desig) {
-            // 框内番号（中式标图队号深色）+ 框下步序号（导航）
-            const dg = this._svgNode('text', { class: 'war-desig', x: 0, y: 4.9, 'text-anchor': 'middle' }, node);
+            const dg = this._svgNode('text', { class: 'war-desig', x: echIn ? 8 : 0, y: 4.9, 'text-anchor': 'middle' }, node);
             dg.textContent = desig;
-            const num2 = this._svgNode('text', { class: 'war-stepnum', x: 0, y: 21, 'text-anchor': 'middle' }, node);
-            num2.textContent = String(i + 1);
-            num2.style.fill = dSideObj.color;
           } else {
-            // 无番号（古代战役未回填）：退回框内步序号
+            // 无番号（古代战役未回填）：框内步序号
             const num = this._svgNode('text', { class: 'war-stepnum', x: 0, y: 4.9, 'text-anchor': 'middle' }, node);
             num.textContent = String(i + 1);
             num.style.fill = '#26221b';
           }
           const lbl = this._warField(b, 'name') || this._warStepTitle(w, s);
           if (lbl) {
-            lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, pending: stepPending, ni: nodeIdx });
+            // 注记（战役名）：框下居中 + 深墨色——阵营色只属于框与箭头。
+            // 锚点=节点位；框下 27px 的偏移在 rescale 时按 1/k 折算（用户单位
+            // 会被相机放大 k 倍——实测 27 用户单位 = 73 屏幕px 的惨案）
+            lblNodes.push({
+              x: sx, y: sy, text: lbl, color: '#3a3020', caption: true,
+              muted: !isCur && !overview, pending: stepPending, ni: nodeIdx,
+            });
           }
           nodeIdx++;
           lastPt = b.at;
@@ -1292,7 +1316,8 @@
               num.style.fill = side.color;
               const lbl = this._warStepTitle(w, s) || this._warField(s, 'title');
               if (lbl) {
-                lblNodes.push({ x: sx, y: sy, text: lbl, color: side.color, muted: !isCur && !overview, pending: stepPending, ni: nodeIdx });
+                // 注记化：点=阵营色，标题=墨色信息（右侧保持，避免与步号叠行）
+                lblNodes.push({ x: sx, y: sy, text: lbl, color: '#3a3020', muted: !isCur && !overview, pending: stepPending, ni: nodeIdx });
               }
             }
             nodeIdx++;
@@ -1306,7 +1331,7 @@
         const lg = this._svgNode(
           'g',
           {
-            class: `war-lbl${lb.muted ? ' is-past-lbl' : ''}${lb.pending ? ' is-pending-lbl' : ''}`,
+            class: `war-lbl${lb.muted ? ' is-past-lbl' : ''}${lb.pending ? ' is-pending-lbl' : ''}${lb.caption ? ' is-caption' : ''}`,
             'data-x': lb.x.toFixed(1),
             'data-y': lb.y.toFixed(1),
             'data-ni': String(lb.ni != null ? lb.ni : -1),
@@ -1315,7 +1340,7 @@
         );
         const t = this._svgNode(
           'text',
-          { class: 'war-lbl-text', x: 11, y: 4 },
+          { class: 'war-lbl-text', x: lb.caption ? 0 : 11, y: 4, 'text-anchor': lb.caption ? 'middle' : 'start' },
           lg
         );
         t.textContent = lb.text;

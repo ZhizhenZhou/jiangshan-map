@@ -288,6 +288,14 @@ async function runWarSandboxSuite(ctx) {
       styleCss.includes('warLayerIn'),
     'Objective-ring preview + rider number + dock animation + layer intro must be styled'
   );
+  // 名签/番号排版层级（调研后重设计）：战役名=框下注记（墨色），番号框=身份；
+  // 编制记号收进框内（desig 框）不再浮空
+  assert(
+    warModule.includes("caption: true") && warModule.includes("'is-caption'") &&
+      warModule.includes("x: -fw / 2 + 8"),
+    'Battle captions must render below frames in ink; echelon marks must sit inside the frame'
+  );
+  assert(styleCss.includes('.war-lbl.is-caption .war-lbl-text'), 'Caption style must be defined');
 
   // 地形标注数据红线：kind 枚举、双语名称与军事含义
   const TERRAIN_KINDS = new Set(['pass', 'ford', 'bridge', 'marsh', 'snow', 'river', 'mountain']);
